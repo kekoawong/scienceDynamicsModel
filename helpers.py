@@ -39,10 +39,10 @@ def createPaper(network, authors, probStop):
 
 # function will return new community number and color
 def getNewCC(network):
-    colors = {"red", "blue", "green", "orange", "purple", "yellow"}
+    colors = ["red", "blue", "green", "orange", "purple"]
     print(max(dict(network.nodes.data('label')).values()))
     newComm = max(dict(network.nodes.data('label')).values()) + 1
-    return newComm, "red"
+    return newComm, random.choice(colors)
 
 def getCommNodes(network, communityNum):
     '''Returns a list of nodes associated with the community'''
@@ -52,6 +52,18 @@ def getCommNodes(network, communityNum):
             nodes.append(nodeID)
     return nodes
 
+def genGraphFeatures(network):
+    '''
+    Will return the dictionary for node labels and list of colors
+    Used for labels and colors in networkx graph drawing: https://networkx.org/documentation/latest/reference/generated/networkx.drawing.nx_pylab.draw_networkx.html?highlight=draw_networkx
+    '''
+    labels = {}
+    colors = []
+    for nodeID, data in network.nodes.data():
+        labels[nodeID] = data["label"]
+        colors.append(data["color"])
+    return labels, colors
+    
 def splitCommunity(network, nodes):
     '''
     Function will take the networkx network as input and the list of nodes in the community
