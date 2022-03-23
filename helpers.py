@@ -61,9 +61,10 @@ def genGraphFeatures(network):
     colors = []
     for nodeID, data in network.nodes.data():
         labels[nodeID] = data["label"]
-        colors.append(data["color"])
+        #colors.append(data["color"])
+        colors.append(data["label"])
     return labels, colors
-    
+
 def splitCommunity(network, nodes):
     '''
     Function will take the networkx network as input and the list of nodes in the community
