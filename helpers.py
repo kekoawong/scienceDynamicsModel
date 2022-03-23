@@ -37,13 +37,6 @@ def createPaper(network, authors, probStop):
     authors.append(coauthorID)
     createPaper(network, authors, probStop)
 
-# function will return new community number and color
-def getNewCC(network):
-    colors = ["red", "blue", "green", "orange", "purple"]
-    print(max(dict(network.nodes.data('label')).values()))
-    newComm = max(dict(network.nodes.data('label')).values()) + 1
-    return newComm, random.choice(colors)
-
 def getCommNodes(network, communityNum):
     '''Returns a list of nodes associated with the community'''
     nodes = []
@@ -85,8 +78,8 @@ def splitCommunity(network, nodes):
 
     # update the colors and group name of the nodes in the smaller sub-community
     # must know all the groups and community names and pick different ones
-    newComm, color = getNewCC(network)
+    newComm = max(dict(network.nodes.data('label')).values()) + 1
     index = 1 if len(clusters[1]) < len(clusters[0]) else 0
     for node in clusters[index]:
-        network.update(nodes=[(node, {"label": newComm, "color": color})])
+        network.update(nodes=[(node, {"label": newComm})])
     # update the papers? Need a data structure of the papers
