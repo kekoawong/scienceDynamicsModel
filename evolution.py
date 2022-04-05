@@ -1,4 +1,4 @@
-import networkx as nx
+from ScholarNetwork import Graph
 import random
 from helpers import getCommNodes, splitCommunity, createPaper
 import pickle
@@ -19,57 +19,49 @@ probSplit = 0.5
 # probability that a merge event occurs
 probMerge = 0.5
 
-# define initial scholars, will be in form (id, scholartopic, color)
-scholarTopic = 0
-nodeID = 0
-paperID = 0
-
+# define initial scholar and topic params
+newTopic = 0
+newAuthor = 0
+initialPaper = 0
 
 '''
 CREATE MODEL
 '''
-network = nx.Graph()
-network.add_node(nodeID, label=scholarTopic, color="red")
 
-# initialize Topics and papers data structures
+# initialize data structures
+network = Graph()
 papers = {}
 topics = {}
 
-# go through time steps, add new scholar and paper at each step
-for i in range(1, timeSteps):
+# add first node and paper to network
+network.add_node(newAuthor, data={newTopic: [initialPaper]})
+papers[initialPaper] = (newTopic, [newAuthor])
+topics[newTopic] = [initialPaper]
 
-    # Choose first author, sets initially as random scholar (can be overridden with new scholar later)
+# go through time steps, add new scholar and paper at each step
+for newPaper in range(1, timeSteps):
+
+    # Randomly select author from network, will be used as first author or first coauthor
     currNodes = list(network.nodes())
     authors = [random.choice(currNodes)]
 
-    # with probability, add new author to network set as main author with a coauthor
+    # with probability, add new author to network set as main author with the coauthor
     if random.random() < probNewAuthor:
-        # generate author and Topic
-        nodeID += 1
-        author = nodeID
-
-        # generate random coauthor from currNodes,
-        coauthorID = random.choice(currNodes)
-
-        # add node with Topic being the co-author's Topic
-        # THIS NEEDS TO BE CHANGED TO MAJORITY OF PAPER
-        scholarTopic = network.nodes[coauthorID]["label"]
-        network.add_node(author, label=scholarTopic, color="red")
-        network.add_edge(author, coauthorID, weight=1, width=1)
-
-        # update authors list
-        authors = [author, coauthorID]
+        # generate new author, add as the first author
+        newAuthor += 1
+        authors.insert(0, newAuthor)
+        # add node without data, disciplines will be added after paper is completed
+        network.add_node(newAuthor, data={})
+        network.add_edge(newAuthor, authors[1], weight=1, width=1)
 
     # Add new paper, calling function
     paper = createPaper(network, authors, probStop)
-    print(paper)
-    papers[paperID] = paper
+    papers[newPaper] = paper
 
     # add paper to corresponding topic
     if paper[0] not in topics:
         topics[paper[0]] = []
-    topics[paper[0]].append(paperID)
-    paperID += 1
+    topics[paper[0]].append(newPaper)
 
     # split random discipline with prob pd
     if random.random() < probSplit:

@@ -46,6 +46,7 @@ def createPaper(network, authors, probStop):
 
     # call function recursively with coauthor
     authors.append(coauthorID)
+    print(authors)
     createPaper(network, authors, probStop)
 
 def getCommNodes(network, communityNum):
