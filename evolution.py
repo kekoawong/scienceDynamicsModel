@@ -1,14 +1,15 @@
-from pyvis.network import Network
-import matplotlib.pyplot as plt
 import networkx as nx
 import random
-from helpers import getCommNodes, splitCommunity, genGraphFeatures, getTopic
+from helpers import getCommNodes, splitCommunity, createPaper
+import pickle
 
-
+'''
+DEFINE PARAMETERS
+'''
 # define time steps
 timeSteps = 50
 
-'''PROBABILITIES'''
+# PROBABILITIES
 # probability that you generate new author
 probNewAuthor = 0.5
 # probability that you stop at a given node when generating papers
@@ -24,6 +25,9 @@ nodeID = 0
 paperID = 0
 
 
+'''
+CREATE MODEL
+'''
 network = nx.Graph()
 network.add_node(nodeID, label=scholarTopic, color="red")
 
@@ -75,3 +79,7 @@ for i in range(1, timeSteps):
     # merge random discipline with prob pm
     if random.random() < probMerge:
         pass
+
+# save network as pickle object
+with open('evolution.net', 'wb') as outfile:
+    pickle.dump(network, outfile)
