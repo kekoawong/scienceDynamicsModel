@@ -32,12 +32,11 @@ class Graph(nx.Graph):
         for author in authors:
             # if there is not an edge, create one
             if not self.has_edge(author, coauthorID) and author != coauthorID:
-                network.add_edge(author, coauthorID, weight=0, width=1)
+                self.add_edge(author, coauthorID, weight=0, width=1)
             
-            newWeight = network.get_edge_data(author, coauthorID)["weight"] + 1
-            network.update(edges=[ (author, coauthorID, {"weight": newWeight}) ])
+            newWeight = self.get_edge_data(author, coauthorID)["weight"] + 1
+            self.update(edges=[ (author, coauthorID, {"weight": newWeight}) ])
 
         # add author to list and call function recursively
         authors.append(coauthorID)
-        print(authors)
-        self.biasedRandomWalk(authors, probStop)
+        return self.biasedRandomWalk(authors, probStop)

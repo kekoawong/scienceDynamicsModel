@@ -55,7 +55,10 @@ for newPaper in range(1, timeSteps):
         network.add_edge(newAuthor, authors[1], weight=1, width=1)
 
     # Add new paper, calling function
-    paper = createPaper(network, authors, probStop)
+    paper = network.biasedRandomWalk(authors, probStop)
+    print(f'Paper: {paper}')
+
+    '''
     papers[newPaper] = paper
 
     # add paper to corresponding topic
@@ -71,6 +74,7 @@ for newPaper in range(1, timeSteps):
     # merge random discipline with prob pm
     if random.random() < probMerge:
         pass
+    '''
 
 # save network as pickle object
 with open('evolution.net', 'wb') as outfile:

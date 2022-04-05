@@ -32,7 +32,7 @@ def createPaper(network, authors, probStop):
         nData = network.get_edge_data(currAuthorID, neighbor)
         probs.extend([neighbor] * nData["weight"])
 
-    # Select coauthor from neighbors probabilities list
+    # Select next coauthor from neighbors probabilities list
     coauthorID = random.choice(probs)
 
     # update all edges of coauthors to this new author
