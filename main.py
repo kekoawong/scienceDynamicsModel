@@ -2,6 +2,8 @@ from Evolution import Evolution
 
 env = Evolution()
 
-env.evolve()
+env.evolve(timeSteps=20)
 
-env.evolve(timeSteps=30)
+test = {1: [14,15], 2: [18]}
+v = max(len(x) for x in test.items())
+print(v)

@@ -69,3 +69,25 @@ class Graph(nx.Graph):
         # add author to list and call function recursively
         authors.append(coauthorID)
         return self.biasedRandomWalk(authors, probStop, newPaperID)
+
+    def getCommunityAuthors(self, topicID):
+        '''
+        Returns a list of authors who would be classified as a community
+        A community is defined as follows: Every author who has a majority of one topic in their papers
+        '''
+
+        communityAuthors = []
+        for auth, data in self.nodes.data('data'):
+
+            # count the author papers
+            authorTopics = {}
+            for top, papers in data.items():
+                if top not in authorTopics:
+                    authorTopics[top] = 0
+                authorTopics[top] += len(papers)
+            
+            # determine if specific community
+            if topicID == max(authorTopics, key=authorTopics.get):
+                communityAuthors.append(auth)
+
+        return communityAuthors

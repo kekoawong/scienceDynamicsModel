@@ -35,7 +35,7 @@ class Evolution:
         '''
         Function will continue evolution for the inputted timesteps
         '''
-        for newPaper in range(self.initialPaper, timeSteps):
+        for newPaper in range(self.initialPaper, self.initialPaper + timeSteps):
 
             # Randomly select author from network, will be used as first author or first coauthor
             currNodes = list(self.network.nodes())
@@ -61,19 +61,20 @@ class Evolution:
             self.topics[paper[0]].append(newPaper)
 
             # split random discipline with prob pd
-            # if random.random() < probSplit:
-            #     commNodes = getCommNodes(network, random.choice(list(topics.keys())))
-            #     splitCommunity(network, commNodes)
+            if random.random() < self.probSplit:
+                pass
+                commNodes = self.network.getCommunityAuthors(random.choice(list(self.topics.keys())))
+                # splitCommunity(network, commNodes)
 
             # merge random discipline with prob pm
             if random.random() < self.probMerge:
                 pass
 
-        self.initialPaper += (timeSteps - 1)
-        print(f'Authors: {self.network.nodes(data=True)}')
-        print(f'Papers: {self.papers}')
-        print(f'Topics: {self.topics}')
-        print(f'Initial Paper: {self.initialPaper}')
+        self.initialPaper += timeSteps
+        # print(f'Authors: {self.network.nodes(data=True)}')
+        # print(f'Papers: {self.papers}')
+        # print(f'Topics: {self.topics}')
+        # print(f'Initial Paper: {self.initialPaper}')
 
     def saveEvolutionWithPickle(self, fileName='evolution.env'):
         with open(fileName, 'wb') as outfile:
