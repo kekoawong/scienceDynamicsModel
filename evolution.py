@@ -32,6 +32,14 @@ class Evolution:
 
     def evolve(self, timeSteps=25):
         '''
-        Function will continue evolution for the declared timesteps
+        Function will continue evolution for the inputted timesteps
         '''
         pass
+
+    def saveEvolutionWithPickle(self, fileName='evolution.env'):
+        with open(fileName, 'wb') as outfile:
+            pickle.dump(self, outfile)
+
+    def saveNetworkWithPickle(self, fileName='evolutionNetwork.net'):
+        with open(fileName, 'wb') as outfile:
+            pickle.dump(self.network, outfile)
