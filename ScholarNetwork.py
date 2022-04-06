@@ -86,7 +86,7 @@ class Graph(nx.Graph):
                     authorTopics[top] = 0
                 authorTopics[top] += len(papers)
             
-            # determine if specific community
+            # determine if in specific community
             if topicID == max(authorTopics, key=authorTopics.get):
                 communityAuthors.append(auth)
 
