@@ -23,7 +23,7 @@ class Evolution:
         '''Inital Parameters'''
         self.newAuthor = 0
 
-        '''Initialize Network and Data'''
+        '''Initialize network with one author, one paper, and one topic'''
         initialPaper = 0
         initialTopic = 0
         self.network.add_node(self.newAuthor, data={initialTopic: [initialPaper]})
