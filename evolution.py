@@ -20,9 +20,9 @@ probSplit = 0.5
 probMerge = 0.5
 
 # define initial scholar and topic params
-newTopic = 0
 newAuthor = 0
 initialPaper = 0
+initialTopic = 0
 
 '''
 CREATE MODEL
@@ -34,9 +34,9 @@ papers = {}
 topics = {}
 
 # add first node and paper to network
-network.add_node(newAuthor, data={newTopic: [initialPaper]})
-papers[initialPaper] = (newTopic, [newAuthor])
-topics[newTopic] = [initialPaper]
+network.add_node(newAuthor, data={initialTopic: [initialPaper]})
+papers[initialPaper] = (initialTopic, [newAuthor])
+topics[initialTopic] = [initialPaper]
 
 # go through time steps, add new scholar and paper at each step
 for newPaper in range(1, timeSteps):
@@ -56,9 +56,7 @@ for newPaper in range(1, timeSteps):
 
     # Add new paper, calling function
     paper = network.biasedRandomWalk(authors, probStop, newPaper)
-    print(f'Paper: {paper}')
-
-    '''
+    # print(f'Paper: {paper}')
     papers[newPaper] = paper
 
     # add paper to corresponding topic
@@ -67,14 +65,17 @@ for newPaper in range(1, timeSteps):
     topics[paper[0]].append(newPaper)
 
     # split random discipline with prob pd
-    if random.random() < probSplit:
-        commNodes = getCommNodes(network, random.choice(list(topics.keys())))
-        splitCommunity(network, commNodes)
+    # if random.random() < probSplit:
+    #     commNodes = getCommNodes(network, random.choice(list(topics.keys())))
+    #     splitCommunity(network, commNodes)
 
     # merge random discipline with prob pm
     if random.random() < probMerge:
         pass
-    '''
+
+print(f'Authors: {network.nodes(data=True)}')
+print(f'Papers: {papers}')
+print(f'Topics: {topics}')
 
 # save network as pickle object
 with open('evolution.net', 'wb') as outfile:

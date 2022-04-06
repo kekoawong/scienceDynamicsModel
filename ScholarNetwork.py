@@ -1,6 +1,5 @@
 import networkx as nx
 import random
-from statistics import mode
 
 '''
 Inherited Graph class from networkx with methods used for scholar evolution
@@ -22,16 +21,13 @@ class Graph(nx.Graph):
         Function will loop through all the authors, determining which field is most prevelant
         '''
         topics = {}
-        print(f'Authors: {authors}')
         for author in authors:
-            print(f'Author {author} Data: {self.nodes[author]["data"]}')
             for top, papers in self.nodes[author]["data"].items():
                 if top not in topics:
                     topics[top] = 0
                 topics[top] += len(papers)
 
         # returns the topic with the most combined papers from all the authors
-        print(f'Topics: {topics}')
         return max(topics, key=topics.get)
     
     def biasedRandomWalk(self, authors, probStop, newPaperID):
