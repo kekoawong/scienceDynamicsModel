@@ -55,7 +55,7 @@ for newPaper in range(1, timeSteps):
         network.add_edge(newAuthor, authors[1], weight=1, width=1)
 
     # Add new paper, calling function
-    paper = network.biasedRandomWalk(authors, probStop)
+    paper = network.biasedRandomWalk(authors, probStop, newPaper)
     print(f'Paper: {paper}')
 
     '''
