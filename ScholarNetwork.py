@@ -27,14 +27,15 @@ class Graph(nx.Graph):
 
         return disciplines
 
-    def updateAuthorPapers(self, authors, topicID, paperID):
+    def updateAuthorPapers(self, authors, topics, paperID):
         '''
         Function will update the topics and papers of all authors
         '''
         for author in authors:
-            if topicID not in self.nodes[author]["data"]:
-                self.nodes[author]["data"][topicID] = []
-            self.nodes[author]["data"][topicID].append(paperID)
+            for topicID in topics:
+                if topicID not in self.nodes[author]["data"]:
+                    self.nodes[author]["data"][topicID] = []
+                self.nodes[author]["data"][topicID].append(paperID)
 
     def determinePaperTopic(self, authors):
         '''
@@ -61,7 +62,7 @@ class Graph(nx.Graph):
                 paperTopics = [id]
 
         # returns the topic that represents the disciplines that most authors are in
-        return max(topics, key=topics.get)
+        return paperTopics
     
     def biasedRandomWalk(self, authors, probStop, newPaperID):
         '''
@@ -75,11 +76,11 @@ class Graph(nx.Graph):
         # base condition: stop at node if probStop hit or there are no new neighbors to traverse
         if random.random() < probStop or len(newNeighbors) == 0:
             # determine the paper topic
-            topic = self.determinePaperTopic(authors)
+            topics = self.determinePaperTopic(authors)
             # update the papers for all authors
-            self.updateAuthorPapers(authors, topic, newPaperID)
+            self.updateAuthorPapers(authors, topics, newPaperID)
 
-            return topic, authors
+            return topics, authors
         
         # create list representing probabilities for the neighboring nodes of the current coauthor
         probs = []

@@ -31,11 +31,26 @@ class Evolution:
         self.topics[initialTopic] = [self.initialPaper]
         self.initialPaper += 1
 
+    def updateCommunity(self, communityAuthors):
+        '''
+        Function will take in the list of authors in the new community
+        Will update the topics, papers, and authors
+        '''
+        comAuthorsSet = set(communityAuthors)
+
+        # loop through all the papers, checking to see the field of majority of their authors
+        for pap, (topic, authors) in self.papers.items():
+            # get intersection, check to see if majority of authors in new community
+            intersectionAuths = comAuthorsSet.intersection(set(authors))
+            if len(intersectionAuths) >= (len(authors)):
+                pass
+        newTopic = max(self.topics.keys()) + 1
+
     def evolve(self, timeSteps=25):
         '''
         Function will continue evolution for the inputted timesteps
         '''
-        for newPaper in range(self.initialPaper, self.initialPaper + timeSteps):
+        for newPaperID in range(self.initialPaper, self.initialPaper + timeSteps):
 
             # Randomly select author from network, will be used as first author or first coauthor
             currNodes = list(self.network.nodes())
@@ -51,19 +66,23 @@ class Evolution:
                 self.network.add_edge(self.newAuthor, authors[1], weight=1, width=1)
 
             # Add new paper, calling function
-            paper = self.network.biasedRandomWalk(authors, self.probStop, newPaper)
-            # print(f'Paper: {paper}')
-            self.papers[newPaper] = paper
+            paper = self.network.biasedRandomWalk(authors, self.probStop, newPaperID)
+            self.papers[newPaperID] = paper
 
-            # add paper to corresponding topic
-            if paper[0] not in self.topics:
-                self.topics[paper[0]] = []
-            self.topics[paper[0]].append(newPaper)
+            # add paper to corresponding topics
+            paperTopics = paper[0]
+            for top in paperTopics:
+                if top not in self.topics:
+                    self.topics[top] = []
+                self.topics[top].append(newPaperID)
 
             # split random discipline with prob pd
             if random.random() < self.probSplit:
                 communityAuthors = self.network.getDisciplineAuthors(random.choice(list(self.topics.keys())))
                 newCommunity = self.network.splitCommunity(communityAuthors)
+                # update the papers, topics, and authors
+                if newCommunity:
+                    self.updateCommunity()
                 print(newCommunity)
 
             # merge random discipline with prob pm
