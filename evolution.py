@@ -27,24 +27,43 @@ class Evolution:
         '''Initialize network with one author, one paper, and one topic'''
         initialTopic = 0
         self.network.add_node(self.newAuthor, data={initialTopic: [self.initialPaper]})
-        self.papers[self.initialPaper] = (initialTopic, [self.newAuthor])
+        self.papers[self.initialPaper] = ([initialTopic], [self.newAuthor])
         self.topics[initialTopic] = [self.initialPaper]
         self.initialPaper += 1
 
-    def updateCommunity(self, communityAuthors):
+    def updateNewCommunity(self, communityAuthors):
         '''
         Function will take in the list of authors in the new community
         Will update the topics, papers, and authors
         '''
+        # set variables
+        newTopic = max(self.topics.keys()) + 1
         comAuthorsSet = set(communityAuthors)
+        allPapers = self.papers.items()
 
         # loop through all the papers, checking to see the field of majority of their authors
-        for pap, (topic, authors) in self.papers.items():
+        for pap, (topics, authors) in allPapers:
+
             # get intersection, check to see if majority of authors in new community
             intersectionAuths = comAuthorsSet.intersection(set(authors))
-            if len(intersectionAuths) >= (len(authors)):
-                pass
-        newTopic = max(self.topics.keys()) + 1
+
+            # relabel papers if in new topic
+            if len(intersectionAuths) >= (len(authors) // 2):
+                self.papers[pap][0].append(newTopic)
+                # add to new topics 
+                if newTopic not in self.topics:
+                    self.topics[newTopic] = []
+                self.topics[newTopic].append(pap)
+            
+                # remove paper from old topics if strictly in new topic
+                if len(intersectionAuths) > (len(authors) // 2):
+                    self.papers[pap][0].clear()
+                    self.papers[pap][0].append(newTopic)
+                    for oldTopic in topics:
+                        self.topics[oldTopic].remove(pap)
+
+                # update authors
+                self.network.updatePaperInNetwork(pap, (topics, authors))    
 
     def evolve(self, timeSteps=25):
         '''
@@ -82,7 +101,7 @@ class Evolution:
                 newCommunity = self.network.splitCommunity(communityAuthors)
                 # update the papers, topics, and authors
                 if newCommunity:
-                    self.updateCommunity()
+                    self.updateNewCommunity(newCommunity)
                 print(newCommunity)
 
             # merge random discipline with prob pm

@@ -141,3 +141,14 @@ class Graph(nx.Graph):
         index = 1 if len(clusters[1]) < len(clusters[0]) else 0
 
         return clusters[index]
+
+
+    def updatePaperInNetwork(self, paperID, paperData):
+        '''
+        Function will update the author network with the paper
+        PaperID: int
+        paperData: ([topics], [authors])
+        '''
+
+        for auth, authData in self.nodes.data("data"):
+            print(authData)
