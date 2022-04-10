@@ -1,10 +1,31 @@
 import networkx as nx
+from igraph import Graph as modularityGraph
 import random
 
 '''
 Inherited Graph class from networkx with methods used for scholar evolution
+Definitions:
+    Discipline: defines the top topic of the author, i.e. the topic with the most papers
 '''
 class Graph(nx.Graph):
+
+    def getAuthorDiscipline(self, authorID):
+        '''
+        Function returns a list containing the discipline(s) of the author
+        For each author, the topic that contains the most papers would be their assigned discipline
+            If there is a tie, then the function returns all discipline IDs
+        '''
+        maxVal = 0
+        disciplines = []
+        for top, papers in self.nodes[authorID]["data"].items():
+            numPapers = len(papers)
+            if numPapers == maxVal:
+                disciplines.append(top)
+            elif numPapers > maxVal:
+                maxVal = numPapers
+                disciplines = [top]
+
+        return disciplines
 
     def updateAuthorPapers(self, authors, topicID, paperID):
         '''
@@ -70,9 +91,9 @@ class Graph(nx.Graph):
         authors.append(coauthorID)
         return self.biasedRandomWalk(authors, probStop, newPaperID)
 
-    def getCommunityAuthors(self, topicID):
+    def getDisciplineAuthors(self, topicID):
         '''
-        Returns a list of authors who would be classified as a community
+        Returns a list of authors who would be in the discipline of the topicID
         A community is defined as follows: Every author who has a majority of one topic in their papers
         '''
 
@@ -91,3 +112,30 @@ class Graph(nx.Graph):
                 communityAuthors.append(auth)
 
         return communityAuthors
+
+    def splitCommunity(self, authors, numClusters=2):
+        '''
+        Function will take the list of authors in the community, numClusters is how many clusters to split into
+            It will then test if it should split the community or not
+        Returns True if split community, False otherwise while updating network
+        '''
+        # split into two communities
+        subGraph = self.subgraph(authors)
+        newGraph = modularityGraph.from_networkx(subGraph)
+
+        # create subgraph and split
+        clusters = newGraph.community_leading_eigenvector(clusters=numClusters)
+
+        # compare unweighted modularity of new communities to the initial, return if there should not be change in community structure
+        if newGraph.modularity(set(subGraph.nodes())) > clusters.modularity or len(clusters) != 2:
+            return False
+
+        # update the newComm number
+        # must know all the groups and community names and pick different ones
+        newComm = max(dict(network.nodes.data('label')).values()) + 1
+        # choose which cluster is new one, based off of community size
+        index = 1 if len(clusters[1]) < len(clusters[0]) else 0
+        for node in clusters[index]:
+            network.update(nodes=[(node, {"label": newComm})])
+
+        return True

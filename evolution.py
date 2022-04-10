@@ -62,7 +62,7 @@ class Evolution:
 
             # split random discipline with prob pd
             if random.random() < self.probSplit:
-                communityAuthors = self.network.getCommunityAuthors(random.choice(list(self.topics.keys())))
+                communityAuthors = self.network.getDisciplineAuthors(random.choice(list(self.topics.keys())))
                 print(communityAuthors)
                 # splitCommunity(network, commNodes)
 
