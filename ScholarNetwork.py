@@ -38,8 +38,10 @@ class Graph(nx.Graph):
 
     def determinePaperTopic(self, authors):
         '''
-        Returns the main topicID
-        Function will loop through all the authors, determining which field is most prevelant
+        Returns the list, containing the paper topic(s)
+        Function will loop through all the authors, getting their disciplines
+            If this is a tie, then the paper is added to both disciplines
+                This is not a strict rule and could be modified
         '''
 
         topics = {}
@@ -48,6 +50,15 @@ class Graph(nx.Graph):
                 if top not in topics:
                     topics[top] = 0
                 topics[top] += 1
+
+        paperTopics = []
+        maxVal = 0
+        for id, num in topics.items():
+            if num == maxVal:
+                paperTopics.append(id)
+            elif num > maxVal:
+                maxVal = num
+                paperTopics = [id]
 
         # returns the topic that represents the disciplines that most authors are in
         return max(topics, key=topics.get)
@@ -97,7 +108,6 @@ class Graph(nx.Graph):
         Returns a list of authors who would be in the discipline of the topicID
         A community is defined as follows: Every author who has a majority of one topic in their papers
         '''
-
         communityAuthors = []
         for auth in self.nodes:
             if topicID in self.getAuthorDiscipline(auth):
