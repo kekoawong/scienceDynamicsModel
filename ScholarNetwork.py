@@ -109,7 +109,11 @@ class Graph(nx.Graph):
         '''
         Function will take the list of authors in the community, numClusters is how many clusters to split into
             It will then test if it should split the community or not
-        Returns True if split community, False otherwise while updating network
+        Arguments:
+            authors: list of authors in the whole community
+            numTopics: number of total topics so far
+            numClusters: number of clusters to testing splitting community into
+        Returns a list of authors in the new community if community is split, False otherwise
         '''
         # split into two communities
         subGraph = self.subgraph(authors)
@@ -122,12 +126,7 @@ class Graph(nx.Graph):
         if newGraph.modularity(set(subGraph.nodes())) > clusters.modularity or len(clusters) != 2:
             return False
 
-        # update the newComm number
-        # must know all the groups and community names and pick different ones
-        newComm = max(dict(network.nodes.data('label')).values()) + 1
         # choose which cluster is new one, based off of community size
         index = 1 if len(clusters[1]) < len(clusters[0]) else 0
-        for node in clusters[index]:
-            network.update(nodes=[(node, {"label": newComm})])
 
-        return True
+        return clusters[index]
