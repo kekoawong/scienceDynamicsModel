@@ -41,14 +41,15 @@ class Graph(nx.Graph):
         Returns the main topicID
         Function will loop through all the authors, determining which field is most prevelant
         '''
+
         topics = {}
         for author in authors:
-            for top, papers in self.nodes[author]["data"].items():
+            for top in self.getAuthorDiscipline(author):
                 if top not in topics:
                     topics[top] = 0
-                topics[top] += len(papers)
+                topics[top] += 1
 
-        # returns the topic with the most combined papers from all the authors
+        # returns the topic that represents the disciplines that most authors are in
         return max(topics, key=topics.get)
     
     def biasedRandomWalk(self, authors, probStop, newPaperID):
@@ -98,17 +99,8 @@ class Graph(nx.Graph):
         '''
 
         communityAuthors = []
-        for auth, data in self.nodes.data('data'):
-
-            # count the author papers
-            authorTopics = {}
-            for top, papers in data.items():
-                if top not in authorTopics:
-                    authorTopics[top] = 0
-                authorTopics[top] += len(papers)
-            
-            # determine if in specific community
-            if topicID == max(authorTopics, key=authorTopics.get):
+        for auth in self.nodes:
+            if topicID in self.getAuthorDiscipline(auth):
                 communityAuthors.append(auth)
 
         return communityAuthors
