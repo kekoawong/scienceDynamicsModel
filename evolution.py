@@ -1,3 +1,4 @@
+from fileinput import filename
 from ScholarNetwork import Graph
 import random
 import pickle
@@ -30,6 +31,37 @@ class Evolution:
         self.papers[self.initialPaper] = ([initialTopic], [self.newAuthor])
         self.topics[initialTopic] = [self.initialPaper]
         self.initialPaper += 1
+
+    '''Access Functions'''
+    def getNetwork(self):
+        return self.network
+
+    def getPapers(self):
+        return self.papers
+
+    def getTopics(self):
+        return self.topics
+
+    def getAuthors(self):
+        return self.network.getAuthors()
+
+    def getNumTopics(self):
+        return len(self.topics.keys())
+
+    def getNumPapers(self):
+        return len(self.papers.keys())
+
+    def getNumAuthors(self):
+        return len(self.getAuthors())
+
+    def __repr__(self):
+        s = f'Evolution network with a total of {self.getNumAuthors()} authors, {self.getNumPapers()} papers, and {self.getNumTopics()} disciplines/topics.\n'
+        for authorID, data in self.getAuthors():
+            s += f'   Author {authorID} primary disciplines: {self.network.getAuthorDiscipline(authorID)}\n'
+            for topicID, papers in data.items():
+                for pap in papers:
+                    s += f'      Paper {pap} with the topics {self.papers[pap][0]}\n'
+        return s
 
     def updateNewCommunity(self, communityAuthors):
         '''
@@ -104,7 +136,6 @@ class Evolution:
                 # update the papers, topics, and authors
                 if newCommunity:
                     self.updateNewCommunity(newCommunity)
-                print(f'NewCommunity: {newCommunity}')
 
             # merge random discipline with prob pm
             if random.random() < self.probMerge:
@@ -119,7 +150,9 @@ class Evolution:
     def saveEvolutionWithPickle(self, fileName='evolution.env'):
         with open(fileName, 'wb') as outfile:
             pickle.dump(self, outfile)
+        print(f'Saved to {fileName} successfully!')
 
     def saveNetworkWithPickle(self, fileName='evolutionNetwork.net'):
         with open(fileName, 'wb') as outfile:
             pickle.dump(self.network, outfile)
+        print(f'Saved to {fileName} successfully!')

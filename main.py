@@ -4,6 +4,14 @@ env = Evolution()
 
 env.evolve(timeSteps=20)
 
+env.saveEvolutionWithPickle('models/evolution.env')
+
+
+print(f'Topics: {env.getTopics()}')
+print(f'Papers: {env.getPapers()}')
+print(f'Authors: {env.getAuthors()}')
+
+print(env)
 
 # test = {
 #     1: [1,2,3],

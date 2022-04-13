@@ -9,6 +9,10 @@ Definitions:
 '''
 class Graph(nx.Graph):
 
+    '''Access Methods'''
+    def getAuthors(self):
+        return self.nodes.data("data")
+
     def getAuthorDiscipline(self, authorID):
         '''
         Function returns a list containing the discipline(s) of the author
