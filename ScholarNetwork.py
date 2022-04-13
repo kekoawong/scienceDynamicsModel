@@ -1,6 +1,7 @@
 import networkx as nx
 from igraph import Graph as modularityGraph
 import random
+import matplotlib.pyplot as plt
 
 '''
 Inherited Graph class from networkx with methods used for scholar evolution
@@ -169,3 +170,27 @@ class Graph(nx.Graph):
                     if topID not in authData:
                         authData[topID] = []
                     authData[topID].append(paperID)
+
+    def genGraphFeatures(self):
+        '''
+        Will return the dictionary for node labels and list of colors for plotting
+        Used for labels and colors in networkx graph drawing: https://networkx.org/documentation/latest/reference/generated/networkx.drawing.nx_pylab.draw_networkx.html?highlight=draw_networkx
+        '''
+        labels = {}
+        colors = []
+        for nodeID, data in self.nodes.data():
+            labels[nodeID] = data["label"]
+            colors.append(4 * data["label"])
+        return labels, colors
+    
+    def plotNetwork(self):
+        nodeLabels, nodeColors = genGraphFeatures(network)
+        # spring layout
+        pos = nx.spring_layout(self, seed=3068)  # Seed layout for reproducibility
+        nx.draw(self, pos=pos, with_labels=True, labels=nodeLabels, node_color=nodeColors)
+        plt.show()
+
+        # shell layout
+        pos = nx.shell_layout(self)  # Seed layout for reproducibility
+        nx.draw(self, pos=pos, with_labels=True, labels=nodeLabels, node_color=nodeColors)
+        plt.show()
