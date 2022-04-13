@@ -149,6 +149,19 @@ class Graph(nx.Graph):
         PaperID: int
         paperData: ([topics], [authors])
         '''
+        paperTopics = paperData[0]
+        paperAuthors = paperData[1]
 
         for auth, authData in self.nodes.data("data"):
-            print(authData)
+            # can just update the authors of the paper
+            if auth in paperAuthors:
+                # remove from old topics
+                for topID, papers in authData.items():
+                    if paperID in papers:
+                        papers.remove(paperID)
+
+                # add paper to new topics in author data structure
+                for topID in paperTopics:
+                    if topID not in authData:
+                        authData[topID] = []
+                    authData[topID].append(paperID)

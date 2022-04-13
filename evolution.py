@@ -57,12 +57,14 @@ class Evolution:
             
                 # remove paper from old topics if strictly in new topic
                 if len(intersectionAuths) > (len(authors) // 2):
+                    # update papers data structure
                     self.papers[pap][0].clear()
                     self.papers[pap][0].append(newTopic)
+                    # update topics data structure
                     for oldTopic in topics:
                         self.topics[oldTopic].remove(pap)
 
-                # update authors
+                # update authors in network with papers
                 self.network.updatePaperInNetwork(pap, (topics, authors))    
 
     def evolve(self, timeSteps=25):
@@ -102,7 +104,7 @@ class Evolution:
                 # update the papers, topics, and authors
                 if newCommunity:
                     self.updateNewCommunity(newCommunity)
-                print(newCommunity)
+                print(f'NewCommunity: {newCommunity}')
 
             # merge random discipline with prob pm
             if random.random() < self.probMerge:
