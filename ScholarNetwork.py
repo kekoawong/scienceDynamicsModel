@@ -178,13 +178,14 @@ class Graph(nx.Graph):
         '''
         labels = {}
         colors = []
-        for nodeID, data in self.nodes.data():
-            labels[nodeID] = data["label"]
-            colors.append(4 * data["label"])
+        for nodeID, data in self.nodes.data("data"):
+            disciplines = self.getAuthorDiscipline(nodeID)
+            labels[nodeID] = str(disciplines)
+            colors.append(4 * disciplines[0])
         return labels, colors
     
     def plotNetwork(self):
-        nodeLabels, nodeColors = genGraphFeatures(network)
+        nodeLabels, nodeColors = self.genGraphFeatures()
         # spring layout
         pos = nx.spring_layout(self, seed=3068)  # Seed layout for reproducibility
         nx.draw(self, pos=pos, with_labels=True, labels=nodeLabels, node_color=nodeColors)

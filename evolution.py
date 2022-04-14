@@ -156,3 +156,6 @@ class Evolution:
         with open(fileName, 'wb') as outfile:
             pickle.dump(self.network, outfile)
         print(f'Saved to {fileName} successfully!')
+
+    def plotNetwork(self):
+        self.network.plotNetwork()
