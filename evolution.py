@@ -54,6 +54,7 @@ class Evolution:
     def getNumAuthors(self):
         return len(self.getAuthors())
 
+    '''Printing and Plotting Functions'''
     def __repr__(self):
         s = f'Evolution network with a total of {self.getNumAuthors()} authors, {self.getNumPapers()} papers, and {self.getNumTopics()} disciplines/topics.\n'
         for authorID, data in self.getAuthors():
@@ -62,6 +63,9 @@ class Evolution:
                 for pap in papers:
                     s += f'      Paper {pap} with the topics {self.papers[pap][0]}\n'
         return s
+
+    def plotNetwork(self):
+        self.network.plotNetwork()
 
     def updateNewCommunity(self, communityAuthors):
         '''
@@ -147,6 +151,7 @@ class Evolution:
         # print(f'Topics: {self.topics}')
         # print(f'Initial Paper: {self.initialPaper}')
 
+    '''Saving Methods'''
     def saveEvolutionWithPickle(self, fileName='evolution.env'):
         with open(fileName, 'wb') as outfile:
             pickle.dump(self, outfile)
@@ -156,6 +161,3 @@ class Evolution:
         with open(fileName, 'wb') as outfile:
             pickle.dump(self.network, outfile)
         print(f'Saved to {fileName} successfully!')
-
-    def plotNetwork(self):
-        self.network.plotNetwork()
