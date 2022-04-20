@@ -67,6 +67,12 @@ class Evolution:
     def printAuthor(self, authorID):
         self.network.printAuthor(authorID)
 
+    def printPaper(self, paperID):
+        topics = ','.join(map(str, self.papers[paperID][0]))
+        authors = ','.join(map(str, self.papers[paperID][1]))
+        print(f'Paper {paperID} topics: {topics}')
+        print(f'Paper {paperID} authors: {authors}')
+
     def plotNetwork(self):
         self.network.plotNetwork()
 
