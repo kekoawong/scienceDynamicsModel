@@ -20,6 +20,7 @@ class Graph(nx.Graph):
     def printAuthor(self, authorID):
         '''Function will print the data associated with the author'''
         # print papers
+        print(self.nodes[authorID]["data"])
         formattedData = [[x, ','.join(map(str, y))] for x, y in self.nodes[authorID]["data"].items()]
         dfTopics = pd.DataFrame(data=formattedData, columns=["Topic", "Papers"])
         print(dfTopics.to_string(index=False))
@@ -185,6 +186,9 @@ class Graph(nx.Graph):
                     if topID not in authData:
                         authData[topID] = []
                     authData[topID].append(paperID)
+
+                # Remove topics from author that are empty
+                authData = {k: papers for k, papers in authData.items() if len(papers) > 0}
 
     def genGraphFeatures(self):
         '''
