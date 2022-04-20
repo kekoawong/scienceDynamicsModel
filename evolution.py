@@ -63,6 +63,9 @@ class Evolution:
                 for pap in papers:
                     s += f'      Paper {pap} with the topics {self.papers[pap][0]}\n'
         return s
+    
+    def printAuthor(self, authorID):
+        self.network.printAuthor(authorID)
 
     def plotNetwork(self):
         self.network.plotNetwork()

@@ -1,7 +1,9 @@
 import networkx as nx
 from igraph import Graph as modularityGraph
 import random
+import pandas as pd
 import matplotlib.pyplot as plt
+from sympy import false
 
 '''
 Inherited Graph class from networkx with methods used for scholar evolution
@@ -13,6 +15,19 @@ class Graph(nx.Graph):
     '''Access Methods'''
     def getAuthors(self):
         return self.nodes.data("data")
+
+    '''Print Methods'''
+    def printAuthor(self, authorID):
+        '''Function will print the data associated with the author'''
+        # print papers
+        formattedData = [[x, ','.join(map(str, y))] for x, y in self.nodes[authorID]["data"].items()]
+        dfTopics = pd.DataFrame(data=formattedData, columns=["Topic", "Papers"])
+        print(dfTopics.to_string(index=False))
+
+        # print neighbors
+        formattedData = [[x, self.get_edge_data(authorID, x)["weight"]] for x in self.neighbors(authorID)]
+        dfNeighbors = pd.DataFrame(data=formattedData, columns=["Neighbor", "Weight"])
+        print(dfNeighbors.to_string(index=False))
 
     def getAuthorDiscipline(self, authorID):
         '''
