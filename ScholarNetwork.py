@@ -232,25 +232,36 @@ class Graph(nx.Graph):
 
     '''Plotting Related Functions'''
     def genHTMLtable(self, authorID):
-        styling = '''
+        html = '''
             <style>
                 table {font-family: arial, sans-serif;border-collapse: collapse;}
                 td, th {border: 1px solid #dddddd;text-align: left;padding: 8px;}
+                th {background-color:#22A7F0}
                 tr:nth-child(even) {background-color: #dddddd;}
             </style>
-        '''
-        tableStr = styling + f'''
             <table>
-                <tr>
-                    <th>Company</th>
-                    <td>Test</td>
-                </tr>
-                <tr>
-                    <th>Country</th>
-                </tr>
-            </table>
+                <tr><caption><b>Topics</b>  Papers</caption></tr>
         '''
-        return tableStr
+        for topicID, papers in self.nodes[authorID]["data"].items():
+            html += f'<tr><th>{topicID}</th><td>'
+            html += '</td><td>'.join(map(str, papers))
+            html += '</td></tr>'
+        html += '</table>'
+        table = '''
+        <table>
+            <tr>
+                <th>Company</th>
+                <th>Contact</th>
+                <th>Country</th>
+            </tr>
+            <tr>
+                <td>Alfreds Futterkiste</td>
+                <td>Maria Anders</td>
+                <td>Germany</td>
+            </tr>
+        </table>
+        '''
+        return html
     
     def genPyvisFeatures(self):
 
