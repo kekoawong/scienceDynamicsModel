@@ -190,8 +190,15 @@ class Graph(nx.Graph):
         newCom = set(com1 + com2)
         subGraphMerged = self.subgraph(list(newCom))
 
+        # testing
+        newGraph = modularityGraph.from_networkx(subGraphMerged)
+        print(f'Merged {newGraph.modularity(set(subGraphMerged.nodes()))}')
+        print(f'Unmerged 1: {newGraph.modularity(set(com1))}')
+        print(f'Unmerged 2: {newGraph.modularity(set(com2))}')
+
         # calculate modularities
         mergedMod = nx_modularity(subGraphMerged, [newCom], weight=None)
+        print(f'Merged: {mergedMod}')
         unMergedMod = nx_modularity(subGraphMerged, [com1, com2], weight=None)
 
         if mergedMod < unMergedMod:

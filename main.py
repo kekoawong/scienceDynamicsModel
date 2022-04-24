@@ -1,6 +1,6 @@
 from Evolution import Evolution
 
-env = Evolution()
+env = Evolution(probMerge=.9)
 
 env.evolve(timeSteps=20)
 env.printAuthor(0)

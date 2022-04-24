@@ -124,9 +124,9 @@ class Evolution:
         while len(allAuthors) > 0:
             author = random.choice(allAuthors)
             allAuthors.remove(author)
-            if len(author[1].keys()) < 2:
-                author = None
+            if len(author[1].keys()) > 1:
                 break
+            author = None
 
         # select two random disciplines from author
         if not author:
