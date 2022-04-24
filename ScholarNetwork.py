@@ -14,7 +14,7 @@ class Graph(nx.Graph):
 
     '''Access Methods'''
     def getAuthors(self):
-        return self.nodes.data("data")
+        return list(self.nodes.data("data"))
 
     '''Print Methods'''
     def printAuthor(self, authorID):
@@ -174,9 +174,8 @@ class Graph(nx.Graph):
         # merge communities 
         newCom = set(com1 + com2)
         subGraphMerged = self.subgraph(list(newCom))
-        mergedGraph = modularityGraph.from_networkx(subGraphMerged)
-        # subGraphUnmerged = 
 
+        # calculate modularities
         mergedMod = nx_modularity(subGraphMerged, [newCom], weight=None)
         unMergedMod = nx_modularity(subGraphMerged, [com1, com2], weight=None)
 
@@ -225,7 +224,7 @@ class Graph(nx.Graph):
         colors = []
         for nodeID, data in self.nodes.data("data"):
             disciplines = self.getAuthorDiscipline(nodeID)
-            labels[nodeID] = str(disciplines)
+            labels[nodeID] = f'{nodeID}: ' + ','.join(map(str, disciplines))
             colors.append(4 * disciplines[0])
         return labels, colors
     

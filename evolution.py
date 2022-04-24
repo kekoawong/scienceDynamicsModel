@@ -122,17 +122,19 @@ class Evolution:
         # choose random author with at least two disciplines
         allAuthors = self.getAuthors()
         while len(allAuthors) > 0:
-            author = allAuthors.pop(random.choice(allAuthors))
-            if len(author.keys()) > 1:
+            author = random.choice(allAuthors)
+            allAuthors.remove(author)
+            if len(author[1].keys()) < 2:
                 author = None
                 break
 
         # select two random disciplines from author
         if not author:
             return None
-        allTopics = author.keys()
-        top1 = allTopics.pop(random.choice(allTopics))
-        top2 = allTopics.pop(random.choice(allTopics))
+        allTopics = list(author[1].keys())
+        top1 = random.choice(allTopics)
+        allTopics.remove(top1)
+        top2 = random.choice(allTopics)
 
         return self.network.getDisciplineAuthors(top1), self.network.getDisciplineAuthors(top2)
 
