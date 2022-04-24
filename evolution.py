@@ -110,7 +110,20 @@ class Evolution:
                         self.topics[oldTopic].remove(pap)
 
                 # update authors in network with papers
-                self.network.updatePaperInNetwork(pap, (topics, authors))    
+                self.network.updatePaperInNetwork(pap, (topics, authors))
+
+    def randomNeighboringCommunities(self):
+        '''
+        Function used to get two random neighboring communities for merge event
+        Returns a tuple of the two communities as
+            ([authorIDs in community 1], [authorIDs in community 2])
+        '''
+
+        # choose random author
+        author = random.choice(self.getAuthors())
+
+        # select two random disciplines from author
+        print(author)
 
     def evolve(self, timeSteps=25):
         '''
@@ -152,7 +165,7 @@ class Evolution:
 
             # merge random discipline with prob pm
             if random.random() < self.probMerge:
-                pass
+                disciplines = self.randomNeighboringCommunities()
 
         self.initialPaper += timeSteps
         # print(f'Authors: {self.network.nodes(data=True)}')

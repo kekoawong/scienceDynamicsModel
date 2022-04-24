@@ -3,7 +3,6 @@ from igraph import Graph as modularityGraph
 import random
 import pandas as pd
 import matplotlib.pyplot as plt
-from sympy import false
 
 '''
 Inherited Graph class from networkx with methods used for scholar evolution
@@ -158,10 +157,23 @@ class Graph(nx.Graph):
         if newGraph.modularity(set(subGraph.nodes())) > clusters.modularity or len(clusters) != 2:
             return False
 
-        # choose which cluster is new one, based off of community size
+        # choose new cluster as the smaller one
         index = 1 if len(clusters[1]) < len(clusters[0]) else 0
 
         return clusters[index]
+
+
+    def mergeCommunities(self, com1=[], com2=[]):
+        '''
+        Function will take the two communities as a list of authorIDs
+        Will check modularity and merge them 
+        Returns list of authors in merged community if merged, False otherwise
+        '''
+
+        # merge communities 
+        subGraphMerged = self.subgraph(list(set(com1 + com2)))
+        mergedGraph = modularityGraph.from_networkx(subGraphMerged)
+        # subGraphUnmerged = 
 
 
     def updatePaperInNetwork(self, paperID, paperData):
@@ -177,9 +189,13 @@ class Graph(nx.Graph):
             # can just update the authors of the paper
             if auth in paperAuthors:
                 # remove from old topics
+                emptyTopics = []
                 for topID, papers in authData.items():
                     if paperID in papers:
+                        # print(f'Before{papers}')
                         papers.remove(paperID)
+                        if len(papers) == 0:
+                            emptyTopics.append(topID)
 
                 # add paper to new topics in author data structure
                 for topID in paperTopics:
@@ -188,7 +204,7 @@ class Graph(nx.Graph):
                     authData[topID].append(paperID)
 
                 # Remove topics from author that are empty
-                authData = {k: papers for k, papers in authData.items() if len(papers) > 0}
+                self.nodes[auth]["data"] = {k: papers for k, papers in authData.items() if len(papers) > 0}
 
     def genGraphFeatures(self):
         '''
