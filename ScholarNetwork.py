@@ -240,8 +240,8 @@ class Graph(nx.Graph):
                 tr:nth-child(even) {background-color: #dddddd;}
             </style>
             <table>
-                <tr><caption><b>Topics</b>  Papers</caption></tr>
         '''
+        html += f'<tr><caption><b>Main Author Disciplines:</b> ' + ','.join(map(str, self.getAuthorDiscipline(authorID))) + '</caption></tr>'
         for topicID, papers in self.nodes[authorID]["data"].items():
             html += f'<tr><th>{topicID}</th><td>'
             html += '</td><td>'.join(map(str, papers))
