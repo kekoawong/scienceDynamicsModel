@@ -6,6 +6,10 @@ env.evolve(timeSteps=20)
 env.printAuthor(0)
 env.printPaper(1)
 
+env.network.getAuthorPapers(0)
+
+env.network.plotPyvisGraph(filename='pyvis.html')
+
 env.saveEvolutionWithPickle('models/evolution.env')
 
 

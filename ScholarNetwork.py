@@ -20,6 +20,15 @@ class Graph(nx.Graph):
     def getAuthorIDs(self): 
         return list(self.nodes)
 
+    def getAuthorPapers(self, authID):
+        '''
+        Returns a list of all author papers
+        '''
+        allPapers = set()
+        for top, papers in self.nodes[authID]["data"].items():
+            allPapers.update(papers)
+        return list(allPapers)
+
     '''Print Methods'''
     def getAuthorPapersStr(self, authorID):
         formattedData = [[x, ','.join(map(str, y))] for x, y in self.nodes[authorID]["data"].items()]
@@ -221,15 +230,42 @@ class Graph(nx.Graph):
                 # Remove topics from author that are empty
                 self.nodes[auth]["data"] = {k: papers for k, papers in authData.items() if len(papers) > 0}
 
+    '''Plotting Related Functions'''
+    def genHTMLtable(self, authorID):
+        styling = '''
+            <style>
+                table {font-family: arial, sans-serif;border-collapse: collapse;}
+                td, th {border: 1px solid #dddddd;text-align: left;padding: 8px;}
+                tr:nth-child(even) {background-color: #dddddd;}
+            </style>
+        '''
+        tableStr = styling + f'''
+            <table>
+                <tr>
+                    <th>Company</th>
+                    <td>Test</td>
+                </tr>
+                <tr>
+                    <th>Country</th>
+                </tr>
+            </table>
+        '''
+        return tableStr
+    
     def genPyvisFeatures(self):
 
         groups = {}
         gid = 1
         for authID in self.getAuthorIDs():
+
+            # add labels
             self.nodes[authID]['label'] = f'Author {authID}'
             disciplines = ','.join(map(str, self.getAuthorDiscipline(authID)))
             title = f'Main Disciplines: ' + disciplines
-            self.nodes[authID]['title'] = title
+            self.nodes[authID]['title'] = self.genHTMLtable(authID)
+
+            # add scaling
+            self.nodes[authID]["value"] = len(self.getAuthorPapers(authID))
 
             if disciplines not in groups:
                 groups[disciplines] = gid
@@ -243,6 +279,7 @@ class Graph(nx.Graph):
         visNetwork = ntvis()
         visNetwork.from_nx(self)
         visNetwork.show(filename)
+        print(f'Plot saved to {filename} successfully!')
 
     def genGraphFeatures(self):
         '''
