@@ -3,6 +3,7 @@ from networkx.algorithms.community import modularity as nx_modularity
 from igraph import Graph as modularityGraph
 import random
 import pandas as pd
+from pyvis.network import Network as ntvis
 import matplotlib.pyplot as plt
 
 '''
@@ -16,14 +17,19 @@ class Graph(nx.Graph):
     def getAuthors(self):
         return list(self.nodes.data("data"))
 
+    def getAuthorIDs(self): 
+        return list(self.nodes)
+
     '''Print Methods'''
+    def getAuthorPapersStr(self, authorID):
+        formattedData = [[x, ','.join(map(str, y))] for x, y in self.nodes[authorID]["data"].items()]
+        dfTopics = pd.DataFrame(data=formattedData, columns=["Topic", "Papers"])
+        return dfTopics.to_string(index=False)
+
     def printAuthor(self, authorID):
         '''Function will print the data associated with the author'''
         # print papers
-        print(self.nodes[authorID]["data"])
-        formattedData = [[x, ','.join(map(str, y))] for x, y in self.nodes[authorID]["data"].items()]
-        dfTopics = pd.DataFrame(data=formattedData, columns=["Topic", "Papers"])
-        print(dfTopics.to_string(index=False))
+        print(self.getAuthorPapersStr(authorID))
 
         # print neighbors
         formattedData = [[x, self.get_edge_data(authorID, x)["weight"]] for x in self.neighbors(authorID)]
@@ -215,6 +221,29 @@ class Graph(nx.Graph):
                 # Remove topics from author that are empty
                 self.nodes[auth]["data"] = {k: papers for k, papers in authData.items() if len(papers) > 0}
 
+    def genPyvisFeatures(self):
+
+        groups = {}
+        gid = 1
+        for authID in self.getAuthorIDs():
+            self.nodes[authID]['label'] = f'Author {authID}'
+            disciplines = ','.join(map(str, self.getAuthorDiscipline(authID)))
+            title = f'Main Disciplines: ' + disciplines
+            self.nodes[authID]['title'] = title
+
+            if disciplines not in groups:
+                groups[disciplines] = gid
+                gid += 1
+
+            self.nodes[authID]["group"] = groups[disciplines]
+
+    def plotPyvisGraph(self, filename='pyvis.html'):
+        
+        self.genPyvisFeatures()
+        visNetwork = ntvis()
+        visNetwork.from_nx(self)
+        visNetwork.show(filename)
+
     def genGraphFeatures(self):
         '''
         Will return the dictionary for node labels and list of colors for plotting
@@ -227,6 +256,7 @@ class Graph(nx.Graph):
             labels[nodeID] = f'{nodeID}: ' + ','.join(map(str, disciplines))
             colors.append(4 * disciplines[0])
         return labels, colors
+
     
     def plotNetwork(self):
         nodeLabels, nodeColors = self.genGraphFeatures()
