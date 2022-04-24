@@ -1,4 +1,5 @@
 import networkx as nx
+from networkx.algorithms.community import modularity as nx_modularity
 from igraph import Graph as modularityGraph
 import random
 import pandas as pd
@@ -171,9 +172,18 @@ class Graph(nx.Graph):
         '''
 
         # merge communities 
-        subGraphMerged = self.subgraph(list(set(com1 + com2)))
+        newCom = set(com1 + com2)
+        subGraphMerged = self.subgraph(list(newCom))
         mergedGraph = modularityGraph.from_networkx(subGraphMerged)
         # subGraphUnmerged = 
+
+        mergedMod = nx_modularity(subGraphMerged, [newCom], weight=None)
+        unMergedMod = nx_modularity(subGraphMerged, [com1, com2], weight=None)
+
+        if mergedMod < unMergedMod:
+            return False
+
+        return list(newCom)
 
 
     def updatePaperInNetwork(self, paperID, paperData):

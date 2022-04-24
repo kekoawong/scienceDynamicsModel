@@ -5,7 +5,7 @@ import pickle
 
 class Evolution:
 
-    def __init__(self, probNewAuthor=0.5, probStop=0.7, probSplit=0.5, probMerge=0.5):
+    def __init__(self, probNewAuthor=0.6, probStop=0.3, probSplit=0.5, probMerge=0.5):
         '''Define Probabilites'''
         # probability that you generate new author
         self.probNewAuthor = probNewAuthor
@@ -115,15 +115,26 @@ class Evolution:
     def randomNeighboringCommunities(self):
         '''
         Function used to get two random neighboring communities for merge event
-        Returns a tuple of the two communities as
+        Returns a tuple of the two communities or None if network not big enough
             ([authorIDs in community 1], [authorIDs in community 2])
         '''
 
-        # choose random author
-        author = random.choice(self.getAuthors())
+        # choose random author with at least two disciplines
+        allAuthors = self.getAuthors()
+        while len(allAuthors) > 0:
+            author = allAuthors.pop(random.choice(allAuthors))
+            if len(author.keys()) > 1:
+                author = None
+                break
 
         # select two random disciplines from author
-        print(author)
+        if not author:
+            return None
+        allTopics = author.keys()
+        top1 = allTopics.pop(random.choice(allTopics))
+        top2 = allTopics.pop(random.choice(allTopics))
+
+        return self.network.getDisciplineAuthors(top1), self.network.getDisciplineAuthors(top2)
 
     def evolve(self, timeSteps=25):
         '''
@@ -166,6 +177,8 @@ class Evolution:
             # merge random discipline with prob pm
             if random.random() < self.probMerge:
                 disciplines = self.randomNeighboringCommunities()
+                if disciplines:
+                    self.network.mergeCommunities(com1=disciplines[0], com2=disciplines[1])
 
         self.initialPaper += timeSteps
         # print(f'Authors: {self.network.nodes(data=True)}')
