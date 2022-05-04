@@ -7,6 +7,7 @@ import random
 import pandas as pd
 from pyvis.network import Network as ntvis
 import matplotlib.pyplot as plt
+import sys
 
 '''
 Inherited Graph class from networkx with methods used for scholar evolution
@@ -154,6 +155,18 @@ class Graph(nx.Graph):
 
         return communityAuthors
 
+    def getAuthorswithTopic(self, topicID):
+        '''
+        Returns a list of authors who would have the given topic
+        '''
+        topicAuthors = []
+        for auth, authData in self.nodes.data('data'):
+            if topicID in authData:
+                topicAuthors.append(auth)
+
+        return topicAuthors
+
+
     def splitCommunity(self, authors, numClusters=2):
         '''
         Function will take the list of authors in the community, numClusters is how many clusters to split into
@@ -219,10 +232,10 @@ class Graph(nx.Graph):
         mergedMod = nx_modularity(subGraphMerged, [newCom], weight=None)
         # merge, authors that are in both communities will just be a part of the first
         coms = dict.fromkeys(com1, 0) | dict.fromkeys(com2, 1)
-        print(coms)
         unMergedMod = community.modularity(coms, subGraphMerged, weight=None)
-        print(f'Merged: {mergedMod}')
-        print(f'Unmerged: {unMergedMod}')
+        # print(f'Mergining communities: {com1} and {com2}')
+        # print(f'Merged: {mergedMod}')
+        # print(f'Unmerged: {unMergedMod}')
 
         if mergedMod < unMergedMod:
             return False
@@ -314,11 +327,13 @@ class Graph(nx.Graph):
 
             self.nodes[authID]["group"] = groups[disciplines]
 
-    def plotPyvisGraph(self, filename='pyvis.html'):
+        return self
+
+    def plotPyvisGraph(self, filename='pyvis.html', network=None):
         
-        self.genPyvisFeatures()
+        net = self.genPyvisFeatures() if not network else network.genPyvisFeatures()
         visNetwork = ntvis()
-        visNetwork.from_nx(self)
+        visNetwork.from_nx(net)
         visNetwork.show(filename)
         print(f'Plot saved to {filename} successfully!')
 

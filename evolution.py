@@ -136,7 +136,10 @@ class Evolution:
         allTopics.remove(top1)
         top2 = random.choice(allTopics)
 
-        return self.network.getDisciplineAuthors(top1), self.network.getDisciplineAuthors(top2)
+
+        # print(f'Random author {author} with Topic {top1} with authors {self.network.getAuthorswithTopic(top1)}, Topic {top2} with authors {self.network.getAuthorswithTopic(top2)}')
+
+        return self.network.getAuthorswithTopic(top1), self.network.getAuthorswithTopic(top2)
 
     def evolve(self, timeSteps=25):
         '''
