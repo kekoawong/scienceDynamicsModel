@@ -1,6 +1,8 @@
 import networkx as nx
 from networkx.algorithms.community import modularity as nx_modularity
+import community
 from igraph import Graph as modularityGraph
+from igraph.clustering import VertexClustering
 import random
 import pandas as pd
 from pyvis.network import Network as ntvis
@@ -172,6 +174,20 @@ class Graph(nx.Graph):
         # compare unweighted modularity of new communities to the initial, return if there should not be change in community structure
         if newGraph.modularity(set(subGraph.nodes())) > clusters.modularity or len(clusters) != 2:
             return False
+        
+        # coms = {}
+        # for i, clust in enumerate(clusters):
+        #     d = dict.fromkeys(clust, i)
+        #     coms = coms | d
+        # test = community.modularity(coms, subGraph, weight=None)
+        # print(f'Test: {test}')
+        # print(f'Real: {clusters.modularity}')
+
+        # coms = dict.fromkeys(list(subGraph.nodes()), 1)
+        # print(coms)
+        # test = community.modularity(coms, subGraph, weight=None)
+        # print(f'test2: {test}')
+        # print(f'Results: {newGraph.modularity(set(subGraph.nodes()))}')
 
         # choose new cluster as the smaller one
         index = 1 if len(clusters[1]) < len(clusters[0]) else 0
@@ -192,14 +208,18 @@ class Graph(nx.Graph):
 
         # testing
         newGraph = modularityGraph.from_networkx(subGraphMerged)
-        print(f'Merged {newGraph.modularity(set(subGraphMerged.nodes()))}')
-        print(f'Unmerged 1: {newGraph.modularity(set(com1))}')
-        print(f'Unmerged 2: {newGraph.modularity(set(com2))}')
+        # print(f'Merged {newGraph.modularity(set(subGraphMerged.nodes()))}')
+        # print(f'Unmerged 1: {newGraph.modularity(set(com1))}')
+        # print(f'Unmerged 2: {newGraph.modularity(set(com2))}')
 
         # calculate modularities
         mergedMod = nx_modularity(subGraphMerged, [newCom], weight=None)
+        # merge, authors that are in both communities will just be a part of the first
+        coms = dict.fromkeys(com1, 0) | dict.fromkeys(com2, 1)
+        print(coms)
+        unMergedMod = community.modularity(coms, subGraphMerged, weight=None)
         print(f'Merged: {mergedMod}')
-        unMergedMod = nx_modularity(subGraphMerged, [com1, com2], weight=None)
+        print(f'Unmerged: {unMergedMod}')
 
         if mergedMod < unMergedMod:
             return False
