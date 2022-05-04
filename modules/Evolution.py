@@ -1,5 +1,4 @@
-from fileinput import filename
-from ScholarNetwork import Graph
+from .ScholarNetwork import Graph
 import random
 import pickle
 

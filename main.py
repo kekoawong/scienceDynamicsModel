@@ -1,4 +1,4 @@
-from Evolution import Evolution
+from modules.Evolution import Evolution
 
 env = Evolution(probMerge=.9)
 
