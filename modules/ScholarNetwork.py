@@ -2,12 +2,10 @@ import networkx as nx
 from networkx.algorithms.community import modularity as nx_modularity
 import community
 from igraph import Graph as modularityGraph
-from igraph.clustering import VertexClustering
 import random
 import pandas as pd
 from pyvis.network import Network as ntvis
 import matplotlib.pyplot as plt
-import sys
 
 '''
 Inherited Graph class from networkx with methods used for scholar evolution
