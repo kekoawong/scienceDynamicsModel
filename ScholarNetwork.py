@@ -204,6 +204,9 @@ class Graph(nx.Graph):
 
         # merge communities 
         newCom = set(com1 + com2)
+        # return if no new commmunity
+        if len(newCom) == 0:
+            return False
         subGraphMerged = self.subgraph(list(newCom))
 
         # testing
