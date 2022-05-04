@@ -1,5 +1,6 @@
 import networkx as nx
 from networkx.algorithms.community import modularity as nx_modularity
+import community
 from igraph import Graph as modularityGraph
 import random
 import pandas as pd
@@ -152,6 +153,18 @@ class Graph(nx.Graph):
 
         return communityAuthors
 
+    def getAuthorswithTopic(self, topicID):
+        '''
+        Returns a list of authors who would have the given topic
+        '''
+        topicAuthors = []
+        for auth, authData in self.nodes.data('data'):
+            if topicID in authData:
+                topicAuthors.append(auth)
+
+        return topicAuthors
+
+
     def splitCommunity(self, authors, numClusters=2):
         '''
         Function will take the list of authors in the community, numClusters is how many clusters to split into
@@ -172,6 +185,20 @@ class Graph(nx.Graph):
         # compare unweighted modularity of new communities to the initial, return if there should not be change in community structure
         if newGraph.modularity(set(subGraph.nodes())) > clusters.modularity or len(clusters) != 2:
             return False
+        
+        # coms = {}
+        # for i, clust in enumerate(clusters):
+        #     d = dict.fromkeys(clust, i)
+        #     coms = coms | d
+        # test = community.modularity(coms, subGraph, weight=None)
+        # print(f'Test: {test}')
+        # print(f'Real: {clusters.modularity}')
+
+        # coms = dict.fromkeys(list(subGraph.nodes()), 1)
+        # print(coms)
+        # test = community.modularity(coms, subGraph, weight=None)
+        # print(f'test2: {test}')
+        # print(f'Results: {newGraph.modularity(set(subGraph.nodes()))}')
 
         # choose new cluster as the smaller one
         index = 1 if len(clusters[1]) < len(clusters[0]) else 0
@@ -188,18 +215,25 @@ class Graph(nx.Graph):
 
         # merge communities 
         newCom = set(com1 + com2)
+        # return if no new commmunity
+        if len(newCom) == 0:
+            return False
         subGraphMerged = self.subgraph(list(newCom))
 
         # testing
         newGraph = modularityGraph.from_networkx(subGraphMerged)
-        print(f'Merged {newGraph.modularity(set(subGraphMerged.nodes()))}')
-        print(f'Unmerged 1: {newGraph.modularity(set(com1))}')
-        print(f'Unmerged 2: {newGraph.modularity(set(com2))}')
+        # print(f'Merged {newGraph.modularity(set(subGraphMerged.nodes()))}')
+        # print(f'Unmerged 1: {newGraph.modularity(set(com1))}')
+        # print(f'Unmerged 2: {newGraph.modularity(set(com2))}')
 
         # calculate modularities
         mergedMod = nx_modularity(subGraphMerged, [newCom], weight=None)
-        print(f'Merged: {mergedMod}')
-        unMergedMod = nx_modularity(subGraphMerged, [com1, com2], weight=None)
+        # merge, authors that are in both communities will just be a part of the first
+        coms = dict.fromkeys(com1, 0) | dict.fromkeys(com2, 1)
+        unMergedMod = community.modularity(coms, subGraphMerged, weight=None)
+        # print(f'Mergining communities: {com1} and {com2}')
+        # print(f'Merged: {mergedMod}')
+        # print(f'Unmerged: {unMergedMod}')
 
         if mergedMod < unMergedMod:
             return False
@@ -291,11 +325,13 @@ class Graph(nx.Graph):
 
             self.nodes[authID]["group"] = groups[disciplines]
 
-    def plotPyvisGraph(self, filename='pyvis.html'):
+        return self
+
+    def plotPyvisGraph(self, filename='pyvis.html', network=None):
         
-        self.genPyvisFeatures()
+        net = self.genPyvisFeatures() if not network else network.genPyvisFeatures()
         visNetwork = ntvis()
-        visNetwork.from_nx(self)
+        visNetwork.from_nx(net)
         visNetwork.show(filename)
         print(f'Plot saved to {filename} successfully!')
 
