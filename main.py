@@ -2,15 +2,15 @@ from Evolution import Evolution
 
 env = Evolution(probMerge=.9)
 
-env.evolve(timeSteps=20)
+env.evolve(timeSteps=30)
 # env.printAuthor(0)
 # env.printPaper(1)
 
 env.network.getAuthorPapers(0)
 
-env.network.plotPyvisGraph(filename='pyvis.html')
+env.network.plotPyvisGraph(filename='outputs/pyvis.html')
 
-env.saveEvolutionWithPickle('models/evolution.env')
+env.saveEvolutionWithPickle('outputs/evolution.env')
 
 
 # print(f'Topics: {env.getTopics()}')
