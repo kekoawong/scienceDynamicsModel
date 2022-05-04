@@ -1,17 +1,35 @@
 # Science Dynamics Model
 This repository contains the code for is based upon [this Social Dynamics of Science Paper](https://www.nature.com/articles/srep01069) which modeled the birth and decline of scientific disciplines. 
 
+<img src="outputs/scienceModel.gif"/>
+
 ## Brief Explanation
 At every time step, new authors and papers are added to the network. Each paper has a certain number of topics associated with it. An author's discipline corresponds to the topics that contain the most papers for the given author.
 
-## Running the model
+## Running the Model
+Reference **main.py** to see how to declare an instance of the **Evolution** class and run a model. With the default parameters, a model can be run and saved with the following code:
+```
+from modules.Evolution import Evolution
 
+env = Evolution()
+env.evolve(timeSteps=10)
+env.saveEvolutionWithPickle('outputs/evolution.env')
+```
+
+The evolve method determines how many time steps to run the model. Then, the saved **Evolution** class can be loaded into a Jupyter Notebook, where the network visualizations can be viewed.
 
 ## Organization
+* **modules**: Contains the main classes for the models
+    * **Evolution.py**: contains the main model class that defines how the scientific collaboration evolves over time.
+    * **ScholarNetwork.py**: contains the scholar network class, which extends from the `networkx.Graph` class.
+* **outputs**: Contains example **Evolution** data structures, **ScholarNetworks**, and network visualizations from models that have been run. 
+* **main.py**: Example python script that declares an instance of an science evolution model and runs it.
+* **viewEvolution.ipynb**: Example python notebook that shows the output of various evolution models.
+
 
 ## Data Structures
 Within the model, there are existing data structures that are updated for **Authors**, **Papers**, and **Topics**. 
-**Authors** will be stored in the ScholarNetwork data structure itself, with the following format:
+**Authors** will be stored in the `ScholarNetwork` class, with the following format:
 ```
 {
     TopicID1: [PaperIDs],
@@ -19,7 +37,7 @@ Within the model, there are existing data structures that are updated for **Auth
 }
 ```
 
-**Papers** will be stored in the *Evolution* class with the following format:
+**Papers** will be stored in the `Evolution` class with the following format:
 
 ```
 {
@@ -28,7 +46,7 @@ Within the model, there are existing data structures that are updated for **Auth
 }
 ```
 
-**Topics** will also be stored in the *Evolution* class with the following format:
+**Topics** will also be stored in the `Evolution` class with the following format:
 ```
 {
     TopicID1: [PaperIDs],
