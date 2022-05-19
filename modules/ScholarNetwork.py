@@ -278,7 +278,6 @@ class Graph(nx.Graph):
             # add labels
             graph.nodes[authID]['label'] = f'Author {authID}'
             disciplines = ','.join(map(str, graph.getAuthorDiscipline(authID)))
-            title = f'Main Disciplines: ' + disciplines
             graph.nodes[authID]['title'] = graph.genHTMLtable(authID)
 
             # add scaling

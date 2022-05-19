@@ -1,4 +1,5 @@
 import pandas as pd
+import sys
 
 class Author:
     '''
@@ -49,7 +50,6 @@ class Author:
             elif numPapers > maxVal:
                 maxVal = numPapers
                 disciplines = [top]
-
         return disciplines
 
     '''Print Methods'''
@@ -75,7 +75,8 @@ class Author:
         for topicID in topics:
             if topicID not in self.collection:
                 self.collection[topicID] = []
-            self.collection[topicID].append(paperID)
+            if paperID not in self.collection[topicID]:
+                self.collection[topicID].append(paperID)
 
     def updateAuthor(self, paperID, paperTopics):
         '''
@@ -85,9 +86,12 @@ class Author:
         for topID, papers in self.collection.items():
             if paperID in papers:
                 papers.remove(paperID)
+        print(f'self collection: {self.collection.items()}')
+        print(f'papers: {papers}')
 
         # add paper to new topics
         self.insertPaper(paperID, paperTopics)
         
         # Remove topics from author that are empty
         self.collection = {k: papers for k, papers in self.collection.items() if len(papers) > 0}
+        print(self.collection)

@@ -56,7 +56,7 @@ class Evolution:
     '''Printing and Plotting Functions'''
     def __repr__(self):
         s = f'Evolution network with a total of {self.getNumAuthors()} authors, {self.getNumPapers()} papers, and {self.getNumTopics()} disciplines/topics.\n'
-        for authClass in self.getAuthorsClasses():
+        for authID, authClass in self.getAuthorsClasses():
             authID = authClass.getID()
             s += f'   Author {authID} primary disciplines: {self.network.getAuthorDiscipline(authID)}\n'
             for topicID, papers in authClass.getData().items():
