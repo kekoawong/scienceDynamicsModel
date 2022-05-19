@@ -41,8 +41,8 @@ class Evolution:
     def getTopics(self):
         return self.topics
 
-    def getAuthors(self):
-        return self.network.getAuthors()
+    def getAuthorsClasses(self):
+        return self.network.getAuthorsClasses()
 
     def getNumTopics(self):
         return len(self.topics.keys())
@@ -51,14 +51,15 @@ class Evolution:
         return len(self.papers.keys())
 
     def getNumAuthors(self):
-        return len(self.getAuthors())
+        return len(self.getAuthorsClasses())
 
     '''Printing and Plotting Functions'''
     def __repr__(self):
         s = f'Evolution network with a total of {self.getNumAuthors()} authors, {self.getNumPapers()} papers, and {self.getNumTopics()} disciplines/topics.\n'
-        for authorID, data in self.getAuthors():
-            s += f'   Author {authorID} primary disciplines: {self.network.getAuthorDiscipline(authorID)}\n'
-            for topicID, papers in data.items():
+        for authClass in self.getAuthorsClasses():
+            authID = authClass.getID()
+            s += f'   Author {authID} primary disciplines: {self.network.getAuthorDiscipline(authID)}\n'
+            for topicID, papers in authClass.getData().items():
                 for pap in papers:
                     s += f'      Paper {pap} with the topics {self.papers[pap][0]}\n'
         return s
@@ -119,18 +120,19 @@ class Evolution:
         '''
 
         # choose random author with at least two disciplines
-        allAuthors = self.getAuthors()
+        allAuthors = self.getAuthorsClasses()
         while len(allAuthors) > 0:
             author = random.choice(allAuthors)
             allAuthors.remove(author)
-            if len(author[1].keys()) > 1:
+            authClass = author[1]
+            if len(authClass.getData().keys()) > 1:
                 break
             author = None
 
         # select two random disciplines from author
         if not author:
             return None
-        allTopics = list(author[1].keys())
+        allTopics = list(authClass.getData().keys())
         top1 = random.choice(allTopics)
         allTopics.remove(top1)
         top2 = random.choice(allTopics)

@@ -21,6 +21,9 @@ class Author:
 
     def getData(self):
         return self.collection
+
+    def getID(self):
+        return self.id
     
     def getAuthorPapers(self):
         '''
@@ -55,15 +58,15 @@ class Author:
         dfTopics = pd.DataFrame(data=formattedData, columns=["Topic", "Papers"])
         return dfTopics.to_string(index=False)
 
-    def printAuthor(self):
-        '''Function will print the data associated with the author'''
-        # print papers
-        print(self.getAuthorPapersStr())
+    # def printAuthor(self):
+    #     '''Function will print the data associated with the author'''
+    #     # print papers
+    #     print(self.getAuthorPapersStr())
 
-        # print neighbors
-        formattedData = [[x, self.get_edge_data(authorID, x)["weight"]] for x in self.neighbors(authorID)]
-        dfNeighbors = pd.DataFrame(data=formattedData, columns=["Neighbor", "Weight"])
-        print(dfNeighbors.to_string(index=False))
+    #     # print neighbors
+    #     formattedData = [[x, self.get_edge_data(authorID, x)["weight"]] for x in self.neighbors(authorID)]
+    #     dfNeighbors = pd.DataFrame(data=formattedData, columns=["Neighbor", "Weight"])
+    #     print(dfNeighbors.to_string(index=False))
 
     def insertPaper(self, paperID, topics):
         '''

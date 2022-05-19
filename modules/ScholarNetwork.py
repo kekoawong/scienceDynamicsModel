@@ -7,6 +7,7 @@ import random
 import pandas as pd
 from pyvis.network import Network as ntvis
 import matplotlib.pyplot as plt
+from copy import deepcopy
 
 '''
 Inherited Graph class from networkx with methods used for scholar evolution
@@ -16,7 +17,7 @@ Definitions:
 class Graph(nx.Graph):
 
     '''Access Methods'''
-    def getAuthors(self):
+    def getAuthorsClasses(self):
         return list(self.nodes.data("data"))
 
     def getAuthorIDs(self): 
@@ -60,7 +61,7 @@ class Graph(nx.Graph):
         Function will update the topics and papers of all authors
         '''
         for authID in authors:
-            self.nodes[authID]["data"].insertPaper(topics, paperID)
+            self.nodes[authID]["data"].insertPaper(paperID, topics)
 
     def determinePaperTopic(self, authors):
         '''
@@ -261,32 +262,42 @@ class Graph(nx.Graph):
         html += '</table>'
         return html
     
-    def genPyvisFeatures(self):
+    def genPyvisGraph(self):
 
+        # create copy
+        graph = deepcopy(self)
+        isSame = graph is self
+        print(isSame)
+
+        # create groups for coloring
         groups = {}
         gid = 1
-        for authID in self.getAuthorIDs():
+
+        for authID in graph.getAuthorIDs():
 
             # add labels
-            self.nodes[authID]['label'] = f'Author {authID}'
-            disciplines = ','.join(map(str, self.getAuthorDiscipline(authID)))
+            graph.nodes[authID]['label'] = f'Author {authID}'
+            disciplines = ','.join(map(str, graph.getAuthorDiscipline(authID)))
             title = f'Main Disciplines: ' + disciplines
-            self.nodes[authID]['title'] = self.genHTMLtable(authID)
+            graph.nodes[authID]['title'] = graph.genHTMLtable(authID)
 
             # add scaling
-            self.nodes[authID]["value"] = len(self.getAuthorPapers(authID))
+            graph.nodes[authID]["value"] = len(graph.getAuthorPapers(authID))
 
             if disciplines not in groups:
                 groups[disciplines] = gid
                 gid += 1
 
-            self.nodes[authID]["group"] = groups[disciplines]
+            graph.nodes[authID]["group"] = groups[disciplines]
 
-        return self
+            # delete auth class since it is not compatible with PyVis
+            graph.nodes[authID]["data"] = None
+
+        return graph
 
     def plotPyvisGraph(self, filename='pyvis.html', network=None):
         
-        net = self.genPyvisFeatures() if not network else network.genPyvisFeatures()
+        net = self.genPyvisGraph() if not network else network.genPyvisGraph()
         visNetwork = ntvis()
         visNetwork.from_nx(net)
         visNetwork.show(filename)
