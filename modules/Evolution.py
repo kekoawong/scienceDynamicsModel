@@ -26,7 +26,7 @@ class Evolution:
 
         '''Initialize network with one author, one paper, and one topic'''
         initialTopic = 0
-        self.network.add_node(self.newAuthor, data={initialTopic: [self.initialPaper]})
+        self.network.addAuthor(self.newAuthor, data={initialTopic: [self.initialPaper]})
         self.papers[self.initialPaper] = ([initialTopic], [self.newAuthor])
         self.topics[initialTopic] = [self.initialPaper]
         self.initialPaper += 1
@@ -156,7 +156,7 @@ class Evolution:
                 self.newAuthor += 1
                 authors.insert(0, self.newAuthor)
                 # add node without data, disciplines will be added after paper is completed
-                self.network.add_node(self.newAuthor, data={})
+                self.network.addAuthor(self.newAuthor)
                 self.network.add_edge(self.newAuthor, authors[1], weight=1, width=1)
 
             # Add new paper, calling function
