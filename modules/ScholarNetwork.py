@@ -288,20 +288,6 @@ class Graph(nx.Graph):
             html += '</td><td>'.join(map(str, papers))
             html += '</td></tr>'
         html += '</table>'
-        table = '''
-        <table>
-            <tr>
-                <th>Company</th>
-                <th>Contact</th>
-                <th>Country</th>
-            </tr>
-            <tr>
-                <td>Alfreds Futterkiste</td>
-                <td>Maria Anders</td>
-                <td>Germany</td>
-            </tr>
-        </table>
-        '''
         return html
     
     def genPyvisFeatures(self):
