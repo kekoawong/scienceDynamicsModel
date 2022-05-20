@@ -1,5 +1,4 @@
 import pandas as pd
-import sys
 
 class Author:
     '''
@@ -19,6 +18,10 @@ class Author:
             }
         '''
         self.collection = initialData
+
+        # measures
+        self.numPapers = 0
+        self.numTopics = 0
 
     def getData(self):
         return self.collection
@@ -77,6 +80,9 @@ class Author:
                 self.collection[topicID] = []
             if paperID not in self.collection[topicID]:
                 self.collection[topicID].append(paperID)
+        # update measures
+        self.numPapers += 1
+        self.numTopics = len(self.collection.keys())
 
     def updateAuthor(self, paperID, paperTopics):
         '''
@@ -92,3 +98,6 @@ class Author:
         
         # Remove topics from author that are empty
         self.collection = {k: papers for k, papers in self.collection.items() if len(papers) > 0}
+
+        # update measure
+        self.numTopics = len(self.collection.keys())
