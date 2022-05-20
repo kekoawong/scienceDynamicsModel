@@ -1,8 +1,8 @@
 from modules.Evolution import Evolution
 
-env = Evolution(probMerge=.3)
+env = Evolution(probMerge=.8)
 
-env.evolve(timeSteps=20)
+env.evolve(timeSteps=40)
 
 # env.printAuthor(0)
 # env.printPaper(1)
@@ -26,9 +26,6 @@ env.saveEvolutionWithPickle('outputs/evolution.env')
 
 print(f'Topics: {env.getTopics()}')
 print(f'Papers: {env.getPapers()}')
-print(f'Authors: {env.getAuthorsClasses()}')
-print(env)
-
 # print(env)
 
 # test = {

@@ -1,5 +1,4 @@
 import networkx as nx
-from .Author import Author
 from networkx.algorithms.community import modularity as nx_modularity
 import community
 from igraph import Graph as modularityGraph
@@ -7,7 +6,6 @@ import random
 import pandas as pd
 from pyvis.network import Network as ntvis
 import matplotlib.pyplot as plt
-from copy import deepcopy
 
 '''
 Inherited Graph class from networkx with methods used for scholar evolution
@@ -17,7 +15,7 @@ Definitions:
 class Graph(nx.Graph):
 
     '''Access Methods'''
-    def getNetworkData(self):
+    def getAuthors(self):
         return list(self.nodes.data("data"))
 
     def getAuthorIDs(self): 
@@ -31,9 +29,6 @@ class Graph(nx.Graph):
         for top, papers in self.nodes[authID]["data"].items():
             allPapers.update(papers)
         return list(allPapers)
-
-    def getAuthorData(self, authID):
-        return self.nodes[authID]["data"]
 
     '''Add Author Method'''
     def addAuthor(self, authID, initialData={}):
@@ -85,8 +80,7 @@ class Graph(nx.Graph):
             for topicID in topics:
                 if topicID not in self.nodes[author]["data"]:
                     self.nodes[author]["data"][topicID] = []
-                if paperID not in self.nodes[author]["data"][topicID]:
-                    self.nodes[author]["data"][topicID].append(paperID)
+                self.nodes[author]["data"][topicID].append(paperID)
 
     def determinePaperTopic(self, authors):
         '''

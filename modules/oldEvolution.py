@@ -1,4 +1,4 @@
-from .ScholarNetwork import Graph
+from .oldScholarNetwork import Graph
 import random
 import pickle
 
@@ -41,8 +41,8 @@ class Evolution:
     def getTopics(self):
         return self.topics
 
-    def getAuthorIDs(self):
-        return self.network.getAuthorIDs()
+    def getAuthors(self):
+        return self.network.getAuthors()
 
     def getNumTopics(self):
         return len(self.topics.keys())
@@ -51,15 +51,14 @@ class Evolution:
         return len(self.papers.keys())
 
     def getNumAuthors(self):
-        return len(self.getAuthorIDs())
+        return len(self.getAuthors())
 
     '''Printing and Plotting Functions'''
     def __repr__(self):
         s = f'Evolution network with a total of {self.getNumAuthors()} authors, {self.getNumPapers()} papers, and {self.getNumTopics()} disciplines/topics.\n'
-        for authID, authClass in self.getAuthorsClasses():
-            authID = authClass.getID()
-            s += f'   Author {authID} primary disciplines: {self.network.getAuthorDiscipline(authID)}\n'
-            for topicID, papers in authClass.getData().items():
+        for authorID, data in self.getAuthors():
+            s += f'   Author {authorID} primary disciplines: {self.network.getAuthorDiscipline(authorID)}\n'
+            for topicID, papers in data.items():
                 for pap in papers:
                     s += f'      Paper {pap} with the topics {self.papers[pap][0]}\n'
         return s
@@ -120,19 +119,18 @@ class Evolution:
         '''
 
         # choose random author with at least two disciplines
-        allAuthors = self.getAuthorIDs()
+        allAuthors = self.getAuthors()
         while len(allAuthors) > 0:
-            authID = random.choice(allAuthors)
-            allAuthors.remove(authID)
-            authData = self.network.getAuthorData(authID)
-            if len(authData.keys()) > 1:
+            author = random.choice(allAuthors)
+            allAuthors.remove(author)
+            if len(author[1].keys()) > 1:
                 break
-            authID = None
+            author = None
 
         # select two random disciplines from author
-        if not authID:
+        if not author:
             return None
-        allTopics = list(authData.keys())
+        allTopics = list(author[1].keys())
         top1 = random.choice(allTopics)
         allTopics.remove(top1)
         top2 = random.choice(allTopics)
