@@ -17,9 +17,6 @@ Definitions:
 class Graph(nx.Graph):
 
     '''Access Methods'''
-    def getNetworkData(self):
-        return list(self.nodes.data("data"))
-
     def getAuthorIDs(self): 
         return list(self.nodes)
 
@@ -27,13 +24,10 @@ class Graph(nx.Graph):
         '''
         Returns a list of all author papers
         '''
-        allPapers = set()
-        for top, papers in self.nodes[authID]["data"].items():
-            allPapers.update(papers)
-        return list(allPapers)
+        return self.nodes[authID]["data"].getAuthorPapers()
 
     def getAuthorData(self, authID):
-        return self.nodes[authID]["data"]
+        return self.nodes[authID]["data"].getData()
 
     '''Add Author Method'''
     def addAuthor(self, authID, initialData={}):
@@ -41,52 +35,33 @@ class Graph(nx.Graph):
         Will add the author with the authID to the network
         data is the initial data to declare the author with
         '''
-        self.add_node(authID, data=initialData)
+        self.add_node(authID, data=Author(authID, initialData=initialData))
 
     '''Print Methods'''
-    def getAuthorPapersStr(self, authorID):
-        formattedData = [[x, ','.join(map(str, y))] for x, y in self.nodes[authorID]["data"].items()]
-        dfTopics = pd.DataFrame(data=formattedData, columns=["Topic", "Papers"])
-        return dfTopics.to_string(index=False)
-
-    def printAuthor(self, authorID):
+    def printAuthor(self, authID):
         '''Function will print the data associated with the author'''
         # print papers
-        print(self.getAuthorPapersStr(authorID))
+        print(self.nodes[authID]["data"].getAuthorPapersStr())
 
         # print neighbors
-        formattedData = [[x, self.get_edge_data(authorID, x)["weight"]] for x in self.neighbors(authorID)]
+        formattedData = [[x, self.get_edge_data(authID, x)["weight"]] for x in self.neighbors(authID)]
         dfNeighbors = pd.DataFrame(data=formattedData, columns=["Neighbor", "Weight"])
         print(dfNeighbors.to_string(index=False))
 
-    def getAuthorDiscipline(self, authorID):
+    def getAuthorDiscipline(self, authID):
         '''
         Function returns a list containing the discipline(s) of the author
         For each author, the topic that contains the most papers would be their assigned discipline
             If there is a tie, then the function returns all discipline IDs
         '''
-        maxVal = 0
-        disciplines = []
-        for top, papers in self.nodes[authorID]["data"].items():
-            numPapers = len(papers)
-            if numPapers == maxVal:
-                disciplines.append(top)
-            elif numPapers > maxVal:
-                maxVal = numPapers
-                disciplines = [top]
-
-        return disciplines
+        return self.nodes[authID]["data"].getAuthorDiscipline()
 
     def updateAuthorPapers(self, authors, topics, paperID):
         '''
         Function will update the topics and papers of all authors
         '''
-        for author in authors:
-            for topicID in topics:
-                if topicID not in self.nodes[author]["data"]:
-                    self.nodes[author]["data"][topicID] = []
-                if paperID not in self.nodes[author]["data"][topicID]:
-                    self.nodes[author]["data"][topicID].append(paperID)
+        for authID in authors:
+            self.nodes[authID]["data"].insertPaper(paperID, topics)
 
     def determinePaperTopic(self, authors):
         '''
@@ -95,10 +70,9 @@ class Graph(nx.Graph):
             If this is a tie, then the paper is added to both disciplines
                 This is not a strict rule and could be modified
         '''
-
         topics = {}
-        for author in authors:
-            for top in self.getAuthorDiscipline(author):
+        for authID in authors:
+            for top in self.getAuthorDiscipline(authID):
                 if top not in topics:
                     topics[top] = 0
                 topics[top] += 1
@@ -161,9 +135,9 @@ class Graph(nx.Graph):
         A community is defined as follows: Every author who has a majority of one topic in their papers
         '''
         communityAuthors = []
-        for auth in self.nodes:
-            if topicID in self.getAuthorDiscipline(auth):
-                communityAuthors.append(auth)
+        for authID in self.nodes:
+            if topicID in self.getAuthorDiscipline(authID):
+                communityAuthors.append(authID)
 
         return communityAuthors
 
@@ -172,9 +146,9 @@ class Graph(nx.Graph):
         Returns a list of authors who would have the given topic
         '''
         topicAuthors = []
-        for auth, authData in self.nodes.data('data'):
-            if topicID in authData:
-                topicAuthors.append(auth)
+        for authID, authClass in self.nodes.data('data'):
+            if topicID in authClass.getData():
+                topicAuthors.append(authID)
 
         return topicAuthors
 
@@ -234,8 +208,6 @@ class Graph(nx.Graph):
             return False
         subGraphMerged = self.subgraph(list(newCom))
 
-        # testing
-
         # calculate modularities
         mergedMod = nx_modularity(subGraphMerged, [newCom], weight=None)
         # merge, authors that are in both communities will just be a part of the first
@@ -260,26 +232,10 @@ class Graph(nx.Graph):
         paperTopics = paperData[0]
         paperAuthors = paperData[1]
 
-        for auth, authData in self.nodes.data("data"):
+        for authID, authClass in self.nodes.data("data"):
             # can just update the authors of the paper
-            if auth in paperAuthors:
-                # remove from old topics
-                emptyTopics = []
-                for topID, papers in authData.items():
-                    if paperID in papers:
-                        # print(f'Before{papers}')
-                        papers.remove(paperID)
-                        if len(papers) == 0:
-                            emptyTopics.append(topID)
-
-                # add paper to new topics in author data structure
-                for topID in paperTopics:
-                    if topID not in authData:
-                        authData[topID] = []
-                    authData[topID].append(paperID)
-
-                # Remove topics from author that are empty
-                self.nodes[auth]["data"] = {k: papers for k, papers in authData.items() if len(papers) > 0}
+            if authID in paperAuthors:
+                authClass.updateAuthor(paperID, paperTopics)
 
     '''Plotting Related Functions'''
     def genHTMLtable(self, authorID):
@@ -293,39 +249,46 @@ class Graph(nx.Graph):
             <table>
         '''
         html += f'<tr><caption><b>Main Author Disciplines:</b> ' + ','.join(map(str, self.getAuthorDiscipline(authorID))) + '</caption></tr>'
-        for topicID, papers in self.nodes[authorID]["data"].items():
+        for topicID, papers in self.nodes[authorID]["data"].getData().items():
             html += f'<tr><th>{topicID}</th><td>'
             html += '</td><td>'.join(map(str, papers))
             html += '</td></tr>'
         html += '</table>'
         return html
     
-    def genPyvisFeatures(self):
+    def genPyvisGraph(self):
 
+        # create copy
+        graph = deepcopy(self)
+
+        # create groups for coloring
         groups = {}
         gid = 1
-        for authID in self.getAuthorIDs():
+
+        for authID in graph.getAuthorIDs():
 
             # add labels
-            self.nodes[authID]['label'] = f'Author {authID}'
-            disciplines = ','.join(map(str, self.getAuthorDiscipline(authID)))
-            title = f'Main Disciplines: ' + disciplines
-            self.nodes[authID]['title'] = self.genHTMLtable(authID)
+            graph.nodes[authID]['label'] = f'Author {authID}'
+            disciplines = ','.join(map(str, graph.getAuthorDiscipline(authID)))
+            graph.nodes[authID]['title'] = graph.genHTMLtable(authID)
 
             # add scaling
-            self.nodes[authID]["value"] = len(self.getAuthorPapers(authID))
+            graph.nodes[authID]["value"] = len(graph.getAuthorPapers(authID))
 
             if disciplines not in groups:
                 groups[disciplines] = gid
                 gid += 1
 
-            self.nodes[authID]["group"] = groups[disciplines]
+            graph.nodes[authID]["group"] = groups[disciplines]
 
-        return self
+            # delete auth class since it is not compatible with PyVis
+            graph.nodes[authID]["data"] = None
+
+        return graph
 
     def plotPyvisGraph(self, filename='pyvis.html', network=None):
         
-        net = self.genPyvisFeatures() if not network else network.genPyvisFeatures()
+        net = self.genPyvisGraph() if not network else network.genPyvisGraph()
         visNetwork = ntvis()
         visNetwork.from_nx(net)
         visNetwork.show(filename)
@@ -338,9 +301,9 @@ class Graph(nx.Graph):
         '''
         labels = {}
         colors = []
-        for nodeID, data in self.nodes.data("data"):
-            disciplines = self.getAuthorDiscipline(nodeID)
-            labels[nodeID] = f'{nodeID}: ' + ','.join(map(str, disciplines))
+        for authID in self.nodes:
+            disciplines = self.getAuthorDiscipline(authID)
+            labels[authID] = f'{authID}: ' + ','.join(map(str, disciplines))
             colors.append(4 * disciplines[0])
         return labels, colors
 
