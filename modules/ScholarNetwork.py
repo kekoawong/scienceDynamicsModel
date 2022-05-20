@@ -235,10 +235,6 @@ class Graph(nx.Graph):
         subGraphMerged = self.subgraph(list(newCom))
 
         # testing
-        newGraph = modularityGraph.from_networkx(subGraphMerged)
-        # print(f'Merged {newGraph.modularity(set(subGraphMerged.nodes()))}')
-        # print(f'Unmerged 1: {newGraph.modularity(set(com1))}')
-        # print(f'Unmerged 2: {newGraph.modularity(set(com2))}')
 
         # calculate modularities
         mergedMod = nx_modularity(subGraphMerged, [newCom], weight=None)
@@ -302,20 +298,6 @@ class Graph(nx.Graph):
             html += '</td><td>'.join(map(str, papers))
             html += '</td></tr>'
         html += '</table>'
-        table = '''
-        <table>
-            <tr>
-                <th>Company</th>
-                <th>Contact</th>
-                <th>Country</th>
-            </tr>
-            <tr>
-                <td>Alfreds Futterkiste</td>
-                <td>Maria Anders</td>
-                <td>Germany</td>
-            </tr>
-        </table>
-        '''
         return html
     
     def genPyvisFeatures(self):

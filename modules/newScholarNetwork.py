@@ -17,9 +17,6 @@ Definitions:
 class Graph(nx.Graph):
 
     '''Access Methods'''
-    def getAuthorsClasses(self):
-        return list(self.nodes.data("data"))
-
     def getAuthorIDs(self): 
         return list(self.nodes)
 
@@ -29,13 +26,16 @@ class Graph(nx.Graph):
         '''
         return self.nodes[authID]["data"].getAuthorPapers()
 
+    def getAuthorData(self, authID):
+        return self.nodes[authID]["data"].getData()
+
     '''Add Author Method'''
-    def addAuthor(self, authID, data={}):
+    def addAuthor(self, authID, initialData={}):
         '''
         Will add the author with the authID to the network
         data is the initial data to declare the author with
         '''
-        self.add_node(authID, data=Author(authID, initialData=data))
+        self.add_node(authID, data=Author(authID, initialData=initialData))
 
     '''Print Methods'''
     def printAuthor(self, authID):
@@ -208,12 +208,6 @@ class Graph(nx.Graph):
             return False
         subGraphMerged = self.subgraph(list(newCom))
 
-        # testing
-        newGraph = modularityGraph.from_networkx(subGraphMerged)
-        # print(f'Merged {newGraph.modularity(set(subGraphMerged.nodes()))}')
-        # print(f'Unmerged 1: {newGraph.modularity(set(com1))}')
-        # print(f'Unmerged 2: {newGraph.modularity(set(com2))}')
-
         # calculate modularities
         mergedMod = nx_modularity(subGraphMerged, [newCom], weight=None)
         # merge, authors that are in both communities will just be a part of the first
@@ -266,8 +260,6 @@ class Graph(nx.Graph):
 
         # create copy
         graph = deepcopy(self)
-        isSame = graph is self
-        print(isSame)
 
         # create groups for coloring
         groups = {}

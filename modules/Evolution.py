@@ -1,4 +1,4 @@
-from .ScholarNetwork import Graph
+from .newScholarNetwork import Graph
 import random
 import pickle
 
