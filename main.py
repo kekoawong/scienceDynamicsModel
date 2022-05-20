@@ -7,7 +7,7 @@ env.evolve(newAuthors=20)
 # env.printAuthor(0)
 # env.printPaper(1)
 
-env.network.getAuthorPapers(0)
+env.network.getAuthorPapers(1)
 
 env.network.plotPyvisGraph(filename='outputs/pyvis.html')
 
@@ -26,6 +26,7 @@ env.saveEvolutionWithPickle('outputs/evolution.env')
 
 print(f'Topics: {env.getTopics()}')
 print(f'Papers: {env.getPapers()}')
+print(f'num authors: {env.getNumAuthors()}')
 # print(env)
 
 # test = {

@@ -23,8 +23,8 @@ class Evolution:
         self.topics = {}
 
         '''Inital Parameters'''
-        self.newAuthor = 0
-        self.newPaper = 0
+        self.newAuthor = 1
+        self.newPaper = 1
 
         '''
         Quantitative Descriptors
@@ -43,7 +43,7 @@ class Evolution:
         self.Dp = None # calculated by looping through all papers and averaging their number of disciplines
 
         '''Initialize network with one author, one paper, and one topic'''
-        initialTopic = 0
+        initialTopic = 1
         self.network.addAuthor(self.newAuthor, initialData={initialTopic: [self.newPaper]})
         self.papers[self.newPaper] = ([initialTopic], [self.newAuthor])
         self.topics[initialTopic] = [self.newPaper]
@@ -192,6 +192,8 @@ class Evolution:
 
         ind = self.newPaper if newPapers else self.newAuthor
         increments = (ind + newPapers) if newPapers else (ind + newAuthors)
+        # subtract one if this is the first evolution, to account for initialized author, topic, and paper
+        increments = (increments - 1) if ind <= 2 else increments
 
         while ind < increments:
             # Randomly select author from network, will be used as first author or first coauthor
@@ -205,6 +207,8 @@ class Evolution:
                 # add node without data, disciplines will be added after paper is completed
                 self.network.addAuthor(self.newAuthor, initialData={})
                 self.network.add_edge(self.newAuthor, authors[1], weight=1, width=1)
+                # increment
+                self.newAuthor += 1
 
             # Add new paper, calling function
             paper = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
@@ -231,10 +235,10 @@ class Evolution:
                 if disciplines:
                     self.network.mergeCommunities(com1=disciplines[0], com2=disciplines[1])
 
-            # increment
-            self.newAuthor += 1
+            # increment papers, update ind
             self.newPaper += 1
-            ind += 1
+            ind = self.newPaper if newPapers else self.newAuthor
+            print(f'ind: {ind} increments: {increments}')
         # print(f'Authors: {self.network.nodes(data=True)}')
         # print(f'Papers: {self.papers}')
         # print(f'Topics: {self.topics}')
