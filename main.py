@@ -25,7 +25,6 @@ env.saveEvolutionWithPickle('outputs/evolution.env')
 # env.saveEvolutionWithPickle('outputs/evolution.env')
 
 print(f'Topics: {env.getTopics()}')
-print(f'Papers: {env.getPapers()}')
 print(f'num authors: {env.getNumAuthors()}')
 # print(env)
 

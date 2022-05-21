@@ -1,5 +1,5 @@
-from operator import xor
 from .ScholarNetwork import Graph
+from .Paper import Paper
 import random
 import pickle
 import sys
@@ -45,7 +45,7 @@ class Evolution:
         '''Initialize network with one author, one paper, and one topic'''
         initialTopic = 1
         self.network.addAuthor(self.newAuthor, initialData={initialTopic: [self.newPaper]})
-        self.papers[self.newPaper] = ([initialTopic], [self.newAuthor])
+        self.papers[self.newPaper] = Paper(self.newPaper, topics=[initialTopic], authors=[self.newAuthor])
         self.topics[initialTopic] = [self.newPaper]
         self.newAuthor += 1
         self.newPaper += 1
@@ -108,10 +108,7 @@ class Evolution:
         self.network.printAuthor(authorID)
 
     def printPaper(self, paperID):
-        topics = ','.join(map(str, self.papers[paperID][0]))
-        authors = ','.join(map(str, self.papers[paperID][1]))
-        print(f'Paper {paperID} topics: {topics}')
-        print(f'Paper {paperID} authors: {authors}')
+        print(self.papers[paperID])
 
     def plotNetwork(self):
         self.network.plotNetwork()
@@ -124,33 +121,32 @@ class Evolution:
         # set variables
         newTopic = max(self.topics.keys()) + 1
         comAuthorsSet = set(communityAuthors)
-        allPapers = self.papers.items()
 
         # loop through all the papers, checking to see the field of majority of their authors
-        for pap, (topics, authors) in allPapers:
+        for paperID, paperClass in self.papers.items():
 
             # get intersection, check to see if majority of authors in new community
-            intersectionAuths = comAuthorsSet.intersection(set(authors))
+            intersectionAuths = comAuthorsSet.intersection(set(paperClass.getAuthors()))
 
             # relabel papers if in new topic
-            if len(intersectionAuths) >= (len(authors) // 2):
-                self.papers[pap][0].append(newTopic)
+            if len(intersectionAuths) >= (len(paperClass.getAuthors()) // 2):
+                paperClass.addTopic(newTopic)
                 # add to new topics 
                 if newTopic not in self.topics:
                     self.topics[newTopic] = []
-                self.topics[newTopic].append(pap)
+                self.topics[newTopic].append(paperID)
             
                 # remove paper from old topics if strictly in new topic
-                if len(intersectionAuths) > (len(authors) // 2):
+                if len(intersectionAuths) > (len(paperClass.getAuthors()) // 2):
                     # update papers data structure
-                    self.papers[pap][0].clear()
-                    self.papers[pap][0].append(newTopic)
+                    paperClass.clearTopics()
+                    paperClass.addTopic(newTopic)
                     # update topics data structure
-                    for oldTopic in topics:
-                        self.topics[oldTopic].remove(pap)
+                    for oldTopic in paperClass.getTopics():
+                        self.topics[oldTopic].remove(paperID)
 
                 # update authors in network with papers
-                self.network.updatePaperInNetwork(pap, (topics, authors))
+                self.network.updatePaperInNetwork(paperID, (paperClass.getTopics(), paperClass.getAuthors()))
 
     def randomNeighboringCommunities(self):
         '''
@@ -211,11 +207,10 @@ class Evolution:
                 self.newAuthor += 1
 
             # Add new paper, calling function
-            paper = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
-            self.papers[self.newPaper] = paper
+            paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
+            self.papers[self.newPaper] = Paper(self.newPaper, topics=paperTopics, authors=paperAuthors)
 
             # add paper to corresponding topics
-            paperTopics = paper[0]
             for top in paperTopics:
                 if top not in self.topics:
                     self.topics[top] = []
@@ -238,7 +233,7 @@ class Evolution:
             # increment papers, update ind
             self.newPaper += 1
             ind = self.newPaper if newPapers else self.newAuthor
-            print(f'ind: {ind} increments: {increments}')
+            # print(f'ind: {ind} increments: {increments}')
         # print(f'Authors: {self.network.nodes(data=True)}')
         # print(f'Papers: {self.papers}')
         # print(f'Topics: {self.topics}')

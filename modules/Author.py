@@ -28,6 +28,15 @@ class Author:
 
     def getID(self):
         return self.id
+
+    def getNumPapers(self):
+        return self.numPapers
+
+    def getNumTopics(self):
+        return self.numTopics
+
+    def getNumDisciplines(self):
+        return len(self.getAuthorDiscipline())
     
     def getAuthorPapers(self):
         '''
