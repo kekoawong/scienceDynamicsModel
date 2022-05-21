@@ -1,7 +1,8 @@
 from .ScholarNetwork import Graph
 from .Paper import Paper
 from .Topic import Topic
-from statistics import mean
+import matplotlib.pyplot as plt
+import numpy as np
 import random
 import pickle
 import sys
@@ -27,22 +28,6 @@ class Evolution:
         '''Inital Parameters'''
         self.newAuthor = 1
         self.newPaper = 1
-
-        '''
-        Quantitative Descriptors
-            Ap: Authors per paper
-            Pa: Papers per author
-            Ad: Authors per discipline
-            Da: Disciplines per author
-            Pd: Papers per discipline
-            Dp: Disciplines per paper
-        '''
-        self.Ap = None # calculated by averaging number of authors in each new paper that is created (method in paper Class)
-        self.Pa = None # calculated by looping through all scholars and averaging their number of papers (from method in Author class)
-        self.Ad = None # calculated by looping through all disciplines and averaging their number of scholars (would need to put authors in topics)
-        self.Da = None # calculated by looping through all scholars and averaging their number of disciplines (method in place in author class)
-        self.Pd = None # calculated by looping through all disciplines and averaging their number of papers (method in place in topic class)
-        self.Dp = None # calculated by looping through all papers and averaging their number of disciplines (method in place in paper class)
 
         '''Initialize network with one author, one paper, and one topic'''
         initialTopic = 1
@@ -74,9 +59,9 @@ class Evolution:
     def getNumAuthors(self):
         return len(self.getAuthorIDs())
 
-    def getQuantDescriptors(self):
+    def getQuantDistr(self):
         '''
-        Will return the Quantitative Descriptors of the evolution network
+        Will return the Quantitative distributions of the evolution network in the following factors
             Ap: Authors per paper - calculated by averaging number of authors in each new paper that is created (method in paper Class)
             Pa: Papers per author - calculated by looping through all scholars and averaging their number of papers (from method in Author class)
             Ad: Authors per discipline - calculated by looping through all disciplines and averaging their number of scholars (would need to put authors in topics)
@@ -85,48 +70,39 @@ class Evolution:
             Dp: Disciplines per paper - calculated by looping through all papers and averaging their number of disciplines (method in place in paper class)
         in the form:
         {
-            'Ap': float
-            'Pa': float
-            'Ad': float
-            'Da': float
-            'Pd': float
-            'Dp': float
+            'Ap': list
+            'Pa': list
+            'Ad': list
+            'Da': list
+            'Pd': list
+            'Dp': list
         }
         '''
         descr = {
-            'Ap': 0,
-            'Pa': 0,
-            'Ad': 0,
-            'Da': 0,
-            'Pd': 0,
-            'Dp': 0
+            'Ap': [],
+            'Pa': [],
+            'Ad': [],
+            'Da': [],
+            'Pd': [],
+            'Dp': []
         }
-        # get average paper parameters
-        numPapers = self.getNumPapers()
+        # get paper parameters distribution
         for paper in self.papers.values():
-            descr['Ap'] += paper.getNumAuthors()
-            descr['Dp'] += paper.getNumTopics()
-        descr['Ap'] /= numPapers
-        descr['Dp'] /= numPapers
+            descr['Ap'].append(paper.getNumAuthors())
+            descr['Dp'].append(paper.getNumTopics())
 
-        # get average author parameters
-        numAuthors = self.getNumAuthors()
+        # get author distributions
         for authID, authClass in self.network.getNetworkData():
-            descr['Pa'] += authClass.getNumPapers()
+            descr['Pa'].append(authClass.getNumPapers())
             disciplines = authClass.getAuthorDiscipline()
-            descr['Da'] += len(disciplines)
+            descr['Da'].append(len(disciplines))
             # update disciplines for discipline parameters
             self.updateDisciplineAuthors(authID, disciplines)
-        descr['Pa'] /= numAuthors
-        descr['Da'] /= numAuthors
 
-        # get average discipline parameters
-        numTopics = self.getNumTopics()
+        # get discipline distributions
         for topic in self.topics.values():
-            descr['Pd'] += topic.getNumPapers()
-            descr['Ad'] += topic.getNumDiscAuthors()
-        descr['Pd'] /= numTopics
-        descr['Ad'] /= numTopics
+            descr['Pd'].append(topic.getNumPapers())
+            descr['Ad'].append(topic.getNumDiscAuthors())
         
         return descr
 
@@ -275,6 +251,34 @@ class Evolution:
         # print(f'Papers: {self.papers}')
         # print(f'Topics: {self.topics}')
         # print(f'Initial Paper: {self.initialPaper}')
+
+    '''Plotting methods'''
+    def plotDescriptorsDistr(self):
+        '''
+        Method will take the descriptors dictionary returned from getQuantDescriptors method and plot subplots
+        '''
+        fig = plt.figure(figsize=(9, 7))
+        # make plot with 3 rows, 2 columns
+        axs = fig.subplots(3,2)
+
+        # loop through and make subplots
+        descr = list(self.getQuantDistr().items())
+
+        # print(descr)
+        for row in axs:
+            for axis in row:
+                lab, data = descr.pop(0)
+                binVals, binEdges = np.histogram(data, bins=min(15, len(data)), density=True)
+                # binVals, binEdges, patches = plt.hist(x=data, density=True, align='mid', bottom=5)
+                binsMean = [0.5 * (binEdges[i] + binEdges[i+1]) for i in range(len(binVals))]
+                axis.scatter(binsMean, binVals)
+                axis.set_title(lab)
+
+        # figure styling
+        fig.suptitle('Science Network Descriptors')
+        fig.tight_layout()
+        
+        return fig, axs
 
     '''Saving Methods'''
     def saveEvolutionWithPickle(self, fileName='evolution.env'):
