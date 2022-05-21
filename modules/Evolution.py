@@ -257,7 +257,7 @@ class Evolution:
         # print(f'Initial Paper: {self.initialPaper}')
 
     '''Plotting methods'''
-    def plotDescriptorsDistr(self, saveToFile=None):
+    def plotDescriptorsDistr(self, saveToFile=None, logBase=None):
         '''
         Method will take the descriptors dictionary returned from getQuantDescriptors method and plot subplots
         '''
@@ -278,6 +278,8 @@ class Evolution:
                 axis.scatter(binsMean, binVals)
                 axis.set_ylabel(f'Density of {lab}', fontweight='bold')
                 axis.set_xlabel(f'{lab}', fontweight='bold')
+                if logBase:
+                    axis.set_yscale('log',base=logBase) 
 
         # figure styling
         fig.suptitle('Science Network Descriptors')
