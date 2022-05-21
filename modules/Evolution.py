@@ -251,6 +251,9 @@ class Evolution:
             self.newPaper += 1
             ind = self.newPaper if newPapers else self.newAuthor
             # print(f'ind: {ind} increments: {increments}')
+
+            if ind % 100 == 0:
+                print(f'{self.newPaper} papers and {self.newAuthor} authors')
         # print(f'Authors: {self.network.nodes(data=True)}')
         # print(f'Papers: {self.papers}')
         # print(f'Topics: {self.topics}')
