@@ -1,22 +1,28 @@
 from .ScholarNetwork import Graph
 from .Paper import Paper
 from .Topic import Topic
+import matplotlib.pyplot as plt
+import numpy as np
 import random
 import pickle
 import sys
 
 class Evolution:
 
-    def __init__(self, probNewAuthor=0.6, probStop=0.3, probSplit=0.5, probMerge=0.5):
+    def __init__(self, Pn=0.6, Pw=0.3, Pd=0.5):
+        '''
+        The probabilities are as follows:
+            Pn: probability of a new author being added to a network at a time step (used in evolve)
+            Pw: probability that a random walk will stop at a given node (used in random walk)
+            Pd: probability that a split and merge event will occur
+        '''
         '''Define Probabilites'''
         # probability that you generate new author
-        self.probNewAuthor = probNewAuthor
+        self.probNewAuthor = Pn
         # probability that you stop at a given node when generating papers
-        self.probStop = probStop
-        # probability that a split event occurs
-        self.probSplit = probSplit
-        # probability that a merge event occurs
-        self.probMerge = probMerge
+        self.probStop = Pw
+        # probability that a split and merge event occurs
+        self.probEvent = Pd
         
         '''Data Structures'''
         self.network = Graph()
@@ -26,22 +32,6 @@ class Evolution:
         '''Inital Parameters'''
         self.newAuthor = 1
         self.newPaper = 1
-
-        '''
-        Quantitative Descriptors
-            Ap: Authors per paper
-            Pa: Papers per author
-            Ad: Authors per discipline
-            Da: Disciplines per author
-            Pd: Papers per discipline
-            Dp: Disciplines per paper
-        '''
-        self.Ap = None # calculated by averaging number of authors in each new paper that is created (updated in evolve method)
-        self.Pa = None # calculated by looping through all scholars and averaging their number of papers (in getQuantDescriptors method)
-        self.Ad = None # calculated by looping through all disciplines and averaging their number of scholars
-        self.Da = None # calculated by looping through all scholars and averaging their number of disciplines
-        self.Pd = None # calculated by looping through all disciplines and averaging their number of papers
-        self.Dp = None # calculated by looping through all papers and averaging their number of disciplines
 
         '''Initialize network with one author, one paper, and one topic'''
         initialTopic = 1
@@ -73,26 +63,56 @@ class Evolution:
     def getNumAuthors(self):
         return len(self.getAuthorIDs())
 
-    def getQuantDescriptors(self):
+    def getQuantDistr(self):
         '''
-        Will return the Quantitative Descriptors of the evolution network
-            Ap: Authors per paper
-            Pa: Papers per author
-            Ad: Authors per discipline
-            Da: Disciplines per author
-            Pd: Papers per discipline
-            Dp: Disciplines per paper
+        Will return the Quantitative distributions of the evolution network in the following factors
+            Ap: Authors per paper - calculated by averaging number of authors in each new paper that is created (method in paper Class)
+            Pa: Papers per author - calculated by looping through all scholars and averaging their number of papers (from method in Author class)
+            Ad: Authors per discipline - calculated by looping through all disciplines and averaging their number of scholars (would need to put authors in topics)
+            Da: Disciplines per author - calculated by looping through all scholars and averaging their number of disciplines (method in place in author class)
+            Pd: Papers per discipline - calculated by looping through all disciplines and averaging their number of papers (method in place in topic class)
+            Dp: Disciplines per paper - calculated by looping through all papers and averaging their number of disciplines (method in place in paper class)
         in the form:
         {
-            'Ap': float
-            'Pa': float
-            'Ad': float
-            'Da': float
-            'Pd': float
-            'Dp': float
+            'Ap': list
+            'Pa': list
+            'Ad': list
+            'Da': list
+            'Pd': list
+            'Dp': list
         }
         '''
-        return None
+        descr = {
+            'Ap': [],
+            'Pa': [],
+            'Ad': [],
+            'Da': [],
+            'Pd': [],
+            'Dp': []
+        }
+        # get paper parameters distribution
+        for paper in self.papers.values():
+            descr['Ap'].append(paper.getNumAuthors())
+            descr['Dp'].append(paper.getNumTopics())
+
+        # get author distributions
+        for authID, authClass in self.network.getNetworkData():
+            descr['Pa'].append(authClass.getNumPapers())
+            disciplines = authClass.getAuthorDiscipline()
+            descr['Da'].append(len(disciplines))
+            # update disciplines for discipline parameters
+            self.updateDisciplineAuthors(authID, disciplines)
+
+        # get discipline distributions
+        for topic in self.topics.values():
+            descr['Pd'].append(topic.getNumPapers())
+            descr['Ad'].append(topic.getNumDiscAuthors())
+        
+        return descr
+
+    def updateDisciplineAuthors(self, authID, disciplines):
+        for discID in disciplines:
+            self.topics[discID].addAuthorToDiscipline(authID)
 
     '''Printing and Plotting Functions'''
     def __repr__(self):
@@ -200,7 +220,7 @@ class Evolution:
                 # add node without data, disciplines will be added after paper is completed
                 self.network.addAuthor(self.newAuthor, initialData={})
                 self.network.add_edge(self.newAuthor, authors[1], weight=1, width=1)
-                # increment
+                # increment new authorID
                 self.newAuthor += 1
 
             # Add new paper, calling function
@@ -214,7 +234,7 @@ class Evolution:
                 self.topics[topicID].addPaper(self.newPaper)
 
             # split random discipline with prob pd
-            if random.random() < self.probSplit:
+            if random.random() < self.probEvent:
                 communityAuthors = self.network.getDisciplineAuthors(random.choice(list(self.topics.keys())))
                 newCommunity = self.network.splitCommunity(communityAuthors)
                 # update the papers, topics, and authors
@@ -222,7 +242,7 @@ class Evolution:
                     self.updateNewCommunity(newCommunity)
 
             # merge random discipline with prob pm
-            if random.random() < self.probMerge:
+            if random.random() < self.probEvent:
                 disciplines = self.randomNeighboringCommunities()
                 if disciplines:
                     self.network.mergeCommunities(com1=disciplines[0], com2=disciplines[1])
@@ -235,6 +255,41 @@ class Evolution:
         # print(f'Papers: {self.papers}')
         # print(f'Topics: {self.topics}')
         # print(f'Initial Paper: {self.initialPaper}')
+
+    '''Plotting methods'''
+    def plotDescriptorsDistr(self, saveToFile=None, logBase=None):
+        '''
+        Method will take the descriptors dictionary returned from getQuantDescriptors method and plot subplots
+        '''
+        fig = plt.figure(figsize=(9, 7))
+        # make plot with 3 rows, 2 columns
+        axs = fig.subplots(3,2)
+
+        # loop through and make subplots
+        descr = list(self.getQuantDistr().items())
+
+        # print(descr)
+        for row in axs:
+            for axis in row:
+                lab, data = descr.pop(0)
+                binVals, binEdges = np.histogram(data, bins=min(20, len(data)), density=True)
+                # binVals, binEdges, patches = plt.hist(x=data, density=True, align='mid', bottom=5)
+                binsMean = [0.5 * (binEdges[i] + binEdges[i+1]) for i in range(len(binVals))]
+                axis.scatter(binsMean, binVals)
+                axis.set_ylabel(f'Density of {lab}', fontweight='bold')
+                axis.set_xlabel(f'{lab}', fontweight='bold')
+                if logBase:
+                    axis.set_yscale('log',base=logBase) 
+
+        # figure styling
+        fig.suptitle('Science Network Descriptors')
+        fig.tight_layout()
+
+        if saveToFile:
+            fig.savefig(saveToFile)
+            print(f'Saved to {saveToFile} successfully!')
+        
+        return fig, axs
 
     '''Saving Methods'''
     def saveEvolutionWithPickle(self, fileName='evolution.env'):

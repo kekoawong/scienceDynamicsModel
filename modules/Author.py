@@ -102,7 +102,8 @@ class Author:
             if paperID in papers:
                 papers.remove(paperID)
 
-        # add paper to new topics
+        # add paper to new topics, subtract self.numPapers since paper exists
+        self.numPapers -= 1
         self.insertPaper(paperID, paperTopics)
         
         # Remove topics from author that are empty
@@ -110,3 +111,6 @@ class Author:
 
         # update measure
         self.numTopics = len(self.collection.keys())
+
+    def __repr__(self):
+        print('Not implemented')
