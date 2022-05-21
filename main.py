@@ -1,22 +1,30 @@
 from modules.Evolution import Evolution
 
-env = Evolution(probMerge=.9)
+env = Evolution(probMerge=.8)
 
-env.evolve(timeSteps=7)
+env.evolve(newAuthors=10)
+
 # env.printAuthor(0)
 # env.printPaper(1)
 
-env.network.getAuthorPapers(0)
+env.network.getAuthorPapers(1)
 
 env.network.plotPyvisGraph(filename='outputs/pyvis.html')
 
 env.saveEvolutionWithPickle('outputs/evolution.env')
+# env.evolve(timeSteps=20)
 
 
-# print(f'Topics: {env.getTopics()}')
-# print(f'Papers: {env.getPapers()}')
-# print(f'Authors: {env.getAuthors()}')
+# env.printAuthor(0)
+# env.printPaper(1)
 
+# env.network.getAuthorPapers(0)
+
+# env.network.plotPyvisGraph(filename='outputs/pyvisNext.html')
+
+# env.saveEvolutionWithPickle('outputs/evolution.env')
+
+print(f'num authors: {env.getNumAuthors()}')
 # print(env)
 
 # test = {

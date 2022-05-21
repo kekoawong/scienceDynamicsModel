@@ -1,6 +1,9 @@
 from .ScholarNetwork import Graph
+from .Paper import Paper
+from .Topic import Topic
 import random
 import pickle
+import sys
 
 class Evolution:
 
@@ -21,15 +24,32 @@ class Evolution:
         self.topics = {}
 
         '''Inital Parameters'''
-        self.newAuthor = 0
-        self.initialPaper = 0
+        self.newAuthor = 1
+        self.newPaper = 1
+
+        '''
+        Quantitative Descriptors
+            Ap: Authors per paper
+            Pa: Papers per author
+            Ad: Authors per discipline
+            Da: Disciplines per author
+            Pd: Papers per discipline
+            Dp: Disciplines per paper
+        '''
+        self.Ap = None # calculated by averaging number of authors in each new paper that is created (updated in evolve method)
+        self.Pa = None # calculated by looping through all scholars and averaging their number of papers (in getQuantDescriptors method)
+        self.Ad = None # calculated by looping through all disciplines and averaging their number of scholars
+        self.Da = None # calculated by looping through all scholars and averaging their number of disciplines
+        self.Pd = None # calculated by looping through all disciplines and averaging their number of papers
+        self.Dp = None # calculated by looping through all papers and averaging their number of disciplines
 
         '''Initialize network with one author, one paper, and one topic'''
-        initialTopic = 0
-        self.network.add_node(self.newAuthor, data={initialTopic: [self.initialPaper]})
-        self.papers[self.initialPaper] = ([initialTopic], [self.newAuthor])
-        self.topics[initialTopic] = [self.initialPaper]
-        self.initialPaper += 1
+        initialTopic = 1
+        self.network.addAuthor(self.newAuthor, initialData={initialTopic: [self.newPaper]})
+        self.papers[self.newPaper] = Paper(self.newPaper, topics=[initialTopic], authors=[self.newAuthor])
+        self.topics[initialTopic] = Topic(initialTopic, papers=[self.newPaper])
+        self.newAuthor += 1
+        self.newPaper += 1
 
     '''Access Functions'''
     def getNetwork(self):
@@ -41,8 +61,8 @@ class Evolution:
     def getTopics(self):
         return self.topics
 
-    def getAuthors(self):
-        return self.network.getAuthors()
+    def getAuthorIDs(self):
+        return self.network.getAuthorIDs()
 
     def getNumTopics(self):
         return len(self.topics.keys())
@@ -51,26 +71,38 @@ class Evolution:
         return len(self.papers.keys())
 
     def getNumAuthors(self):
-        return len(self.getAuthors())
+        return len(self.getAuthorIDs())
+
+    def getQuantDescriptors(self):
+        '''
+        Will return the Quantitative Descriptors of the evolution network
+            Ap: Authors per paper
+            Pa: Papers per author
+            Ad: Authors per discipline
+            Da: Disciplines per author
+            Pd: Papers per discipline
+            Dp: Disciplines per paper
+        in the form:
+        {
+            'Ap': float
+            'Pa': float
+            'Ad': float
+            'Da': float
+            'Pd': float
+            'Dp': float
+        }
+        '''
+        return None
 
     '''Printing and Plotting Functions'''
     def __repr__(self):
-        s = f'Evolution network with a total of {self.getNumAuthors()} authors, {self.getNumPapers()} papers, and {self.getNumTopics()} disciplines/topics.\n'
-        for authorID, data in self.getAuthors():
-            s += f'   Author {authorID} primary disciplines: {self.network.getAuthorDiscipline(authorID)}\n'
-            for topicID, papers in data.items():
-                for pap in papers:
-                    s += f'      Paper {pap} with the topics {self.papers[pap][0]}\n'
-        return s
+        return f'Evolution network with a total of {self.getNumAuthors()} authors, {self.getNumPapers()} papers, and {self.getNumTopics()} disciplines/topics.\n'
     
     def printAuthor(self, authorID):
         self.network.printAuthor(authorID)
 
     def printPaper(self, paperID):
-        topics = ','.join(map(str, self.papers[paperID][0]))
-        authors = ','.join(map(str, self.papers[paperID][1]))
-        print(f'Paper {paperID} topics: {topics}')
-        print(f'Paper {paperID} authors: {authors}')
+        print(self.papers[paperID])
 
     def plotNetwork(self):
         self.network.plotNetwork()
@@ -83,33 +115,35 @@ class Evolution:
         # set variables
         newTopic = max(self.topics.keys()) + 1
         comAuthorsSet = set(communityAuthors)
-        allPapers = self.papers.items()
 
         # loop through all the papers, checking to see the field of majority of their authors
-        for pap, (topics, authors) in allPapers:
+        for paperID, paperClass in self.papers.items():
 
             # get intersection, check to see if majority of authors in new community
-            intersectionAuths = comAuthorsSet.intersection(set(authors))
+            intersectionAuths = comAuthorsSet.intersection(set(paperClass.getAuthors()))
 
             # relabel papers if in new topic
-            if len(intersectionAuths) >= (len(authors) // 2):
-                self.papers[pap][0].append(newTopic)
-                # add to new topics 
+            numIntersectAuths = len(intersectionAuths)
+            numHalfAuths = len(paperClass.getAuthors()) // 2
+            if numIntersectAuths >= numHalfAuths:
+                paperClass.addTopic(newTopic)
+
+                # add to topics 
                 if newTopic not in self.topics:
-                    self.topics[newTopic] = []
-                self.topics[newTopic].append(pap)
+                    self.topics[newTopic] = Topic(newTopic)
+                self.topics[newTopic].addPaper(paperID)
             
                 # remove paper from old topics if strictly in new topic
-                if len(intersectionAuths) > (len(authors) // 2):
+                if numIntersectAuths > numHalfAuths:
                     # update papers data structure
-                    self.papers[pap][0].clear()
-                    self.papers[pap][0].append(newTopic)
+                    paperClass.clearTopics()
+                    paperClass.addTopic(newTopic)
                     # update topics data structure
-                    for oldTopic in topics:
-                        self.topics[oldTopic].remove(pap)
+                    for oldTopic in paperClass.getTopics():
+                        self.topics[oldTopic].removePaper(paperID)
 
                 # update authors in network with papers
-                self.network.updatePaperInNetwork(pap, (topics, authors))
+                self.network.updatePaperInNetwork(paperID, (paperClass.getTopics(), paperClass.getAuthors()))
 
     def randomNeighboringCommunities(self):
         '''
@@ -119,18 +153,19 @@ class Evolution:
         '''
 
         # choose random author with at least two disciplines
-        allAuthors = self.getAuthors()
+        allAuthors = self.getAuthorIDs()
         while len(allAuthors) > 0:
-            author = random.choice(allAuthors)
-            allAuthors.remove(author)
-            if len(author[1].keys()) > 1:
+            authID = random.choice(allAuthors)
+            allAuthors.remove(authID)
+            authData = self.network.getAuthorData(authID)
+            if len(authData.keys()) > 1:
                 break
-            author = None
+            authID = None
 
         # select two random disciplines from author
-        if not author:
+        if not authID:
             return None
-        allTopics = list(author[1].keys())
+        allTopics = list(authData.keys())
         top1 = random.choice(allTopics)
         allTopics.remove(top1)
         top2 = random.choice(allTopics)
@@ -140,12 +175,20 @@ class Evolution:
 
         return self.network.getAuthorswithTopic(top1), self.network.getAuthorswithTopic(top2)
 
-    def evolve(self, timeSteps=25):
+    def evolve(self, newPapers=None, newAuthors=None):
         '''
         Function will continue evolution for the inputted timesteps
         '''
-        for newPaperID in range(self.initialPaper, self.initialPaper + timeSteps):
+        # use XOR to make sure either newPapers or newAuthors is inputted, but not both
+        if bool(newPapers) == bool(newAuthors):
+            sys.exit('Must input either newPapers or newAuthors to constrain how many evolution steps, but not both.')
 
+        ind = self.newPaper if newPapers else self.newAuthor
+        increments = (ind + newPapers) if newPapers else (ind + newAuthors)
+        # subtract one if this is the first evolution, to account for initialized author, topic, and paper
+        increments = (increments - 1) if ind <= 2 else increments
+
+        while ind < increments:
             # Randomly select author from network, will be used as first author or first coauthor
             currNodes = list(self.network.nodes())
             authors = [random.choice(currNodes)]
@@ -153,22 +196,22 @@ class Evolution:
             # with probability, add new author to network set as main author with the coauthor
             if random.random() < self.probNewAuthor:
                 # generate new author, add as the first author
-                self.newAuthor += 1
                 authors.insert(0, self.newAuthor)
                 # add node without data, disciplines will be added after paper is completed
-                self.network.add_node(self.newAuthor, data={})
+                self.network.addAuthor(self.newAuthor, initialData={})
                 self.network.add_edge(self.newAuthor, authors[1], weight=1, width=1)
+                # increment
+                self.newAuthor += 1
 
             # Add new paper, calling function
-            paper = self.network.biasedRandomWalk(authors, self.probStop, newPaperID)
-            self.papers[newPaperID] = paper
+            paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
+            self.papers[self.newPaper] = Paper(self.newPaper, topics=paperTopics, authors=paperAuthors)
 
             # add paper to corresponding topics
-            paperTopics = paper[0]
-            for top in paperTopics:
-                if top not in self.topics:
-                    self.topics[top] = []
-                self.topics[top].append(newPaperID)
+            for topicID in paperTopics:
+                if topicID not in self.topics:
+                    self.topics[topicID] = Topic(topicID)
+                self.topics[topicID].addPaper(self.newPaper)
 
             # split random discipline with prob pd
             if random.random() < self.probSplit:
@@ -184,7 +227,10 @@ class Evolution:
                 if disciplines:
                     self.network.mergeCommunities(com1=disciplines[0], com2=disciplines[1])
 
-        self.initialPaper += timeSteps
+            # increment papers, update ind
+            self.newPaper += 1
+            ind = self.newPaper if newPapers else self.newAuthor
+            # print(f'ind: {ind} increments: {increments}')
         # print(f'Authors: {self.network.nodes(data=True)}')
         # print(f'Papers: {self.papers}')
         # print(f'Topics: {self.topics}')
