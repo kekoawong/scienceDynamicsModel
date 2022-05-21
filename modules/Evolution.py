@@ -257,7 +257,7 @@ class Evolution:
         # print(f'Initial Paper: {self.initialPaper}')
 
     '''Plotting methods'''
-    def plotDescriptorsDistr(self):
+    def plotDescriptorsDistr(self, saveToFile=None):
         '''
         Method will take the descriptors dictionary returned from getQuantDescriptors method and plot subplots
         '''
@@ -282,6 +282,10 @@ class Evolution:
         # figure styling
         fig.suptitle('Science Network Descriptors')
         fig.tight_layout()
+
+        if saveToFile:
+            fig.savefig(saveToFile)
+            print(f'Saved to {saveToFile} successfully!')
         
         return fig, axs
 

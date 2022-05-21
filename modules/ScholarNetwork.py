@@ -8,6 +8,7 @@ import pandas as pd
 from pyvis.network import Network as ntvis
 import matplotlib.pyplot as plt
 from copy import deepcopy
+import sys
 
 '''
 Inherited Graph class from networkx with methods used for scholar evolution
@@ -214,7 +215,12 @@ class Graph(nx.Graph):
         subGraphMerged = self.subgraph(list(newCom))
 
         # calculate modularities
-        mergedMod = nx_modularity(subGraphMerged, [newCom], weight=None)
+        try:
+            mergedMod = nx_modularity(subGraphMerged, [newCom], weight=None)
+        except ZeroDivisionError:
+            print(f'New Community: {newCom}')
+            print(f'Com1: {com1} and Com2: {com2}')
+            sys.exit('Error with merging')
         # merge, authors that are in both communities will just be a part of the first
         coms = dict.fromkeys(com1, 0) | dict.fromkeys(com2, 1)
         unMergedMod = community.modularity(coms, subGraphMerged, weight=None)

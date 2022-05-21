@@ -2,7 +2,7 @@ from modules.Evolution import Evolution
 
 env = Evolution(Pn=.8)
 
-env.evolve(newAuthors=100)
+env.evolve(newAuthors=300)
 
 # env.printAuthor(0)
 # env.printPaper(1)
