@@ -1,6 +1,6 @@
 from modules.Evolution import Evolution
 
-env = Evolution(probMerge=.8)
+env = Evolution(Pn=.8)
 
 env.evolve(newAuthors=100)
 
@@ -9,9 +9,9 @@ env.evolve(newAuthors=100)
 
 env.network.getAuthorPapers(1)
 
-env.network.plotPyvisGraph(filename='outputs/pyvis.html')
+# env.network.plotPyvisGraph(filename='outputs/pyvis.html')
 
-env.saveEvolutionWithPickle('outputs/evolution.env')
+# env.saveEvolutionWithPickle('outputs/evolution.env')
 # env.evolve(timeSteps=20)
 
 

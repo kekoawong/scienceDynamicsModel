@@ -9,16 +9,20 @@ import sys
 
 class Evolution:
 
-    def __init__(self, probNewAuthor=0.6, probStop=0.3, probSplit=0.5, probMerge=0.5):
+    def __init__(self, Pn=0.6, Pw=0.3, Pd=0.5):
+        '''
+        The probabilities are as follows:
+            Pn: probability of a new author being added to a network at a time step (used in evolve)
+            Pw: probability that a random walk will stop at a given node (used in random walk)
+            Pd: probability that a split and merge event will occur
+        '''
         '''Define Probabilites'''
         # probability that you generate new author
-        self.probNewAuthor = probNewAuthor
+        self.probNewAuthor = Pn
         # probability that you stop at a given node when generating papers
-        self.probStop = probStop
-        # probability that a split event occurs
-        self.probSplit = probSplit
-        # probability that a merge event occurs
-        self.probMerge = probMerge
+        self.probStop = Pw
+        # probability that a split and merge event occurs
+        self.probEvent = Pd
         
         '''Data Structures'''
         self.network = Graph()
@@ -230,7 +234,7 @@ class Evolution:
                 self.topics[topicID].addPaper(self.newPaper)
 
             # split random discipline with prob pd
-            if random.random() < self.probSplit:
+            if random.random() < self.probEvent:
                 communityAuthors = self.network.getDisciplineAuthors(random.choice(list(self.topics.keys())))
                 newCommunity = self.network.splitCommunity(communityAuthors)
                 # update the papers, topics, and authors
@@ -238,7 +242,7 @@ class Evolution:
                     self.updateNewCommunity(newCommunity)
 
             # merge random discipline with prob pm
-            if random.random() < self.probMerge:
+            if random.random() < self.probEvent:
                 disciplines = self.randomNeighboringCommunities()
                 if disciplines:
                     self.network.mergeCommunities(com1=disciplines[0], com2=disciplines[1])
@@ -268,11 +272,12 @@ class Evolution:
         for row in axs:
             for axis in row:
                 lab, data = descr.pop(0)
-                binVals, binEdges = np.histogram(data, bins=min(15, len(data)), density=True)
+                binVals, binEdges = np.histogram(data, bins=min(20, len(data)), density=True)
                 # binVals, binEdges, patches = plt.hist(x=data, density=True, align='mid', bottom=5)
                 binsMean = [0.5 * (binEdges[i] + binEdges[i+1]) for i in range(len(binVals))]
                 axis.scatter(binsMean, binVals)
-                axis.set_title(lab)
+                axis.set_ylabel(f'Density of {lab}', fontweight='bold')
+                axis.set_xlabel(f'{lab}', fontweight='bold')
 
         # figure styling
         fig.suptitle('Science Network Descriptors')
