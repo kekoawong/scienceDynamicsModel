@@ -1,6 +1,7 @@
 from .ScholarNetwork import Graph
 from .Paper import Paper
 from .Topic import Topic
+from statistics import mean
 import random
 import pickle
 import sys
@@ -36,12 +37,12 @@ class Evolution:
             Pd: Papers per discipline
             Dp: Disciplines per paper
         '''
-        self.Ap = None # calculated by averaging number of authors in each new paper that is created (updated in evolve method)
-        self.Pa = None # calculated by looping through all scholars and averaging their number of papers (in getQuantDescriptors method)
-        self.Ad = None # calculated by looping through all disciplines and averaging their number of scholars
-        self.Da = None # calculated by looping through all scholars and averaging their number of disciplines
-        self.Pd = None # calculated by looping through all disciplines and averaging their number of papers
-        self.Dp = None # calculated by looping through all papers and averaging their number of disciplines
+        self.Ap = None # calculated by averaging number of authors in each new paper that is created (method in paper Class)
+        self.Pa = None # calculated by looping through all scholars and averaging their number of papers (from method in Author class)
+        self.Ad = None # calculated by looping through all disciplines and averaging their number of scholars (would need to put authors in topics)
+        self.Da = None # calculated by looping through all scholars and averaging their number of disciplines (method in place in author class)
+        self.Pd = None # calculated by looping through all disciplines and averaging their number of papers (method in place in topic class)
+        self.Dp = None # calculated by looping through all papers and averaging their number of disciplines (method in place in paper class)
 
         '''Initialize network with one author, one paper, and one topic'''
         initialTopic = 1
@@ -76,12 +77,12 @@ class Evolution:
     def getQuantDescriptors(self):
         '''
         Will return the Quantitative Descriptors of the evolution network
-            Ap: Authors per paper
-            Pa: Papers per author
-            Ad: Authors per discipline
-            Da: Disciplines per author
-            Pd: Papers per discipline
-            Dp: Disciplines per paper
+            Ap: Authors per paper - calculated by averaging number of authors in each new paper that is created (method in paper Class)
+            Pa: Papers per author - calculated by looping through all scholars and averaging their number of papers (from method in Author class)
+            Ad: Authors per discipline - calculated by looping through all disciplines and averaging their number of scholars (would need to put authors in topics)
+            Da: Disciplines per author - calculated by looping through all scholars and averaging their number of disciplines (method in place in author class)
+            Pd: Papers per discipline - calculated by looping through all disciplines and averaging their number of papers (method in place in topic class)
+            Dp: Disciplines per paper - calculated by looping through all papers and averaging their number of disciplines (method in place in paper class)
         in the form:
         {
             'Ap': float
@@ -92,7 +93,46 @@ class Evolution:
             'Dp': float
         }
         '''
-        return None
+        descr = {
+            'Ap': 0,
+            'Pa': 0,
+            'Ad': 0,
+            'Da': 0,
+            'Pd': 0,
+            'Dp': 0
+        }
+        # get average paper parameters
+        numPapers = self.getNumPapers()
+        for paper in self.papers.values():
+            descr['Ap'] += paper.getNumAuthors()
+            descr['Dp'] += paper.getNumTopics()
+        descr['Ap'] /= numPapers
+        descr['Dp'] /= numPapers
+
+        # get average author parameters
+        numAuthors = self.getNumAuthors()
+        for authID, authClass in self.network.getNetworkData():
+            descr['Pa'] += authClass.getNumPapers()
+            disciplines = authClass.getAuthorDiscipline()
+            descr['Da'] += len(disciplines)
+            # update disciplines for discipline parameters
+            self.updateDisciplineAuthors(authID, disciplines)
+        descr['Pa'] /= numAuthors
+        descr['Da'] /= numAuthors
+
+        # get average discipline parameters
+        numTopics = self.getNumTopics()
+        for topic in self.topics.values():
+            descr['Pd'] += topic.getNumPapers()
+            descr['Ad'] += topic.getNumDiscAuthors()
+        descr['Pd'] /= numTopics
+        descr['Ad'] /= numTopics
+        
+        return descr
+
+    def updateDisciplineAuthors(self, authID, disciplines):
+        for discID in disciplines:
+            self.topics[discID].addAuthorToDiscipline(authID)
 
     '''Printing and Plotting Functions'''
     def __repr__(self):
@@ -200,7 +240,7 @@ class Evolution:
                 # add node without data, disciplines will be added after paper is completed
                 self.network.addAuthor(self.newAuthor, initialData={})
                 self.network.add_edge(self.newAuthor, authors[1], weight=1, width=1)
-                # increment
+                # increment new authorID
                 self.newAuthor += 1
 
             # Add new paper, calling function

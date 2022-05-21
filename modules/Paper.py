@@ -18,6 +18,12 @@ class Paper:
     def getAuthors(self):
         return self.authors
 
+    def getNumTopics(self):
+        return len(self.topics)
+
+    def getNumAuthors(self):
+        return len(self.authors)
+
     def clearTopics(self):
         self.topics = []
 
@@ -32,6 +38,5 @@ class Paper:
     def __repr__(self):
         topics = ','.join(map(str, self.topics))
         authors = ','.join(map(str, self.authors))
-        print(f'Paper {self.id} topics: {topics}')
-        print(f'Paper {self.id} authors: {authors}')
+        print(f'''Paper {self.id} topics: {topics} and authors: {authors}''')
 

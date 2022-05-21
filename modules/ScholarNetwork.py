@@ -17,6 +17,9 @@ Definitions:
 class Graph(nx.Graph):
 
     '''Access Methods'''
+    def getNetworkData(self):
+        return self.nodes.data("data")
+
     def getAuthorIDs(self): 
         return list(self.nodes)
 
@@ -70,6 +73,7 @@ class Graph(nx.Graph):
             If this is a tie, then the paper is added to both disciplines
                 This is not a strict rule and could be modified
         '''
+        # count all the author disciplines, put them in topics
         topics = {}
         for authID in authors:
             for top in self.getAuthorDiscipline(authID):
@@ -77,6 +81,7 @@ class Graph(nx.Graph):
                     topics[top] = 0
                 topics[top] += 1
 
+        # get the topics with the maximum value, append them to the paper topics
         paperTopics = []
         maxVal = 0
         for id, num in topics.items():
