@@ -2,7 +2,7 @@ from modules.Evolution import Evolution
 
 env = Evolution(probMerge=.8)
 
-env.evolve(newAuthors=20)
+env.evolve(newAuthors=10)
 
 # env.printAuthor(0)
 # env.printPaper(1)

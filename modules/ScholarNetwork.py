@@ -238,7 +238,7 @@ class Graph(nx.Graph):
                 authClass.updateAuthor(paperID, paperTopics)
 
     '''Plotting Related Functions'''
-    def genHTMLtable(self, authorID):
+    def genHTMLtable(self, authorID, width='500px'):
         html = '''
             <style>
                 table {font-family: arial, sans-serif;border-collapse: collapse;}
@@ -246,14 +246,13 @@ class Graph(nx.Graph):
                 th {background-color:#22A7F0}
                 tr:nth-child(even) {background-color: #dddddd;}
             </style>
-            <table>
-        '''
+            ''' + f'<div style="overflow-x:auto; width:{width}"><table>'
         html += f'<tr><caption><b>Main Author Disciplines:</b> ' + ','.join(map(str, self.getAuthorDiscipline(authorID))) + '</caption></tr>'
         for topicID, papers in self.nodes[authorID]["data"].getData().items():
             html += f'<tr><th>{topicID}</th><td>'
             html += '</td><td>'.join(map(str, papers))
             html += '</td></tr>'
-        html += '</table>'
+        html += '</table></div>'
         return html
     
     def genPyvisGraph(self):
@@ -286,13 +285,15 @@ class Graph(nx.Graph):
 
         return graph
 
-    def plotPyvisGraph(self, filename='pyvis.html', network=None):
+    def plotPyvisGraph(self, filename='pyvis.html', network=None, notebook=False):
         
         net = self.genPyvisGraph() if not network else network.genPyvisGraph()
-        visNetwork = ntvis()
+        visNetwork = ntvis(notebook=notebook)
         visNetwork.from_nx(net)
-        visNetwork.show(filename)
+        output = visNetwork.show(filename)
         print(f'Plot saved to {filename} successfully!')
+        return output
+        
 
     def genGraphFeatures(self):
         '''

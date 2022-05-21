@@ -95,14 +95,7 @@ class Evolution:
 
     '''Printing and Plotting Functions'''
     def __repr__(self):
-        s = f'Evolution network with a total of {self.getNumAuthors()} authors, {self.getNumPapers()} papers, and {self.getNumTopics()} disciplines/topics.\n'
-        for authID, authClass in self.getAuthorsClasses():
-            authID = authClass.getID()
-            s += f'   Author {authID} primary disciplines: {self.network.getAuthorDiscipline(authID)}\n'
-            for topicID, papers in authClass.getData().items():
-                for pap in papers:
-                    s += f'      Paper {pap} with the topics {self.papers[pap][0]}\n'
-        return s
+        return f'Evolution network with a total of {self.getNumAuthors()} authors, {self.getNumPapers()} papers, and {self.getNumTopics()} disciplines/topics.\n'
     
     def printAuthor(self, authorID):
         self.network.printAuthor(authorID)
@@ -129,7 +122,9 @@ class Evolution:
             intersectionAuths = comAuthorsSet.intersection(set(paperClass.getAuthors()))
 
             # relabel papers if in new topic
-            if len(intersectionAuths) >= (len(paperClass.getAuthors()) // 2):
+            numIntersectAuths = len(intersectionAuths)
+            numHalfAuths = len(paperClass.getAuthors()) // 2
+            if numIntersectAuths >= numHalfAuths:
                 paperClass.addTopic(newTopic)
                 # add to new topics 
                 if newTopic not in self.topics:
@@ -137,7 +132,7 @@ class Evolution:
                 self.topics[newTopic].append(paperID)
             
                 # remove paper from old topics if strictly in new topic
-                if len(intersectionAuths) > (len(paperClass.getAuthors()) // 2):
+                if numIntersectAuths > numHalfAuths:
                     # update papers data structure
                     paperClass.clearTopics()
                     paperClass.addTopic(newTopic)

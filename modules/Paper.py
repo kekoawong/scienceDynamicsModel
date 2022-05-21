@@ -1,5 +1,3 @@
-
-
 class Paper:
     '''
     Class defines the papers and their corresponding methods
