@@ -1,5 +1,6 @@
 from .ScholarNetwork import Graph
 from .Paper import Paper
+from .Topic import Topic
 import random
 import pickle
 import sys
@@ -46,7 +47,7 @@ class Evolution:
         initialTopic = 1
         self.network.addAuthor(self.newAuthor, initialData={initialTopic: [self.newPaper]})
         self.papers[self.newPaper] = Paper(self.newPaper, topics=[initialTopic], authors=[self.newAuthor])
-        self.topics[initialTopic] = [self.newPaper]
+        self.topics[initialTopic] = Topic(initialTopic, papers=[self.newPaper])
         self.newAuthor += 1
         self.newPaper += 1
 
@@ -126,10 +127,11 @@ class Evolution:
             numHalfAuths = len(paperClass.getAuthors()) // 2
             if numIntersectAuths >= numHalfAuths:
                 paperClass.addTopic(newTopic)
-                # add to new topics 
+
+                # add to topics 
                 if newTopic not in self.topics:
-                    self.topics[newTopic] = []
-                self.topics[newTopic].append(paperID)
+                    self.topics[newTopic] = Topic(newTopic)
+                self.topics[newTopic].addPaper(paperID)
             
                 # remove paper from old topics if strictly in new topic
                 if numIntersectAuths > numHalfAuths:
@@ -138,7 +140,7 @@ class Evolution:
                     paperClass.addTopic(newTopic)
                     # update topics data structure
                     for oldTopic in paperClass.getTopics():
-                        self.topics[oldTopic].remove(paperID)
+                        self.topics[oldTopic].removePaper(paperID)
 
                 # update authors in network with papers
                 self.network.updatePaperInNetwork(paperID, (paperClass.getTopics(), paperClass.getAuthors()))
@@ -206,10 +208,10 @@ class Evolution:
             self.papers[self.newPaper] = Paper(self.newPaper, topics=paperTopics, authors=paperAuthors)
 
             # add paper to corresponding topics
-            for top in paperTopics:
-                if top not in self.topics:
-                    self.topics[top] = []
-                self.topics[top].append(self.newPaper)
+            for topicID in paperTopics:
+                if topicID not in self.topics:
+                    self.topics[topicID] = Topic(topicID)
+                self.topics[topicID].addPaper(self.newPaper)
 
             # split random discipline with prob pd
             if random.random() < self.probSplit:
