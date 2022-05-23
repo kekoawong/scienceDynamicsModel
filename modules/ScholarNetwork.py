@@ -220,6 +220,7 @@ class Graph(nx.Graph):
         except ZeroDivisionError:
             print(f'New Community: {newCom}')
             print(f'Com1: {com1} and Com2: {com2}')
+            self.plotPyvisGraph(filename='outputs/ErrorGraph.html', network=subGraphMerged)
             sys.exit('Error with merging')
         # merge, authors that are in both communities will just be a part of the first
         coms = dict.fromkeys(com1, 0) | dict.fromkeys(com2, 1)
