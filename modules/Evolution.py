@@ -63,7 +63,7 @@ class Evolution:
     def getNumAuthors(self):
         return len(self.getAuthorIDs())
 
-    def getQuantDistr(self):
+    def getQuantDistr(self, initialDescr=None):
         '''
         Will return the Quantitative distributions of the evolution network in the following factors
             Ap: Authors per paper - calculated by averaging number of authors in each new paper that is created (method in paper Class)
@@ -81,15 +81,20 @@ class Evolution:
             'Pd': list
             'Dp': list
         }
+
+        Inputs:
+            initalDescr: if averaging over many runs, input previous initialDescr to get the histogram of all values
         '''
-        descr = {
-            'Ap': [],
-            'Pa': [],
-            'Ad': [],
-            'Da': [],
-            'Pd': [],
-            'Dp': []
-        }
+        descr = initialDescr
+        if not initialDescr:
+            descr = {
+                'Ap': [],
+                'Pa': [],
+                'Ad': [],
+                'Da': [],
+                'Pd': [],
+                'Dp': []
+            }
         # get paper parameters distribution
         for paper in self.papers.values():
             descr['Ap'].append(paper.getNumAuthors())
@@ -198,6 +203,10 @@ class Evolution:
     def evolve(self, newPapers=None, newAuthors=None):
         '''
         Function will continue evolution for the inputted timesteps
+        Inputs:
+            newPapers: stopping point for amount of new papers
+            newAuthors: stopping point for amount of new authors
+        NOTE: input either newPapers or newAuthors stopping point, but not both
         '''
         # use XOR to make sure either newPapers or newAuthors is inputted, but not both
         if bool(newPapers) == bool(newAuthors):
@@ -260,29 +269,43 @@ class Evolution:
         # print(f'Initial Paper: {self.initialPaper}')
 
     '''Plotting methods'''
-    def plotDescriptorsDistr(self, saveToFile=None, logBase=None):
+    def plotDescriptorsDistr(self, saveToFile=None, ylogBase=None, xlogBase=None, data=None):
         '''
         Method will take the descriptors dictionary returned from getQuantDescriptors method and plot subplots
+        Inputs:
+            saveToFile: string of a filename to save the plot to
+            logBase: if you want to plot on a log scale on the yaxis, input the desired log base
+            data: data to plot, defaults to the list of self.getQuantDistr.items() of the current Evolution class
         '''
         fig = plt.figure(figsize=(9, 7))
         # make plot with 3 rows, 2 columns
         axs = fig.subplots(3,2)
 
         # loop through and make subplots
-        descr = list(self.getQuantDistr().items())
+        descr = data
+        if not descr:
+            descr = list(self.getQuantDistr().items())
 
         # print(descr)
         for row in axs:
             for axis in row:
-                lab, data = descr.pop(0)
-                binVals, binEdges = np.histogram(data, bins=min(20, len(data)), density=True)
+                label, labelData = descr.pop(0)
+                binVals, binEdges = np.histogram(labelData, bins=min(20, len(labelData)), density=True)
                 # binVals, binEdges, patches = plt.hist(x=data, density=True, align='mid', bottom=5)
                 binsMean = [0.5 * (binEdges[i] + binEdges[i+1]) for i in range(len(binVals))]
                 axis.scatter(binsMean, binVals)
-                axis.set_ylabel(f'Density of {lab}', fontweight='bold')
-                axis.set_xlabel(f'{lab}', fontweight='bold')
-                if logBase:
-                    axis.set_yscale('log',base=logBase) 
+                axis.set_ylabel(f'Density of {label}', fontweight='bold')
+                axis.set_xlabel(f'{label}', fontweight='bold')
+
+                # scale axis
+                if ylogBase:
+                    axis.set_yscale('log', base=ylogBase) 
+                if xlogBase:
+                    axis.set_xscale('log', base=xlogBase)
+
+                # set limits
+                axis.set_ylim(10**-6, 1)
+                axis.set_xlim(1, 10**4)
 
         # figure styling
         fig.suptitle('Science Network Descriptors')
@@ -301,6 +324,4 @@ class Evolution:
         print(f'Saved to {fileName} successfully!')
 
     def saveNetworkWithPickle(self, fileName='evolutionNetwork.net'):
-        with open(fileName, 'wb') as outfile:
-            pickle.dump(self.network, outfile)
-        print(f'Saved to {fileName} successfully!')
+        self.network.saveNetworkWithPickle(fileName=fileName)

@@ -4,6 +4,7 @@ from networkx.algorithms.community import modularity as nx_modularity
 import community
 from igraph import Graph as modularityGraph
 import random
+import pickle
 import pandas as pd
 from pyvis.network import Network as ntvis
 import matplotlib.pyplot as plt
@@ -220,6 +221,11 @@ class Graph(nx.Graph):
         except ZeroDivisionError:
             print(f'New Community: {newCom}')
             print(f'Com1: {com1} and Com2: {com2}')
+            self.plotPyvisGraph(filename='outputs/ErrorGraph.html', network=subGraphMerged)
+            print(f'Authors in community {com1}: {self.getDisciplineAuthors(com1)}')
+            print(f'Authors in community {com2}: {self.getDisciplineAuthors(com2)}')
+            self.saveNetworkWithPickle(fileName='outputs/wholeErrorNetwork.net')
+            self.saveNetworkWithPickle(fileName='outputs/partErrorNetwork.net', network=subGraphMerged)
             sys.exit('Error with merging')
         # merge, authors that are in both communities will just be a part of the first
         coms = dict.fromkeys(com1, 0) | dict.fromkeys(com2, 1)
@@ -331,3 +337,9 @@ class Graph(nx.Graph):
         pos = nx.shell_layout(self)  # Seed layout for reproducibility
         nx.draw(self, pos=pos, with_labels=True, labels=nodeLabels, node_color=nodeColors)
         plt.show()
+
+    def saveNetworkWithPickle(self, fileName='evolutionNetwork.net', network=None):
+        net = self if not network else network
+        with open(fileName, 'wb') as outfile:
+            pickle.dump(net, outfile)
+        print(f'Saved to {fileName} successfully!')
