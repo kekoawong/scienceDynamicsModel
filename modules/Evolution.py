@@ -324,6 +324,4 @@ class Evolution:
         print(f'Saved to {fileName} successfully!')
 
     def saveNetworkWithPickle(self, fileName='evolutionNetwork.net'):
-        with open(fileName, 'wb') as outfile:
-            pickle.dump(self.network, outfile)
-        print(f'Saved to {fileName} successfully!')
+        self.network.saveNetworkWithPickle(fileName=fileName)
