@@ -269,13 +269,13 @@ class Evolution:
         # print(f'Initial Paper: {self.initialPaper}')
 
     '''Plotting methods'''
-    def plotDescriptorsDistr(self, saveToFile=None, ylogBase=None, xlogBase=None, data=None):
+    def plotDescriptorsDistr(self, saveToFile=None, ylogBase=None, xlogBase=None, data=None, numAuthors='NA', numPapers='NA', numTopics='NA', networkName=''):
         '''
         Method will take the descriptors dictionary returned from getQuantDescriptors method and plot subplots
         Inputs:
             saveToFile: string of a filename to save the plot to
             logBase: if you want to plot on a log scale on the yaxis, input the desired log base
-            data: data to plot, defaults to the list of self.getQuantDistr.items() of the current Evolution class
+            data: data to plot, defaults to the self.getQuantDistr() dict of the current Evolution class
         '''
         fig = plt.figure(figsize=(9, 7))
         # make plot with 3 rows, 2 columns
@@ -284,7 +284,10 @@ class Evolution:
         # loop through and make subplots
         descr = data
         if not descr:
-            descr = list(self.getQuantDistr().items())
+            descr = self.getQuantDistr().items()
+
+        # turn dict into list
+        descr = list(descr.items())
 
         # print(descr)
         for row in axs:
@@ -308,7 +311,8 @@ class Evolution:
                 axis.set_xlim(1, 10**4)
 
         # figure styling
-        fig.suptitle('Science Network Descriptors')
+        fig.suptitle(f'''{networkName} Network with {numAuthors} total authors, {numPapers} total papers, and {numTopics} total topics.
+                    ''')
         fig.tight_layout()
 
         if saveToFile:
@@ -316,6 +320,7 @@ class Evolution:
             print(f'Saved to {saveToFile} successfully!')
         
         return fig, axs
+        
 
     '''Saving Methods'''
     def saveEvolutionWithPickle(self, fileName='evolution.env'):
