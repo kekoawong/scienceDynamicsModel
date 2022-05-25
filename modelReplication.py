@@ -57,7 +57,7 @@ if __name__ == "__main__":
         'Pn': 0.90,
         'Pw': 0.28,
         'Pd': 0.0,
-        'newAuthors': int(1000),
+        'newAuthors': int(2.9*10**5),
         'simulationName': 'Nanobank'
     }
     scholarometer = {
@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     print(os.cpu_count())
     # declare amount of runs to average
-    RUNS = 5
+    RUNS = 10
 
     # declare multiprocessing
     pool = Pool()
@@ -86,6 +86,8 @@ if __name__ == "__main__":
     data = pool.map(runSimulation, [nanobank] * RUNS)
     pool.close()
     data = list(data)
-    descr, numAuths, numPaps, numTops = combineDescr(data)
+
+    # get nanobank results
+    descr, numAuths, numPaps, numTops = combineDescr(data[:RUNS])
     Evolution().plotDescriptorsDistr(saveToFile='outputs/nanobankPlots.png', ylogBase=10, xlogBase=10, data=descr, 
                                     numAuthors=numAuths, numPapers=numPaps, numTopics=numTops)
