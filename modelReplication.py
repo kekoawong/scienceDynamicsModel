@@ -57,7 +57,7 @@ if __name__ == "__main__":
         'Pn': 0.90,
         'Pw': 0.28,
         'Pd': 0.0,
-        'newAuthors': int(2.9*10**5),
+        'newPapers': int(2.9*10**5),
         'simulationName': 'Nanobank'
     }
     scholarometer = {
@@ -72,22 +72,29 @@ if __name__ == "__main__":
         'Pw': 0.71,
         'Pd': 0.50,
         'newPapers': int(2.9*10**5),
+        # 'newPapers': int(2.9*10**5),
         'simulationName': 'Bibsonomy'
     }
 
 
-    print(os.cpu_count())
     # declare amount of runs to average
     RUNS = 10
 
     # declare multiprocessing
-    pool = Pool()
+    pool = Pool(10)
 
-    data = pool.map(runSimulation, [nanobank] * RUNS)
+    simulations = [nanobank] * RUNS + [bibsonomy] * RUNS
+
+    data = pool.map(runSimulation, simulations)
     pool.close()
     data = list(data)
 
     # get nanobank results
     descr, numAuths, numPaps, numTops = combineDescr(data[:RUNS])
     Evolution().plotDescriptorsDistr(saveToFile='outputs/nanobankPlots.png', ylogBase=10, xlogBase=10, data=descr, 
+                                    numAuthors=numAuths, numPapers=numPaps, numTopics=numTops)
+
+    # get bibsonomy results
+    descr, numAuths, numPaps, numTops = combineDescr(data[RUNS:])
+    Evolution().plotDescriptorsDistr(saveToFile='outputs/bibsonomyPlots.png', ylogBase=10, xlogBase=10, data=descr, 
                                     numAuthors=numAuths, numPapers=numPaps, numTopics=numTops)
