@@ -233,7 +233,8 @@ class Evolution:
                 self.newAuthor += 1
 
             # Add new paper, calling function
-            paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
+            # paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
+            paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper)
             self.papers[self.newPaper] = Paper(self.newPaper, topics=paperTopics, authors=paperAuthors)
 
             # add paper to corresponding topics
