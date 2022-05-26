@@ -285,7 +285,7 @@ class Evolution:
         # loop through and make subplots
         descr = data
         if not descr:
-            descr = self.getQuantDistr().items()
+            descr = self.getQuantDistr()
 
         # turn dict into list
         descr = list(descr.items())

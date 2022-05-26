@@ -31,6 +31,9 @@ class Graph(nx.Graph):
         '''
         return self.nodes[authID]["data"].getAuthorPapers()
 
+    def getAuthorClass(self, authID):
+        return self.nodes[authID]["data"]
+
     def getAuthorData(self, authID):
         return self.nodes[authID]["data"].getData()
 
@@ -119,7 +122,7 @@ class Graph(nx.Graph):
         probs = []
         for neighbor in newNeighbors:
             nData = self.get_edge_data(currAuthorID, neighbor)
-            probs.extend([neighbor] * (nData["weight"] * self.getAuthorData(neighbor).getCredit()))
+            probs.extend([neighbor] * (nData["weight"] * self.getAuthorClass(neighbor).getCredit()))
 
         # Select next coauthor from neighbors probabilities list
         coauthorID = random.choice(probs)
@@ -132,6 +135,10 @@ class Graph(nx.Graph):
             
             newWeight = self.get_edge_data(author, coauthorID)["weight"] + 1
             self.update(edges=[ (author, coauthorID, {"weight": newWeight}) ])
+
+        # add author to list and call function recursively
+        authors.append(coauthorID)
+        return self.biasedRandomWalk(authors, probStop, newPaperID)
     
     def biasedRandomWalk(self, authors, probStop, newPaperID):
         '''
