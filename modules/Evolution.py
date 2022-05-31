@@ -177,7 +177,7 @@ class Evolution:
             ([authorIDs in community 1], [authorIDs in community 2])
         '''
 
-        # choose random author with at least two disciplines
+        # choose random author with at least two papers in different topics. 
         allAuthors = self.getAuthorIDs()
         while len(allAuthors) > 0:
             authID = random.choice(allAuthors)
@@ -187,7 +187,7 @@ class Evolution:
                 break
             authID = None
 
-        # select two random disciplines from author
+        # select two random topics from author
         if not authID:
             return None
         allTopics = list(authData.keys())
@@ -196,7 +196,7 @@ class Evolution:
         top2 = random.choice(allTopics)
 
 
-        # print(f'Random author {author} with Topic {top1} with authors {self.network.getAuthorswithTopic(top1)}, Topic {top2} with authors {self.network.getAuthorswithTopic(top2)}')
+        print(f'Random author {authID} with Topic {top1} with authors {self.network.getAuthorswithTopic(top1)}, Topic {top2} with authors {self.network.getAuthorswithTopic(top2)}')
 
         return self.network.getAuthorswithTopic(top1), self.network.getAuthorswithTopic(top2)
 

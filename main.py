@@ -23,7 +23,8 @@ env.network.plotPyvisGraph(filename='outputs/pyvis.html')
 # env.network.plotPyvisGraph(filename='outputs/pyvisNext.html')
 
 # env.saveEvolutionWithPickle('outputs/evolution.env')
-env.plotDescriptorsDistr(saveToFile='outputs/creditAccumulation.png')
+env.plotDescriptorsDistr(saveToFile='outputs/creditAccumulation.png', xlogBase=10, ylogBase=10, 
+                            numAuthors=env.getNumAuthors(), numPapers=env.getNumPapers(), numTopics=env.getNumTopics(), networkName='Credit accumulation')
 print(f'num authors: {env.getNumAuthors()}')
 # print(env)
 

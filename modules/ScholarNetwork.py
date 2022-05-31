@@ -266,6 +266,7 @@ class Graph(nx.Graph):
             print(f'New Community: {newCom}')
             print(f'Com1: {com1} and Com2: {com2}')
             self.plotPyvisGraph(filename='outputs/ErrorGraph.html', network=subGraphMerged)
+            self.plotPyvisGraph(filename='outputs/wholeErrorGraph.html')
             print(f'Authors in community {com1}: {self.getDisciplineAuthors(com1)}')
             print(f'Authors in community {com2}: {self.getDisciplineAuthors(com2)}')
             self.saveNetworkWithPickle(fileName='outputs/wholeErrorNetwork.net')
