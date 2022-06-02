@@ -200,7 +200,7 @@ class Evolution:
         top2 = random.choice(allTopics)
 
 
-        print(f'Random author {authID} with Topic {top1} with authors {self.network.getAuthorswithTopic(top1)}, Topic {top2} with authors {self.network.getAuthorswithTopic(top2)}')
+        # print(f'Random author {authID} with Topic {top1} with authors {self.network.getAuthorswithTopic(top1)}, Topic {top2} with authors {self.network.getAuthorswithTopic(top2)}')
 
         return self.network.getAuthorswithTopic(top1), self.network.getAuthorswithTopic(top2)
 

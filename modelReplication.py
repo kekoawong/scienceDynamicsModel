@@ -49,7 +49,7 @@ def combineDescr(descrList):
     return descr, sumAuths//len(descrList), sumPaps//len(descrList), sumTops//len(descrList)
 
 def saveToFile(fileName, descr, numAuthors, numPapers, numTopics):
-    with open(fileName) as outfile:
+    with open(fileName, 'wb') as outfile:
         pickle.dump({
             'descr': descr,
             'numAuthors': numAuthors,

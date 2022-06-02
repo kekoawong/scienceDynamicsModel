@@ -271,7 +271,8 @@ class Graph(nx.Graph):
             print(f'Authors in community {com2}: {self.getDisciplineAuthors(com2)}')
             self.saveNetworkWithPickle(fileName='outputs/wholeErrorNetwork.net')
             self.saveNetworkWithPickle(fileName='outputs/partErrorNetwork.net', network=subGraphMerged)
-            sys.exit('Error with merging')
+            print('Error with merging')
+            return False
         # merge, authors that are in both communities will just be a part of the first
         coms = dict.fromkeys(com1, 0) | dict.fromkeys(com2, 1)
         unMergedMod = community.modularity(coms, subGraphMerged, weight=None)
