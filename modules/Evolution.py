@@ -3,6 +3,7 @@ from .Paper import Paper
 from .Topic import Topic
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 import random
 import pickle
 import sys
@@ -273,17 +274,23 @@ class Evolution:
         # print(f'Initial Paper: {self.initialPaper}')
 
     '''Plotting methods'''
-    def plotDistibution(self, distribution, label='', ylogBase=None, xlogBase=None, ylim=10**-6, xlim=10**4, saveToFile=None,):
+    def plotDistibution(self, distribution, label='', ylogBase=10, xlogBase=10, ylim=10**-6, xlim=10**4, saveToFile=None):
 
         # declare figure and axis
         fig = plt.figure(figsize=(9, 7))
         axis = fig.add_subplot()
 
-        # plot on axis
+        # calculate bin values
         numDistribution = len(distribution)
-        binVals, binEdges = np.histogram(distribution, bins=min(20, numDistribution), density=True)
-        binsMean = [0.5 * (binEdges[i] + binEdges[i+1]) for i in range(len(binVals))]
-        axis.scatter(binsMean, binVals)
+        numBins = min(20, numDistribution) + 1
+        logBinEdges = np.logspace(math.log(1, xlogBase), math.log(max(distribution), xlogBase), numBins)
+        binVals, binEdges = np.histogram(distribution, bins=logBinEdges, density=True)
+
+        # convert to scatter
+        xVals = [0.5 * (binEdges[i] + binEdges[i+1]) for i in range(len(binVals))]
+        axis.scatter(xVals, binVals)
+
+        # styling
         axis.set_ylabel(f'Density of {label}', fontweight='bold')
         axis.set_xlabel(f'{label}', fontweight='bold')
 
@@ -307,7 +314,11 @@ class Evolution:
         
         return fig, axis
 
-    def plotDescriptorsDistr(self, saveToFile=None, ylogBase=None, xlogBase=None, data=None, numAuthors='NA', numPapers='NA', numTopics='NA', networkName=''):
+    def plotDegreeDistr(self, label='Degree', ylogBase=10, xlogBase=10, ylim=10**-6, xlim=10**4, saveToFile=None):
+        distrib = self.getDegreeDistribution()
+        return self.plotDistibution(distrib, label=label, ylogBase=ylogBase, xlogBase=xlogBase, ylim=ylim, xlim=xlim, saveToFile=saveToFile)
+
+    def plotDescriptorsDistr(self, saveToFile=None, ylogBase=10, xlogBase=10, data=None, numAuthors='NA', numPapers='NA', numTopics='NA', networkName=''):
         '''
         Method will take the descriptors dictionary returned from getQuantDescriptors method and plot subplots
         Inputs:
@@ -331,10 +342,15 @@ class Evolution:
         for row in axs:
             for axis in row:
                 label, labelData = descr.pop(0)
-                binVals, binEdges = np.histogram(labelData, bins=min(20, len(labelData)), density=True)
-                # binVals, binEdges, patches = plt.hist(x=data, density=True, align='mid', bottom=5)
-                binsMean = [0.5 * (binEdges[i] + binEdges[i+1]) for i in range(len(binVals))]
-                axis.scatter(binsMean, binVals)
+
+                # calculate bin values
+                numBins = min(20, len(labelData)) + 1
+                logBinEdges = np.logspace(math.log(1, xlogBase), math.log(max(labelData), xlogBase), numBins)
+                binVals, binEdges = np.histogram(labelData, bins=logBinEdges, density=True)
+
+                # create scatter
+                xVals = [0.5 * (binEdges[i] + binEdges[i+1]) for i in range(len(binVals))]
+                axis.scatter(xVals, binVals)
                 axis.set_ylabel(f'Density of {label}', fontweight='bold')
                 axis.set_xlabel(f'{label}', fontweight='bold')
 
