@@ -11,6 +11,7 @@ class Type:
         self.authors = authors
         
         # credit
+        # TODO: Need some sort of credit function that determines how successful this discipline is
         self.totalCredit = 0 # will represent how much accumulated credit for the whole type
 
     def getTypeAuthors(self):
@@ -18,3 +19,6 @@ class Type:
 
     def getTotalCredit(self):
         return self.totalCredit
+
+    def addAuthor(self, authID):
+        self.authors.append(authID)

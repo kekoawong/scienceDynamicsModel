@@ -115,6 +115,9 @@ class Evolution:
         
         return descr
 
+    def getDegreeDistribution(self):
+        return sorted((d for n, d in self.network.degree()), reverse=True)
+
     def updateDisciplineAuthors(self, authID, disciplines):
         for discID in disciplines:
             self.topics[discID].addAuthorToDiscipline(authID)
@@ -270,6 +273,40 @@ class Evolution:
         # print(f'Initial Paper: {self.initialPaper}')
 
     '''Plotting methods'''
+    def plotDistibution(self, distribution, label='', ylogBase=None, xlogBase=None, ylim=10**-6, xlim=10**4, saveToFile=None,):
+
+        # declare figure and axis
+        fig = plt.figure(figsize=(9, 7))
+        axis = fig.add_subplot()
+
+        # plot on axis
+        numDistribution = len(distribution)
+        binVals, binEdges = np.histogram(distribution, bins=min(20, numDistribution), density=True)
+        binsMean = [0.5 * (binEdges[i] + binEdges[i+1]) for i in range(len(binVals))]
+        axis.scatter(binsMean, binVals)
+        axis.set_ylabel(f'Density of {label}', fontweight='bold')
+        axis.set_xlabel(f'{label}', fontweight='bold')
+
+        # scale axis
+        if ylogBase:
+            axis.set_yscale('log', base=ylogBase) 
+        if xlogBase:
+            axis.set_xscale('log', base=xlogBase)
+
+        # set limits
+        axis.set_ylim(ylim, 1)
+        axis.set_xlim(1, xlim)
+
+        # figure styling
+        fig.suptitle(f'''Network distribution with {numDistribution} total authors.''')
+        fig.tight_layout()
+
+        if saveToFile:
+            fig.savefig(saveToFile)
+            print(f'Saved to {saveToFile} successfully!')
+        
+        return fig, axis
+
     def plotDescriptorsDistr(self, saveToFile=None, ylogBase=None, xlogBase=None, data=None, numAuthors='NA', numPapers='NA', numTopics='NA', networkName=''):
         '''
         Method will take the descriptors dictionary returned from getQuantDescriptors method and plot subplots
