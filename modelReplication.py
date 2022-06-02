@@ -1,7 +1,6 @@
 from multiprocessing.pool import RUN
 from modules.Evolution import Evolution
-import os
-import sys
+import pickle
 from multiprocessing import Pool
 
 '''
@@ -49,6 +48,14 @@ def combineDescr(descrList):
 
     return descr, sumAuths//len(descrList), sumPaps//len(descrList), sumTops//len(descrList)
 
+def saveToFile(fileName, descr, numAuthors, numPapers, numTopics):
+    with open(fileName) as outfile:
+        pickle.dump({
+            'descr': descr,
+            'numAuthors': numAuthors,
+            'numPapers': numPapers,
+            'numTopics': numTopics 
+        }, outfile)
 
 if __name__ == "__main__":
 
@@ -57,21 +64,23 @@ if __name__ == "__main__":
         'Pn': 0.90,
         'Pw': 0.28,
         'Pd': 0.0,
-        'newPapers': int(2.9*10**5),
+        'newPapers': int(500),
+        # 'newPapers': int(2.9*10**5),
         'simulationName': 'Nanobank'
     }
     scholarometer = {
         'Pn': 0.04,
         'Pw': 0.35,
         'Pd': 0.01,
-        'newAuthors': int(2.2*10**4),
+        'newAuthors': int(300),
+        # 'newAuthors': int(2.2*10**4),
         'simulationName': 'Scholarometer'
     }
     bibsonomy = {
         'Pn': 0.80,
         'Pw': 0.71,
         'Pd': 0.50,
-        'newPapers': int(2.9*10**5),
+        'newPapers': int(500),
         # 'newPapers': int(2.9*10**5),
         'simulationName': 'Bibsonomy'
     }
@@ -83,18 +92,25 @@ if __name__ == "__main__":
     # declare multiprocessing
     pool = Pool(10)
 
-    simulations = [nanobank] * RUNS + [bibsonomy] * RUNS
+    simulations = [nanobank] * RUNS + [scholarometer] * RUNS + [bibsonomy] * RUNS
 
     data = pool.map(runSimulation, simulations)
     pool.close()
     data = list(data)
 
-    # get nanobank results
+    # get nanobank results and save
     descr, numAuths, numPaps, numTops = combineDescr(data[:RUNS])
+    saveToFile(fileName='outputs/nanobanksData.pi', descr=descr, numAuthors=numAuths, numPapers=numPaps, numTopics=numTops)
     Evolution().plotDescriptorsDistr(saveToFile='outputs/nanobankPlots.png', ylogBase=10, xlogBase=10, data=descr, 
                                     numAuthors=numAuths, numPapers=numPaps, numTopics=numTops)
 
+    # get scholarometer results and save
+    descr, numAuths, numPaps, numTops = combineDescr(data[RUNS:2*RUNS])
+    saveToFile(fileName='outputs/scholarometerData.pi', descr=descr, numAuthors=numAuths, numPapers=numPaps, numTopics=numTops)
+    Evolution().plotDescriptorsDistr(saveToFile='outputs/scholarometerPlots.png', ylogBase=10, xlogBase=10, data=descr, 
+                                    numAuthors=numAuths, numPapers=numPaps, numTopics=numTops)
     # get bibsonomy results
-    descr, numAuths, numPaps, numTops = combineDescr(data[RUNS:])
+    descr, numAuths, numPaps, numTops = combineDescr(data[2*RUNS:])
+    saveToFile(fileName='outputs/bibsonomyData.pi', descr=descr, numAuthors=numAuths, numPapers=numPaps, numTopics=numTops)
     Evolution().plotDescriptorsDistr(saveToFile='outputs/bibsonomyPlots.png', ylogBase=10, xlogBase=10, data=descr, 
                                     numAuthors=numAuths, numPapers=numPaps, numTopics=numTops)
