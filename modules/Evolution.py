@@ -276,6 +276,8 @@ class Evolution:
     '''Plotting methods'''
     def plotDistibution(self, distribution, label='', ylogBase=10, xlogBase=10, ylim=10**-6, xlim=10**4, saveToFile=None):
 
+        largestVal = max(distribution)
+        maxVal = 10 if not largestVal else largestVal
         # declare figure and axis
         fig = plt.figure(figsize=(9, 7))
         axis = fig.add_subplot()
@@ -283,7 +285,7 @@ class Evolution:
         # calculate bin values
         numDistribution = len(distribution)
         numBins = min(20, numDistribution) + 1
-        logBinEdges = np.logspace(math.log(1, xlogBase), math.log(max(distribution), xlogBase), numBins)
+        logBinEdges = np.logspace(math.log(1, xlogBase), math.log(maxVal, xlogBase), numBins)
         binVals, binEdges = np.histogram(distribution, bins=logBinEdges, density=True)
 
         # convert to scatter
@@ -305,7 +307,7 @@ class Evolution:
         axis.set_xlim(1, xlim)
 
         # figure styling
-        fig.suptitle(f'''Network distribution with {numDistribution} total authors.''')
+        fig.suptitle(f'''Network {label} distribution.''')
         fig.tight_layout()
 
         if saveToFile:
@@ -314,8 +316,8 @@ class Evolution:
         
         return fig, axis
 
-    def plotDegreeDistr(self, label='Degree', ylogBase=10, xlogBase=10, ylim=10**-6, xlim=10**4, saveToFile=None):
-        distrib = self.getDegreeDistribution()
+    def plotDegreeDistr(self, degreeDistrib=None, label='Degree', ylogBase=10, xlogBase=10, ylim=10**-6, xlim=10**4, saveToFile=None):
+        distrib = self.getDegreeDistribution() if not degreeDistrib else degreeDistrib
         return self.plotDistibution(distrib, label=label, ylogBase=ylogBase, xlogBase=xlogBase, ylim=ylim, xlim=xlim, saveToFile=saveToFile)
 
     def plotDescriptorsDistr(self, saveToFile=None, ylogBase=10, xlogBase=10, data=None, numAuthors='NA', numPapers='NA', numTopics='NA', networkName=''):

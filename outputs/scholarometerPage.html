@@ -1,45 +1,18 @@
-from modules.Evolution import Evolution
 
-class Page(Evolution):
-    '''
-    Class will extend evolution class for printing functions
-    '''
-
-    def writeHTMLPage(self, simName, descr, degreeDistrib, numAuths, numPaps, numTops, directory='./'):
-        '''
-        Assumes all the files should be located in the same directory
-
-        directory must end with '/'
-        '''
-        descrPlotsFile = f'{simName}Plots.png'
-        degPlotsFile = f'{simName}Deg.png'
-        htmlfileName = directory + f'{simName}Page.html'
-
-        self.plotDescriptorsDistr(saveToFile=directory + descrPlotsFile, ylogBase=10, xlogBase=10, data=descr, 
-                                        numAuthors=numAuths, numPapers=numPaps, numTopics=numTops)
-        self.plotDegreeDistr(degreeDistrib=degreeDistrib,saveToFile=directory + degPlotsFile)
-
-        with open(htmlfileName, 'w') as fileObj:
-            fileObj.write(self.generateHTML(simName=simName, descrPlotFile=descrPlotsFile, degreePlotFile=degPlotsFile))
-        print(f'Saved to {htmlfileName} successfully!')
-
-    def generateHTML(self, simName, descrPlotFile, degreePlotFile):
-
-        return f'''
 
         <!DOCTYPE html>
         <html>
             <head>
-            <title>{simName}</title>
+            <title>scholarometer</title>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
             <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
             <style>
-            body,h1 {{font-family: "Raleway", Arial, sans-serif}}
-            h1 {{letter-spacing: 6px}}
-            .w3-row-padding img {{margin-bottom: 12px}}
+            body,h1 {font-family: "Raleway", Arial, sans-serif}
+            h1 {letter-spacing: 6px}
+            .w3-row-padding img {margin-bottom: 12px}
             </style>
             </head>
 
@@ -50,7 +23,7 @@ class Page(Evolution):
             <!-- Header -->
             <header class="w3-panel w3-center w3-opacity" style="padding:128px 16px">
             <h1 class="w3-xlarge">Simulation Outputs</h1>
-            <h1>{simName}</h1>
+            <h1>scholarometer</h1>
             
             <div class="w3-padding-32">
                 <div class="w3-bar w3-border">
@@ -65,11 +38,11 @@ class Page(Evolution):
             <!-- Photo Grid -->
             <div class="w3-row-padding" style="margin-bottom:128px">
                 <div class="w3-half">
-                    <img src={descrPlotFile} style="width:100%">
+                    <img src=scholarometerPlots.png style="width:100%">
                 </div>
 
                 <div class="w3-half">
-                    <img src={degreePlotFile} style="width:100%">
+                    <img src=scholarometerDeg.png style="width:100%">
                 </div>
             </div>
             
@@ -89,4 +62,4 @@ class Page(Evolution):
 
         </body>
         </html>
-        '''
+        
