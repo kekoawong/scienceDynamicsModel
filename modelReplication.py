@@ -15,6 +15,7 @@ RUNS = 2
 
 def runSimulation(simulationObj):
     '''
+    Function will be passed to pool to map the different processes
     simulationObj must contain the following parameters:
     {
         'Pn': float
@@ -30,9 +31,12 @@ def runSimulation(simulationObj):
     else:
         model.evolve(newAuthors=simulationObj['newAuthors'])
     print(f'Done with simulation ' + simulationObj['simulationName'])
-    return model.getQuantDistr(), model.getNumAuthors(), model.getNumPapers(), model.getNumTopics(), model.getDegreeDistribution()
+    return model.getQuantDistr(), model.getNumAuthors(), model.getNumPapers(), model.getNumTopics(), model.getDegreeDistribution(), simulationObj
 
-def combineDescr(descrList):
+def getData(descrList):
+    '''
+    Function will aggragate all the data from the different runs
+    '''
     descr = {
         'Ap': [],
         'Pa': [],
@@ -45,7 +49,7 @@ def combineDescr(descrList):
     sumPaps = 0
     sumTops = 0
     degreeDistrib = []
-    for des, numAuths, numPaps, numTops, deg in descrList:
+    for des, numAuths, numPaps, numTops, deg, simObj in descrList:
         for key, vals in des.items():
             descr[key].extend(vals)
         sumAuths += numAuths
@@ -53,9 +57,12 @@ def combineDescr(descrList):
         sumTops += numTops
         degreeDistrib.extend(deg)
 
-    return descr, sumAuths//len(descrList), sumPaps//len(descrList), sumTops//len(descrList), degreeDistrib
+    return descr, sumAuths//len(descrList), sumPaps//len(descrList), sumTops//len(descrList), degreeDistrib, simObj
 
 def saveToFile(fileName, descr, numAuthors, numPapers, numTopics):
+    '''
+    Function used to save data to pickle file
+    '''
     with open(fileName, 'wb') as outfile:
         pickle.dump({
             'descr': descr,
@@ -65,11 +72,15 @@ def saveToFile(fileName, descr, numAuthors, numPapers, numTopics):
         }, outfile)
 
 def saveResults(simName, simData):
+    '''
+    Function used to save outputs to html file and pickle file
+    '''
     htmlPage = Page()
 
-    descr, numAuths, numPaps, numTops, degreeDistrib = combineDescr(simData)
+    descr, numAuths, numPaps, numTops, degreeDistrib, simObj = getData(simData)
     saveToFile(fileName=f'outputs/{simName}Data.pi', descr=descr, numAuthors=numAuths, numPapers=numPaps, numTopics=numTops)
-    htmlPage.writeHTMLPage(simName=simName, descr=descr, degreeDistrib=degreeDistrib, numAuths=numAuths, numPaps=numPaps, numTops=numTops, directory='./outputs/')
+    htmlPage.writeHTMLPage(simName=simName, descr=descr, degreeDistrib=degreeDistrib, numAuths=numAuths, numPaps=numPaps, 
+                        numTops=numTops, Pn=simObj['Pn'], Pw=simObj['Pw'], Pd=simObj['Pd'], numRuns=simObj['runs'], directory='./outputs/')
 
 if __name__ == "__main__":
 
@@ -80,7 +91,8 @@ if __name__ == "__main__":
         'Pd': 0.0,
         'newPapers': int(500),
         # 'newPapers': int(2.9*10**5),
-        'simulationName': 'Nanobank'
+        'simulationName': 'Nanobank',
+        'runs': RUNS
     }
     scholarometer = {
         'Pn': 0.04,
@@ -88,7 +100,8 @@ if __name__ == "__main__":
         'Pd': 0.01,
         'newAuthors': int(100),
         # 'newAuthors': int(2.2*10**4),
-        'simulationName': 'Scholarometer'
+        'simulationName': 'Scholarometer',
+        'runs': RUNS
     }
     bibsonomy = {
         'Pn': 0.80,
@@ -96,7 +109,8 @@ if __name__ == "__main__":
         'Pd': 0.50,
         'newPapers': int(500),
         # 'newPapers': int(2.9*10**5),
-        'simulationName': 'Bibsonomy'
+        'simulationName': 'Bibsonomy',
+        'runs': RUNS
     }
 
 
