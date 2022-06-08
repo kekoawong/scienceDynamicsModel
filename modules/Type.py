@@ -22,3 +22,9 @@ class Type:
 
     def addAuthor(self, authID):
         self.authors.append(authID)
+
+
+    def rule(self):
+        '''
+        Defines the rule for collaboration between different types
+        '''

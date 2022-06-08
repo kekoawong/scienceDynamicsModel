@@ -11,7 +11,7 @@ Uses multiprocessing
 '''
 
 # declare amount of runs to average
-RUNS = 2
+RUNS = 6
 
 def runSimulation(simulationObj):
     '''
@@ -80,7 +80,7 @@ def saveResults(simName, simData):
     descr, numAuths, numPaps, numTops, degreeDistrib, simObj = getData(simData)
     saveToFile(fileName=f'outputs/{simName}Data.pi', descr=descr, numAuthors=numAuths, numPapers=numPaps, numTopics=numTops)
     htmlPage.writeHTMLPage(simName=simName, descr=descr, degreeDistrib=degreeDistrib, numAuths=numAuths, numPaps=numPaps, 
-                        numTops=numTops, Pn=simObj['Pn'], Pw=simObj['Pw'], Pd=simObj['Pd'], numRuns=simObj['runs'], directory='./outputs/')
+                        numTops=numTops, Pn=simObj['Pn'], Pw=simObj['Pw'], Pd=simObj['Pd'], numRuns=simObj['runs'], directory='./docs/outputs/')
 
 if __name__ == "__main__":
 
@@ -89,7 +89,7 @@ if __name__ == "__main__":
         'Pn': 0.90,
         'Pw': 0.28,
         'Pd': 0.0,
-        'newPapers': int(500),
+        'newPapers': int(10000),
         # 'newPapers': int(2.9*10**5),
         'simulationName': 'Nanobank',
         'runs': RUNS
@@ -98,7 +98,7 @@ if __name__ == "__main__":
         'Pn': 0.04,
         'Pw': 0.35,
         'Pd': 0.01,
-        'newAuthors': int(100),
+        'newAuthors': int(800),
         # 'newAuthors': int(2.2*10**4),
         'simulationName': 'Scholarometer',
         'runs': RUNS
@@ -107,7 +107,7 @@ if __name__ == "__main__":
         'Pn': 0.80,
         'Pw': 0.71,
         'Pd': 0.50,
-        'newPapers': int(500),
+        'newPapers': int(5000),
         # 'newPapers': int(2.9*10**5),
         'simulationName': 'Bibsonomy',
         'runs': RUNS
