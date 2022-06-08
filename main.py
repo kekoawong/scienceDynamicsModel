@@ -2,7 +2,7 @@ from modules.Evolution import Evolution
 
 env = Evolution(Pn=.8)
 
-env.evolve(newAuthors=300)
+env.evolve(newAuthors=1000)
 
 # env.printAuthor(0)
 # env.printPaper(1)
@@ -11,7 +11,7 @@ env.network.getAuthorPapers(1)
 
 # env.network.plotPyvisGraph(filename='outputs/pyvis.html')
 
-# env.saveEvolutionWithPickle('outputs/evolution.env')
+env.saveEvolutionWithPickle('outputs/evolution.env')
 # env.evolve(timeSteps=20)
 
 
@@ -23,7 +23,8 @@ env.network.getAuthorPapers(1)
 # env.network.plotPyvisGraph(filename='outputs/pyvisNext.html')
 
 # env.saveEvolutionWithPickle('outputs/evolution.env')
-env.plotDescriptorsDistr()
+env.plotDescriptorsDistr(saveToFile='outputs/creditAccumulation.png', xlogBase=10, ylogBase=10, 
+                            numAuthors=env.getNumAuthors(), numPapers=env.getNumPapers(), numTopics=env.getNumTopics(), networkName='Credit accumulation')
 print(f'num authors: {env.getNumAuthors()}')
 # print(env)
 

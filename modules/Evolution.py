@@ -3,6 +3,7 @@ from .Paper import Paper
 from .Topic import Topic
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 import random
 import pickle
 import sys
@@ -115,6 +116,9 @@ class Evolution:
         
         return descr
 
+    def getDegreeDistribution(self):
+        return sorted((d for n, d in self.network.degree()), reverse=True)
+
     def updateDisciplineAuthors(self, authID, disciplines):
         for discID in disciplines:
             self.topics[discID].addAuthorToDiscipline(authID)
@@ -177,7 +181,7 @@ class Evolution:
             ([authorIDs in community 1], [authorIDs in community 2])
         '''
 
-        # choose random author with at least two disciplines
+        # choose random author with at least two papers in different topics. 
         allAuthors = self.getAuthorIDs()
         while len(allAuthors) > 0:
             authID = random.choice(allAuthors)
@@ -187,7 +191,7 @@ class Evolution:
                 break
             authID = None
 
-        # select two random disciplines from author
+        # select two random topics from author
         if not authID:
             return None
         allTopics = list(authData.keys())
@@ -196,7 +200,7 @@ class Evolution:
         top2 = random.choice(allTopics)
 
 
-        # print(f'Random author {author} with Topic {top1} with authors {self.network.getAuthorswithTopic(top1)}, Topic {top2} with authors {self.network.getAuthorswithTopic(top2)}')
+        # print(f'Random author {authID} with Topic {top1} with authors {self.network.getAuthorswithTopic(top1)}, Topic {top2} with authors {self.network.getAuthorswithTopic(top2)}')
 
         return self.network.getAuthorswithTopic(top1), self.network.getAuthorswithTopic(top2)
 
@@ -234,6 +238,7 @@ class Evolution:
 
             # Add new paper, calling function
             paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
+            # paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper)
             self.papers[self.newPaper] = Paper(self.newPaper, topics=paperTopics, authors=paperAuthors)
 
             # add paper to corresponding topics
@@ -269,7 +274,53 @@ class Evolution:
         # print(f'Initial Paper: {self.initialPaper}')
 
     '''Plotting methods'''
-    def plotDescriptorsDistr(self, saveToFile=None, ylogBase=None, xlogBase=None, data=None, numAuthors='NA', numPapers='NA', numTopics='NA', networkName=''):
+    def plotDistibution(self, distribution, label='', ylogBase=10, xlogBase=10, ylim=10**-6, xlim=10**4, saveToFile=None):
+
+        largestVal = max(distribution)
+        maxVal = 10 if not largestVal else largestVal
+        # declare figure and axis
+        fig = plt.figure(figsize=(9, 7))
+        axis = fig.add_subplot()
+
+        # calculate bin values
+        numDistribution = len(distribution)
+        numBins = min(20, numDistribution) + 1
+        logBinEdges = np.logspace(math.log(1, xlogBase), math.log(maxVal, xlogBase), numBins)
+        binVals, binEdges = np.histogram(distribution, bins=logBinEdges, density=True)
+
+        # convert to scatter
+        xVals = [0.5 * (binEdges[i] + binEdges[i+1]) for i in range(len(binVals))]
+        axis.scatter(xVals, binVals)
+
+        # styling
+        axis.set_ylabel(f'Density of {label}', fontweight='bold')
+        axis.set_xlabel(f'{label}', fontweight='bold')
+
+        # scale axis
+        if ylogBase:
+            axis.set_yscale('log', base=ylogBase) 
+        if xlogBase:
+            axis.set_xscale('log', base=xlogBase)
+
+        # set limits
+        axis.set_ylim(ylim, 1)
+        axis.set_xlim(1, xlim)
+
+        # figure styling
+        fig.suptitle(f'''Network {label} distribution.''')
+        fig.tight_layout()
+
+        if saveToFile:
+            fig.savefig(saveToFile)
+            print(f'Saved to {saveToFile} successfully!')
+        
+        return fig, axis
+
+    def plotDegreeDistr(self, degreeDistrib=None, label='Degree', ylogBase=10, xlogBase=10, ylim=10**-6, xlim=10**4, saveToFile=None):
+        distrib = self.getDegreeDistribution() if not degreeDistrib else degreeDistrib
+        return self.plotDistibution(distrib, label=label, ylogBase=ylogBase, xlogBase=xlogBase, ylim=ylim, xlim=xlim, saveToFile=saveToFile)
+
+    def plotDescriptorsDistr(self, saveToFile=None, ylogBase=10, xlogBase=10, data=None, numAuthors='NA', numPapers='NA', numTopics='NA', networkName=''):
         '''
         Method will take the descriptors dictionary returned from getQuantDescriptors method and plot subplots
         Inputs:
@@ -284,7 +335,7 @@ class Evolution:
         # loop through and make subplots
         descr = data
         if not descr:
-            descr = self.getQuantDistr().items()
+            descr = self.getQuantDistr()
 
         # turn dict into list
         descr = list(descr.items())
@@ -293,10 +344,15 @@ class Evolution:
         for row in axs:
             for axis in row:
                 label, labelData = descr.pop(0)
-                binVals, binEdges = np.histogram(labelData, bins=min(20, len(labelData)), density=True)
-                # binVals, binEdges, patches = plt.hist(x=data, density=True, align='mid', bottom=5)
-                binsMean = [0.5 * (binEdges[i] + binEdges[i+1]) for i in range(len(binVals))]
-                axis.scatter(binsMean, binVals)
+
+                # calculate bin values
+                numBins = min(20, len(labelData)) + 1
+                logBinEdges = np.logspace(math.log(1, xlogBase), math.log(max(labelData), xlogBase), numBins)
+                binVals, binEdges = np.histogram(labelData, bins=logBinEdges, density=True)
+
+                # create scatter
+                xVals = [0.5 * (binEdges[i] + binEdges[i+1]) for i in range(len(binVals))]
+                axis.scatter(xVals, binVals)
                 axis.set_ylabel(f'Density of {label}', fontweight='bold')
                 axis.set_xlabel(f'{label}', fontweight='bold')
 

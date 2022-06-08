@@ -31,6 +31,9 @@ class Graph(nx.Graph):
         '''
         return self.nodes[authID]["data"].getAuthorPapers()
 
+    def getAuthorClass(self, authID):
+        return self.nodes[authID]["data"]
+
     def getAuthorData(self, authID):
         return self.nodes[authID]["data"].getData()
 
@@ -95,6 +98,47 @@ class Graph(nx.Graph):
 
         # returns the topic that represents the disciplines that most authors are in
         return paperTopics
+
+    def creditWalk(self, authors, probStop, newPaperID):
+        '''
+        Recursive function that takes the current list of authors and probStop as input
+        Returns paper tuple with (topicID, [authors])
+        Will walk based on the credit accumulation of the authors
+        '''
+
+        currAuthorID = authors[-1]
+        newNeighbors = set(self.neighbors(currAuthorID)).difference(set(authors))
+
+        # base condition: stop at node if probStop hit or there are no new neighbors to traverse
+        if random.random() < probStop or len(newNeighbors) == 0:
+            # determine the paper topic
+            topics = self.determinePaperTopic(authors)
+            # update the papers for all authors
+            self.updateAuthorPapers(authors, topics, newPaperID)
+
+            return topics, authors
+        
+        # create list representing probabilities for the neighboring nodes of the current coauthor
+        probs = []
+        for neighbor in newNeighbors:
+            nData = self.get_edge_data(currAuthorID, neighbor)
+            probs.extend([neighbor] * (nData["weight"] * self.getAuthorClass(neighbor).getCredit()))
+
+        # Select next coauthor from neighbors probabilities list
+        coauthorID = random.choice(probs)
+
+        # update all edges of coauthors to this new author
+        for author in authors:
+            # if there is not an edge, create one
+            if not self.has_edge(author, coauthorID) and author != coauthorID:
+                self.add_edge(author, coauthorID, weight=0, width=1)
+            
+            newWeight = self.get_edge_data(author, coauthorID)["weight"] + 1
+            self.update(edges=[ (author, coauthorID, {"weight": newWeight}) ])
+
+        # add author to list and call function recursively
+        authors.append(coauthorID)
+        return self.biasedRandomWalk(authors, probStop, newPaperID)
     
     def biasedRandomWalk(self, authors, probStop, newPaperID):
         '''
@@ -222,11 +266,13 @@ class Graph(nx.Graph):
             print(f'New Community: {newCom}')
             print(f'Com1: {com1} and Com2: {com2}')
             self.plotPyvisGraph(filename='outputs/ErrorGraph.html', network=subGraphMerged)
+            self.plotPyvisGraph(filename='outputs/wholeErrorGraph.html')
             print(f'Authors in community {com1}: {self.getDisciplineAuthors(com1)}')
             print(f'Authors in community {com2}: {self.getDisciplineAuthors(com2)}')
             self.saveNetworkWithPickle(fileName='outputs/wholeErrorNetwork.net')
             self.saveNetworkWithPickle(fileName='outputs/partErrorNetwork.net', network=subGraphMerged)
-            sys.exit('Error with merging')
+            print('Error with merging')
+            return False
         # merge, authors that are in both communities will just be a part of the first
         coms = dict.fromkeys(com1, 0) | dict.fromkeys(com2, 1)
         unMergedMod = community.modularity(coms, subGraphMerged, weight=None)
