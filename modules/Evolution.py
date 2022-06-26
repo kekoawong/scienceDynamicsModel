@@ -216,6 +216,15 @@ class Evolution:
 
         return self.network.getAuthorswithTopic(top1), self.network.getAuthorswithTopic(top2)
 
+    def addAuthortoType(self, authID):
+        # define only two types for now
+        typeID = 0 if random.random() < 0.7 else 1
+        if typeID not in self.types:
+            self.types[typeID] = []
+        self.types[typeID].append(authID)
+
+        return typeID
+
     def evolve(self, newPapers=None, newAuthors=None):
         '''
         Function will continue evolution for the inputted timesteps
@@ -245,6 +254,8 @@ class Evolution:
                 # add node without data, disciplines will be added after paper is completed
                 self.network.addAuthor(self.newAuthor, initialData={})
                 self.network.add_edge(self.newAuthor, authors[1], weight=1, width=1)
+                # add author to type
+                self.addAuthortoType(self.newAuthor)
                 # increment new authorID
                 self.newAuthor += 1
 
@@ -332,7 +343,7 @@ class Evolution:
         distrib = self.getDegreeDistribution() if not degreeDistrib else degreeDistrib
         return self.plotDistibution(distrib, label=label, ylogBase=ylogBase, xlogBase=xlogBase, ylim=ylim, xlim=xlim, saveToFile=saveToFile)
 
-    def plotCreditDistr(self, distr, label='Credit', ylogBase=1, xlogBase=1, saveToFile=None):
+    def plotCreditDistr(self, distr, ylogBase=1, xlogBase=1, saveToFile=None):
         # get data
         distribs = self.getDegreeDistribution() if not distr else distr
 
@@ -340,7 +351,14 @@ class Evolution:
         fig = plt.figure(figsize=(9, 7))
         axis = fig.add_subplot()
 
-        axis.hist(distribs.values(), label=label)
+        axis.hist(distribs.values(), label=[str(x) for x in distribs.keys()], density=True)
+
+        # styling
+        axis.set_ylabel(f'Density of credit', fontweight='bold')
+        axis.set_xlabel(f'Credit', fontweight='bold')
+        fig.suptitle(f'''Network credit distribution per type''')
+        fig.tight_layout()
+        plt.legend([str(x) for x in distribs.keys()], title="Type")
 
         if saveToFile:
             fig.savefig(saveToFile)

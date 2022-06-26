@@ -137,7 +137,7 @@ class Graph(nx.Graph):
 
         # add author to list and call function recursively
         authors.append(coauthorID)
-        return self.biasedRandomWalk(authors, probStop, newPaperID)
+        return self.creditWalk(authors, probStop, newPaperID)
     
     def biasedRandomWalk(self, authors, probStop, newPaperID):
         '''

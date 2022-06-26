@@ -86,6 +86,9 @@ class Author:
     #     dfNeighbors = pd.DataFrame(data=formattedData, columns=["Neighbor", "Weight"])
     #     print(dfNeighbors.to_string(index=False))
 
+    def addCredit(self, creditAmount):
+        self.credit += creditAmount
+
     def insertPaper(self, paperID, topics):
         '''
         Function will insert a new paper into the author
