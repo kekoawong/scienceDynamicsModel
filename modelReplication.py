@@ -95,7 +95,7 @@ if __name__ == "__main__":
         'Pn': 0.90,
         'Pw': 0.28,
         'Pd': 0.0,
-        'newPapers': int(100),
+        'newPapers': int(102),
         # 'newPapers': int(2.9*10**5),
         'simulationName': 'Nanobank',
         'runs': RUNS

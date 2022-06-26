@@ -6,6 +6,9 @@ This repository contains a model based upon [this Social Dynamics of Science Pap
 ## Brief Explanation
 At every time step, new authors and papers are added to the network. Each paper has a certain number of topics associated with it. An author's discipline corresponds to the topics that contain the most papers for the given author.
 
+## to change the model to original
+Just edit the credit walk to random biased walk
+
 ## Running the Model
 Reference **main.py** to see how to declare an instance of the **Evolution** class and run a model. With the default parameters, a model can be run and saved with the following code:
 ```

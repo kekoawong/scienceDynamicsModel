@@ -1,3 +1,4 @@
+from modules.Type import Type
 from .ScholarNetwork import Graph
 from .Paper import Paper
 from .Topic import Topic
@@ -37,7 +38,9 @@ class Evolution:
 
         '''Initialize network with one author, one paper, and one topic'''
         initialTopic = 1
+        # add author, adding it to type
         self.network.addAuthor(self.newAuthor, initialData={initialTopic: [self.newPaper]})
+        self.addAuthortoType(self.newAuthor)
         self.papers[self.newPaper] = Paper(self.newPaper, topics=[initialTopic], authors=[self.newAuthor])
         self.topics[initialTopic] = Topic(initialTopic, papers=[self.newPaper])
         self.newAuthor += 1
@@ -125,9 +128,9 @@ class Evolution:
         Returns a dict of { typeKey: [authCredit, authCredit]}
         '''
         creditDistr = {}
-        for id, authors in self.types.items():
+        for id, typeClass in self.types.items():
             creditDistr[id] = []
-            for authID in authors:
+            for authID in typeClass.getAuthors():
                 creditDistr[id].append(self.network.getAuthorClass(authID).getCredit())
         return creditDistr
 
@@ -220,8 +223,9 @@ class Evolution:
         # define only two types for now
         typeID = 0 if random.random() < 0.7 else 1
         if typeID not in self.types:
-            self.types[typeID] = []
-        self.types[typeID].append(authID)
+            self.types[typeID] = Type(typeID)
+        self.types[typeID].addAuthor(authID)
+        self.network.getAuthorClass(authID).setType(self.types[typeID])
 
         return typeID
 
@@ -254,7 +258,7 @@ class Evolution:
                 # add node without data, disciplines will be added after paper is completed
                 self.network.addAuthor(self.newAuthor, initialData={})
                 self.network.add_edge(self.newAuthor, authors[1], weight=1, width=1)
-                # add author to type
+                # NOTE: add author to type, must be edited out for original model
                 self.addAuthortoType(self.newAuthor)
                 # increment new authorID
                 self.newAuthor += 1
@@ -291,6 +295,7 @@ class Evolution:
 
             if ind % 100 == 0:
                 print(f'{self.newPaper} papers and {self.newAuthor} authors')
+                print(f'Testing type authors: {self.network.getAuthorClass(1).type.getAuthors()}')
         # print(f'Authors: {self.network.nodes(data=True)}')
         # print(f'Papers: {self.papers}')
         # print(f'Topics: {self.topics}')

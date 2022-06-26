@@ -21,6 +21,7 @@ class Author:
 
         # credit accumulation
         self.credit = 0
+        self.type = None
 
         # measures
         self.numPapers = 0
@@ -28,6 +29,9 @@ class Author:
 
     def getData(self):
         return self.collection
+
+    def getType(self):
+        return self.type
 
     def getID(self):
         return self.id
@@ -89,6 +93,9 @@ class Author:
     def addCredit(self, creditAmount):
         self.credit += creditAmount
 
+    def setType(self, type):
+        self.type = type
+
     def insertPaper(self, paperID, topics):
         '''
         Function will insert a new paper into the author
@@ -100,9 +107,6 @@ class Author:
                 self.collection[topicID].append(paperID)
         # update measures
         self.numPapers += 1
-
-        # update credit based on type
-        self.credit += 1
         self.numTopics = len(self.collection.keys())
 
     def updateAuthor(self, paperID, paperTopics):
@@ -116,7 +120,6 @@ class Author:
 
         # add paper to new topics, subtract self.numPapers since paper exists
         self.numPapers -= 1
-        self.credit -= 1
         self.insertPaper(paperID, paperTopics)
         
         # Remove topics from author that are empty
