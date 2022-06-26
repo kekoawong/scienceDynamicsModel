@@ -332,9 +332,9 @@ class Evolution:
         distrib = self.getDegreeDistribution() if not degreeDistrib else degreeDistrib
         return self.plotDistibution(distrib, label=label, ylogBase=ylogBase, xlogBase=xlogBase, ylim=ylim, xlim=xlim, saveToFile=saveToFile)
 
-    def plotCreditDistr(self, label='Credit', ylogBase=1, xlogBase=1, saveToFile=None):
+    def plotCreditDistr(self, distr, label='Credit', ylogBase=1, xlogBase=1, saveToFile=None):
         # get data
-        distribs = self.getCreditDistribution()
+        distribs = self.getDegreeDistribution() if not distr else distr
 
         # declare figure and axis
         fig = plt.figure(figsize=(9, 7))

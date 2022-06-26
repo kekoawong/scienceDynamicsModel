@@ -21,7 +21,7 @@ class Page(Evolution):
         self.plotDescriptorsDistr(saveToFile=directory + descrPlotsFile, ylogBase=10, xlogBase=10, data=descr, 
                                         numAuthors=numAuths, numPapers=numPaps, numTopics=numTops)
         self.plotDegreeDistr(degreeDistrib=degreeDistrib,saveToFile=directory + degPlotsFile)
-        self.plotCreditDistr(saveToFile=creditPlotsFile)
+        self.plotCreditDistr(creditDistr, saveToFile=directory + creditPlotsFile)
 
         with open(htmlfileName, 'w') as fileObj:
             fileObj.write(self.generateHTML(simName=simName, descrPlotFile=descrPlotsFile, degreePlotFile=degPlotsFile, creditPlotFile=creditPlotsFile,
