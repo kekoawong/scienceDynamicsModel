@@ -29,6 +29,7 @@ class Evolution:
         self.network = Graph()
         self.papers = {}
         self.topics = {}
+        self.types = {}
 
         '''Inital Parameters'''
         self.newAuthor = 1
@@ -118,6 +119,17 @@ class Evolution:
 
     def getDegreeDistribution(self):
         return sorted((d for n, d in self.network.degree()), reverse=True)
+
+    def getCreditDistribution(self):
+        '''
+        Returns a dict of { typeKey: [authCredit, authCredit]}
+        '''
+        creditDistr = {}
+        for id, authors in self.types.items():
+            creditDistr[id] = []
+            for authID in authors:
+                creditDistr[id].append(self.network.getAuthorClass(authID).getCredit())
+        return creditDistr
 
     def updateDisciplineAuthors(self, authID, disciplines):
         for discID in disciplines:
@@ -237,8 +249,8 @@ class Evolution:
                 self.newAuthor += 1
 
             # Add new paper, calling function
-            paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
-            # paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper)
+            # paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
+            paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper)
             self.papers[self.newPaper] = Paper(self.newPaper, topics=paperTopics, authors=paperAuthors)
 
             # add paper to corresponding topics
@@ -319,6 +331,21 @@ class Evolution:
     def plotDegreeDistr(self, degreeDistrib=None, label='Degree', ylogBase=10, xlogBase=10, ylim=10**-6, xlim=10**4, saveToFile=None):
         distrib = self.getDegreeDistribution() if not degreeDistrib else degreeDistrib
         return self.plotDistibution(distrib, label=label, ylogBase=ylogBase, xlogBase=xlogBase, ylim=ylim, xlim=xlim, saveToFile=saveToFile)
+
+    def plotCreditDistr(self, label='Credit', ylogBase=1, xlogBase=1, saveToFile=None):
+        # get data
+        distribs = self.getCreditDistribution()
+
+        # declare figure and axis
+        fig = plt.figure(figsize=(9, 7))
+        axis = fig.add_subplot()
+
+        axis.hist(distribs.values(), label=label)
+
+        if saveToFile:
+            fig.savefig(saveToFile)
+            print(f'Saved to {saveToFile} successfully!')
+        return fig, axis
 
     def plotDescriptorsDistr(self, saveToFile=None, ylogBase=10, xlogBase=10, data=None, numAuthors='NA', numPapers='NA', numTopics='NA', networkName=''):
         '''

@@ -9,7 +9,6 @@ import pandas as pd
 from pyvis.network import Network as ntvis
 import matplotlib.pyplot as plt
 from copy import deepcopy
-import sys
 
 '''
 Inherited Graph class from networkx with methods used for scholar evolution

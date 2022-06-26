@@ -31,7 +31,7 @@ def runSimulation(simulationObj):
     else:
         model.evolve(newAuthors=simulationObj['newAuthors'])
     print(f'Done with simulation ' + simulationObj['simulationName'])
-    return model.getQuantDistr(), model.getNumAuthors(), model.getNumPapers(), model.getNumTopics(), model.getDegreeDistribution(), simulationObj
+    return model.getQuantDistr(), model.getNumAuthors(), model.getNumPapers(), model.getNumTopics(), model.getDegreeDistribution(), model.getCreditDistribution(), simulationObj
 
 def getData(descrList):
     '''
@@ -49,15 +49,21 @@ def getData(descrList):
     sumPaps = 0
     sumTops = 0
     degreeDistrib = []
-    for des, numAuths, numPaps, numTops, deg, simObj in descrList:
+    creditDistr = {}
+    for des, numAuths, numPaps, numTops, deg, credit, simObj in descrList:
         for key, vals in des.items():
             descr[key].extend(vals)
         sumAuths += numAuths
         sumPaps += numPaps
         sumTops += numTops
         degreeDistrib.extend(deg)
+        # append credit to distributions in dict
+        for key, val in credit.items():
+            if key not in creditDistr:
+                creditDistr[key] = []
+            creditDistr[key].extend(val)
 
-    return descr, sumAuths//len(descrList), sumPaps//len(descrList), sumTops//len(descrList), degreeDistrib, simObj
+    return descr, sumAuths//len(descrList), sumPaps//len(descrList), sumTops//len(descrList), degreeDistrib, creditDistr, simObj
 
 def saveToFile(fileName, descr, numAuthors, numPapers, numTopics):
     '''
@@ -77,9 +83,9 @@ def saveResults(simName, simData):
     '''
     htmlPage = Page()
 
-    descr, numAuths, numPaps, numTops, degreeDistrib, simObj = getData(simData)
+    descr, numAuths, numPaps, numTops, degreeDistrib, creditDistr, simObj = getData(simData)
     saveToFile(fileName=f'outputs/{simName}Data.pi', descr=descr, numAuthors=numAuths, numPapers=numPaps, numTopics=numTops)
-    htmlPage.writeHTMLPage(simName=simName, descr=descr, degreeDistrib=degreeDistrib, numAuths=numAuths, numPaps=numPaps, 
+    htmlPage.writeHTMLPage(simName=simName, descr=descr, creditDistr=creditDistr, degreeDistrib=degreeDistrib, numAuths=numAuths, numPaps=numPaps, 
                         numTops=numTops, Pn=simObj['Pn'], Pw=simObj['Pw'], Pd=simObj['Pd'], numRuns=simObj['runs'], directory='./docs/outputs/')
 
 if __name__ == "__main__":
@@ -89,7 +95,7 @@ if __name__ == "__main__":
         'Pn': 0.90,
         'Pw': 0.28,
         'Pd': 0.0,
-        'newPapers': int(10000),
+        'newPapers': int(100),
         # 'newPapers': int(2.9*10**5),
         'simulationName': 'Nanobank',
         'runs': RUNS
@@ -98,7 +104,7 @@ if __name__ == "__main__":
         'Pn': 0.04,
         'Pw': 0.35,
         'Pd': 0.01,
-        'newAuthors': int(800),
+        'newAuthors': int(50),
         # 'newAuthors': int(2.2*10**4),
         'simulationName': 'Scholarometer',
         'runs': RUNS
@@ -107,7 +113,7 @@ if __name__ == "__main__":
         'Pn': 0.80,
         'Pw': 0.71,
         'Pd': 0.50,
-        'newPapers': int(5000),
+        'newPapers': int(100),
         # 'newPapers': int(2.9*10**5),
         'simulationName': 'Bibsonomy',
         'runs': RUNS

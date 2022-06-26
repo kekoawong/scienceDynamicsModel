@@ -97,6 +97,8 @@ class Author:
                 self.collection[topicID].append(paperID)
         # update measures
         self.numPapers += 1
+
+        # update credit based on type
         self.credit += 1
         self.numTopics = len(self.collection.keys())
 
