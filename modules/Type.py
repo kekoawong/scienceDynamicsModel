@@ -11,6 +11,7 @@ class Type:
         self.authors = list(set(discAuthors))
         
         # credit
+        self.scalar = id + 1
         # TODO: Need some sort of credit function that determines how successful this discipline is
         self.totalCredit = 0 # will represent how much accumulated credit for the whole type
 
@@ -24,8 +25,9 @@ class Type:
         if authID not in self.authors:
             self.authors.append(authID)
 
-    def rule(self):
+    def getCreditAmount(self, baseCredit):
         '''
         Defines the rule for collaboration between different types
         '''
-        return
+        self.totalCredit += baseCredit * self.scalar
+        return baseCredit * self.scalar

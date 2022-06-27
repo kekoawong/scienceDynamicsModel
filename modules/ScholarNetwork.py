@@ -74,8 +74,13 @@ class Graph(nx.Graph):
         '''
         Function will update the topics and papers of all authors, updating their credit for the paper and the paper itself
         '''
+
+        # right now doing base case of 
         for authID in authors:
-            self.nodes[authID]["data"].insertPaper(paperID, topics)
+            authorClass = self.getAuthorClass(authID)
+            authorClass.insertPaper(paperID, topics)
+            amountCredit = authorClass.getType().getCreditAmount(1)
+            authorClass.addCredit(amountCredit)
 
     def determinePaperTopic(self, authors):
         '''
@@ -128,8 +133,8 @@ class Graph(nx.Graph):
         probs = []
         for neighbor in newNeighbors:
             nData = self.get_edge_data(currAuthorID, neighbor)
-            # probs.extend([neighbor] * (nData["weight"] * self.getAuthorClass(neighbor).getCredit()))
-            probs.extend([neighbor] * nData["weight"])
+            probs.extend([neighbor] * (nData["weight"] * self.getAuthorClass(neighbor).getCredit()))
+            # probs.extend([neighbor] * nData["weight"])
 
         # Select next coauthor from neighbors probabilities list
         coauthorID = random.choice(probs)

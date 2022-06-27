@@ -11,7 +11,7 @@ Uses multiprocessing
 '''
 
 # declare amount of runs to average
-RUNS = 6
+RUNS = 3
 
 def runSimulation(simulationObj):
     '''
@@ -25,6 +25,7 @@ def runSimulation(simulationObj):
         'simulationName': str
     }
     '''
+    print(f'Starting simulation ' + simulationObj['simulationName'])
     model = Evolution(Pn=simulationObj['Pn'], Pw=simulationObj['Pw'], Pd=simulationObj['Pd'])
     if 'newPapers' in simulationObj:
         model.evolve(newPapers=simulationObj['newPapers'])

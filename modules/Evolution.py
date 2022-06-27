@@ -221,7 +221,7 @@ class Evolution:
 
     def addAuthortoType(self, authID):
         # define only two types for now
-        typeID = 0 if random.random() < 0.7 else 1
+        typeID = 0 if random.random() < 0.5 else 1
         if typeID not in self.types:
             self.types[typeID] = Type(typeID)
         self.types[typeID].addAuthor(authID)
@@ -295,7 +295,6 @@ class Evolution:
 
             if ind % 100 == 0:
                 print(f'{self.newPaper} papers and {self.newAuthor} authors')
-                print(f'Testing type authors: {self.network.getAuthorClass(1).type.getAuthors()}')
         # print(f'Authors: {self.network.nodes(data=True)}')
         # print(f'Papers: {self.papers}')
         # print(f'Topics: {self.topics}')
@@ -350,13 +349,13 @@ class Evolution:
 
     def plotCreditDistr(self, distr, ylogBase=1, xlogBase=1, saveToFile=None):
         # get data
-        distribs = self.getDegreeDistribution() if not distr else distr
+        distribs = self.getCreditDistribution() if not distr else distr
 
         # declare figure and axis
         fig = plt.figure(figsize=(9, 7))
         axis = fig.add_subplot()
 
-        axis.hist(distribs.values(), label=[str(x) for x in distribs.keys()], density=True)
+        axis.hist(distribs.values(), label=[str(x) for x in distribs.keys()], density=True, bins='sqrt')
 
         # styling
         axis.set_ylabel(f'Density of credit', fontweight='bold')

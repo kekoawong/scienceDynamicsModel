@@ -20,7 +20,7 @@ class Author:
         self.collection = initialData
 
         # credit accumulation
-        self.credit = 0
+        self.credit = 1
         self.type = None
 
         # measures
