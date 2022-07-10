@@ -4,11 +4,14 @@ class Author:
     '''
     Class defines the author in a given network
     '''
-    def __init__(self, id, initialData={}):
+    def __init__(self, id, birthIteration, initialData={}):
 
         # identification
         self.id = id
         self.name = 'Something'
+
+        # used to infer age
+        self.birthIteration = birthIteration
 
         '''
         Main data collection, stored in the following format:
@@ -29,6 +32,9 @@ class Author:
 
     def getData(self):
         return self.collection
+
+    def getAge(self, currentIteration):
+        return currentIteration - self.birthIteration
 
     def getType(self):
         return self.type

@@ -12,7 +12,7 @@ import sys
 
 class Evolution:
 
-    def __init__(self, Pn=0.6, Pw=0.3, Pd=0.5):
+    def __init__(self, Pn=0.6, Pw=0.3, Pd=0.5, maxAge=50):
         '''
         The probabilities are as follows:
             Pn: probability of a new author being added to a network at a time step (used in evolve)
@@ -36,11 +36,12 @@ class Evolution:
         '''Inital Parameters'''
         self.newAuthor = 1
         self.newPaper = 1
+        self.maxAge = maxAge
 
         '''Initialize network with one author, one paper, and one topic'''
         initialTopic = 1
         # add author, adding it to type
-        self.network.addAuthor(self.newAuthor, initialData={initialTopic: [self.newPaper]})
+        self.network.addAuthor(self.newAuthor, birthIteration=self.newAuthor, initialData={initialTopic: [self.newPaper]})
         self.addAuthortoType(self.newAuthor)
         self.papers[self.newPaper] = Paper(self.newPaper, topics=[initialTopic], authors=[self.newAuthor])
         self.topics[initialTopic] = Topic(initialTopic, papers=[self.newPaper])
@@ -276,7 +277,7 @@ class Evolution:
                 # generate new author, add as the first author
                 authors.insert(0, self.newAuthor)
                 # add node without data, disciplines will be added after paper is completed
-                self.network.addAuthor(self.newAuthor, initialData={})
+                self.network.addAuthor(self.newAuthor, birthIteration=self.newPaper, initialData={})
                 self.network.add_edge(self.newAuthor, authors[1], weight=1, width=1)
                 # NOTE: add author to type, must be edited out for original model
                 self.addAuthortoType(self.newAuthor)
@@ -285,7 +286,7 @@ class Evolution:
 
             # Add new paper, calling function
             # paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
-            paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper)
+            paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper, maxAge=self.maxAge)
             self.papers[self.newPaper] = Paper(self.newPaper, topics=paperTopics, authors=paperAuthors)
 
             # add paper to corresponding topics
@@ -404,7 +405,7 @@ class Evolution:
         # declare figure and axis
         fig, (ax1, ax2) = plt.subplots(figsize=(9, 7), nrows=2, ncols=1)
 
-        ax1.hist(types.values(), label=[str(x) for x in types.keys()], density=True, bins=len(typeDistrib.keys()))
+        ax1.hist(types.values(), label=[str(x) for x in types.keys()], density=True, bins=len(typeDistrib.keys()), stacked=True)
         ax2.bar(creditDistrib.keys(), [sum(x)/len(x) if len(x) else 0 for x in creditDistrib.values()], label='Average Credit per Author')
 
         # styling

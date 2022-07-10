@@ -37,12 +37,12 @@ class Graph(nx.Graph):
         return self.nodes[authID]["data"].getData()
 
     '''Add Author Method'''
-    def addAuthor(self, authID, initialData={}):
+    def addAuthor(self, authID, birthIteration, initialData={}):
         '''
         Will add the author with the authID to the network
         data is the initial data to declare the author with
         '''
-        self.add_node(authID, data=Author(authID, initialData=initialData))
+        self.add_node(authID, data=Author(authID, birthIteration=birthIteration, initialData=initialData))
 
     '''Print Methods'''
     def printAuthor(self, authID):
@@ -110,7 +110,7 @@ class Graph(nx.Graph):
         # returns the topic that represents the disciplines that most authors are in
         return paperTopics
 
-    def creditWalk(self, authors, probStop, newPaperID):
+    def creditWalk(self, authors, probStop, newPaperID, maxAge=50):
         '''
         Recursive function that takes the current list of authors and probStop as input
         Returns paper tuple with (topicID, [authors])
@@ -120,21 +120,24 @@ class Graph(nx.Graph):
         currAuthorID = authors[-1]
         newNeighbors = set(self.neighbors(currAuthorID)).difference(set(authors))
 
+        # create list representing probabilities for the neighboring nodes of the current coauthor
+        probs = []
+        for neighbor in newNeighbors:
+            # check to make sure that author is below the max age
+            if self.getAuthorClass(neighbor).getAge(currentIteration=newPaperID) < maxAge:
+                nData = self.get_edge_data(currAuthorID, neighbor)
+                probs.extend([neighbor] * (nData["weight"] * self.getAuthorClass(neighbor).getCredit()))
+                # probs.extend([neighbor] * nData["weight"])
+
         # base condition: stop at node if probStop hit or there are no new neighbors to traverse
-        if random.random() < probStop or len(newNeighbors) == 0:
+        if random.random() < probStop or len(probs) == 0:
             # determine the paper topic
             topics = self.determinePaperTopic(authors)
             # update the papers for all authors
             self.updateAuthorPapersAndCredit(authors, topics, newPaperID)
 
             return topics, authors
-        
-        # create list representing probabilities for the neighboring nodes of the current coauthor
-        probs = []
-        for neighbor in newNeighbors:
-            nData = self.get_edge_data(currAuthorID, neighbor)
-            probs.extend([neighbor] * (nData["weight"] * self.getAuthorClass(neighbor).getCredit()))
-            # probs.extend([neighbor] * nData["weight"])
+
 
         # Select next coauthor from neighbors probabilities list
         coauthorID = random.choice(probs)
