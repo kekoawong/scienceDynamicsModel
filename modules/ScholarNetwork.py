@@ -1,3 +1,4 @@
+import math
 import networkx as nx
 from .Author import Author
 from networkx.algorithms.community import modularity as nx_modularity
@@ -126,7 +127,7 @@ class Graph(nx.Graph):
             # check to make sure that author is below the max age
             if self.getAuthorClass(neighbor).getAge(currentIteration=newPaperID) < maxAge:
                 nData = self.get_edge_data(currAuthorID, neighbor)
-                probs.extend([neighbor] * (nData["weight"] * self.getAuthorClass(neighbor).getCredit()))
+                probs.extend([neighbor] * round(math.log(nData["weight"] * self.getAuthorClass(neighbor).getCredit())) )
                 # probs.extend([neighbor] * nData["weight"])
 
         # base condition: stop at node if probStop hit or there are no new neighbors to traverse

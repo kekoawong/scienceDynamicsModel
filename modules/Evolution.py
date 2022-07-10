@@ -405,11 +405,11 @@ class Evolution:
         # declare figure and axis
         fig, (ax1, ax2) = plt.subplots(figsize=(9, 7), nrows=2, ncols=1)
 
-        ax1.hist(types.values(), label=[str(x) for x in types.keys()], density=True, bins=len(typeDistrib.keys()), stacked=True)
+        ax1.hist(types.values(), label=[str(x) for x in types.keys()], density=False, bins=len(typeDistrib.keys()), stacked=True)
         ax2.bar(creditDistrib.keys(), [sum(x)/len(x) if len(x) else 0 for x in creditDistrib.values()], label='Average Credit per Author')
 
         # styling
-        ax1.set_ylabel(f'Density of Types in Disciplines', fontweight='bold')
+        ax1.set_ylabel(f'Number Authors', fontweight='bold')
         ax1.set_xlabel(f'Discipline', fontweight='bold')
         ax1.set_title(f'''Network Type Distribution throughout Disciplines''')
         ax1.legend([str(x) for x in types.keys()], title="Type")
