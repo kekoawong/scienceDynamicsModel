@@ -13,6 +13,9 @@ class Topic:
     def getNumPapers(self):
         return len(self.papers)
 
+    def getAuthors(self):
+        return self.disciplineAuthors
+
     def getNumDiscAuthors(self):
         return len(self.disciplineAuthors)
 

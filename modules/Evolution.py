@@ -134,6 +134,25 @@ class Evolution:
                 creditDistr[id].append(self.network.getAuthorClass(authID).getCredit())
         return creditDistr
 
+    def getDisciplineTypeDistribution(self):
+        '''
+            Will return the distribution of types in the disciplines
+            Will return 2 object: the credit distribution and the type distribution
+            { disiplineKey: [authType, authType] } 
+            and 
+            { disiplineKey: [authCredit, authCredit] } 
+            
+        '''
+        types = {}
+        credits = {}
+        for id, discipline in self.topics.items():
+            types[id] = []
+            credits[id] = []
+            for authID in discipline.getAuthors():
+                types[id].append(self.network.getAuthorClass(authID).getType().id)
+                credits[id].append(self.network.getAuthorClass(authID).getCredit())
+        return types, credits
+
     def updateDisciplineAuthors(self, authID, disciplines):
         for discID in disciplines:
             self.topics[discID].addAuthorToDiscipline(authID)
@@ -363,6 +382,28 @@ class Evolution:
         fig.suptitle(f'''Network credit distribution per type''')
         fig.tight_layout()
         plt.legend([str(x) for x in distribs.keys()], title="Type")
+
+        if saveToFile:
+            fig.savefig(saveToFile)
+            print(f'Saved to {saveToFile} successfully!')
+        return fig, axis
+
+    def plotTypeDisciplineDistrib(self, distr=None, ylogBase=1, xlogBase=1, saveToFile=None):
+        # get data from getDisciplineTypeDistribution method
+        typeDistrib, creditDistrib = self.getDisciplineTypeDistribution() if not distr else distr
+
+        # declare figure and axis
+        fig = plt.figure(figsize=(9, 7))
+        axis = fig.add_subplot()
+
+        axis.hist(typeDistrib.values(), label=[str(x) for x in typeDistrib.keys()], density=False, bins='sqrt')
+
+        # styling
+        axis.set_ylabel(f'Density of Types in Disciplines', fontweight='bold')
+        axis.set_xlabel(f'Discipline', fontweight='bold')
+        fig.suptitle(f'''Network Type Distribution throughout Disciplines''')
+        fig.tight_layout()
+        plt.legend([str(x) for x in typeDistrib.keys()], title="Discipline")
 
         if saveToFile:
             fig.savefig(saveToFile)

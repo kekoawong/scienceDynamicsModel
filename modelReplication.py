@@ -32,9 +32,9 @@ def runSimulation(simulationObj):
     else:
         model.evolve(newAuthors=simulationObj['newAuthors'])
     print(f'Done with simulation ' + simulationObj['simulationName'])
-    return model.getQuantDistr(), model.getNumAuthors(), model.getNumPapers(), model.getNumTopics(), model.getDegreeDistribution(), model.getCreditDistribution(), simulationObj
+    return model.getQuantDistr(), model.getNumAuthors(), model.getNumPapers(), model.getNumTopics(), model.getDegreeDistribution(), model.getCreditDistribution(), model.getDisciplineTypeDistribution(), simulationObj
 
-def getData(descrList):
+def getData(simData):
     '''
     Function will aggragate all the data from the different runs
     '''
@@ -51,20 +51,30 @@ def getData(descrList):
     sumTops = 0
     degreeDistrib = []
     creditDistr = {}
-    for des, numAuths, numPaps, numTops, deg, credit, simObj in descrList:
+    disciplineTypeDistribs = [{}, {}]
+
+    for des, numAuths, numPaps, numTops, deg, credit, disciplineTypeObj, simObj in simData:
         for key, vals in des.items():
             descr[key].extend(vals)
         sumAuths += numAuths
         sumPaps += numPaps
         sumTops += numTops
         degreeDistrib.extend(deg)
+
         # append credit to distributions in dict
         for key, val in credit.items():
             if key not in creditDistr:
                 creditDistr[key] = []
             creditDistr[key].extend(val)
 
-    return descr, sumAuths//len(descrList), sumPaps//len(descrList), sumTops//len(descrList), degreeDistrib, creditDistr, simObj
+        # append displineType objects
+        for i, distribution in enumerate(disciplineTypeObj):
+            for key, val in distribution.items():
+                if key not in disciplineTypeDistribs[i]:
+                    disciplineTypeDistribs[i][key] = []
+                disciplineTypeDistribs[i][key].extend(val)
+
+    return descr, sumAuths//len(simData), sumPaps//len(simData), sumTops//len(simData), degreeDistrib, creditDistr, disciplineTypeDistribs, simObj
 
 def saveToFile(fileName, descr, numAuthors, numPapers, numTopics):
     '''
@@ -84,9 +94,9 @@ def saveResults(simName, simData):
     '''
     htmlPage = Page()
 
-    descr, numAuths, numPaps, numTops, degreeDistrib, creditDistr, simObj = getData(simData)
+    descr, numAuths, numPaps, numTops, degreeDistrib, creditDistr, disciplineObj, simObj = getData(simData)
     saveToFile(fileName=f'outputs/{simName}Data.pi', descr=descr, numAuthors=numAuths, numPapers=numPaps, numTopics=numTops)
-    htmlPage.writeHTMLPage(simName=simName, descr=descr, creditDistr=creditDistr, degreeDistrib=degreeDistrib, numAuths=numAuths, numPaps=numPaps, 
+    htmlPage.writeHTMLPage(simName=simName, descr=descr, creditDistr=creditDistr, degreeDistrib=degreeDistrib, displineTypeObj=disciplineObj, numAuths=numAuths, numPaps=numPaps, 
                         numTops=numTops, Pn=simObj['Pn'], Pw=simObj['Pw'], Pd=simObj['Pd'], numRuns=simObj['runs'], directory='./docs/outputs/')
 
 if __name__ == "__main__":

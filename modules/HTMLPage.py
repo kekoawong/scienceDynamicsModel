@@ -5,7 +5,7 @@ class Page(Evolution):
     Class will extend evolution class for printing functions
     '''
 
-    def writeHTMLPage(self, simName, descr, degreeDistrib, creditDistr, numAuths='N/A', numPaps='N/A', numTops='N/A', numTypes='N/A', 
+    def writeHTMLPage(self, simName, descr, degreeDistrib, creditDistr, displineTypeObj, numAuths='N/A', numPaps='N/A', numTops='N/A', numTypes='N/A', 
                         Pn='N/A', Pw='N/A', Pd='N/A', numRuns='N/A', directory='./'):
         '''
         Assumes all the files should be located in the same directory
@@ -15,6 +15,7 @@ class Page(Evolution):
         descrPlotsFile = f'{simName}Plots.png'
         degPlotsFile = f'{simName}Deg.png'
         creditPlotsFile = f'{simName}Credit.png'
+        displineTypeFile = f'{simName}DiscType.png'
         htmlfileName = directory + f'{simName}Page.html'
 
         # plot distributions
@@ -22,13 +23,14 @@ class Page(Evolution):
                                         numAuthors=numAuths, numPapers=numPaps, numTopics=numTops)
         self.plotDegreeDistr(degreeDistrib=degreeDistrib,saveToFile=directory + degPlotsFile)
         self.plotCreditDistr(creditDistr, saveToFile=directory + creditPlotsFile)
+        self.plotTypeDisciplineDistrib(displineTypeObj, saveToFile=directory + displineTypeFile)
 
         with open(htmlfileName, 'w') as fileObj:
-            fileObj.write(self.generateHTML(simName=simName, descrPlotFile=descrPlotsFile, degreePlotFile=degPlotsFile, creditPlotFile=creditPlotsFile,
-                        numPapers=numPaps, numAuthors=numAuths, numTopics=numTops, numTypes=numTypes, Pn=Pn, Pw=Pw, Pd=Pd, numRuns=numRuns))
+            fileObj.write(self.generateHTML(simName=simName, descrPlotFile=descrPlotsFile, degreePlotFile=degPlotsFile, creditPlotFile=creditPlotsFile, 
+                            displineTypeFile=displineTypeFile, numPapers=numPaps, numAuthors=numAuths, numTopics=numTops, numTypes=numTypes, Pn=Pn, Pw=Pw, Pd=Pd, numRuns=numRuns))
         print(f'Saved to {htmlfileName} successfully!')
 
-    def generateHTML(self, simName, descrPlotFile, degreePlotFile, creditPlotFile, numPapers='N/A', numAuthors='N/A', numTopics='N/A', numTypes='N/A',
+    def generateHTML(self, simName, descrPlotFile, degreePlotFile, creditPlotFile, displineTypeFile, numPapers='N/A', numAuthors='N/A', numTopics='N/A', numTypes='N/A',
                         Pn='N/A', Pw='N/A', Pd='N/A', numRuns='N/A',):
 
         return f'''
@@ -106,6 +108,7 @@ class Page(Evolution):
                         </tr>
                     </table>
                     <img src={descrPlotFile} style="width:100%">
+                    <img src={displineTypeFile} style="width:100%">
                 </div>
 
                 <div class="w3-half">
