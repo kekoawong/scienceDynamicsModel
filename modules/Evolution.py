@@ -1,3 +1,4 @@
+from cProfile import label
 from modules.Type import Type
 from .ScholarNetwork import Graph
 from .Paper import Paper
@@ -378,7 +379,7 @@ class Evolution:
 
         # styling
         axis.set_ylabel(f'Density of credit', fontweight='bold')
-        axis.set_xlabel(f'Credit', fontweight='bold')
+        axis.set_xlabel(f'Author Credit', fontweight='bold')
         fig.suptitle(f'''Network credit distribution per type''')
         fig.tight_layout()
         plt.legend([str(x) for x in distribs.keys()], title="Type")
@@ -392,23 +393,35 @@ class Evolution:
         # get data from getDisciplineTypeDistribution method
         typeDistrib, creditDistrib = self.getDisciplineTypeDistribution() if not distr else distr
 
-        # declare figure and axis
-        fig = plt.figure(figsize=(9, 7))
-        axis = fig.add_subplot()
+        # change orientation of distributions
+        types = {}
+        for displineID, distrib in typeDistrib.items():
+            for typeID in distrib:
+                if typeID not in types:
+                    types[typeID] = []
+                types[typeID].append(displineID)
 
-        axis.hist(typeDistrib.values(), label=[str(x) for x in typeDistrib.keys()], density=False, bins='sqrt')
+        # declare figure and axis
+        fig, (ax1, ax2) = plt.subplots(figsize=(9, 7), nrows=2, ncols=1)
+
+        ax1.hist(types.values(), label=[str(x) for x in types.keys()], density=True, bins=len(typeDistrib.keys()))
+        ax2.bar(creditDistrib.keys(), [sum(x)/len(x) if len(x) else 0 for x in creditDistrib.values()], label='Average Credit per Author')
 
         # styling
-        axis.set_ylabel(f'Density of Types in Disciplines', fontweight='bold')
-        axis.set_xlabel(f'Discipline', fontweight='bold')
-        fig.suptitle(f'''Network Type Distribution throughout Disciplines''')
+        ax1.set_ylabel(f'Density of Types in Disciplines', fontweight='bold')
+        ax1.set_xlabel(f'Discipline', fontweight='bold')
+        ax1.set_title(f'''Network Type Distribution throughout Disciplines''')
+        ax1.legend([str(x) for x in types.keys()], title="Type")
+
+        ax2.set_ylabel(f'Average Credit per Author', fontweight='bold')
+        ax2.set_xlabel(f'Discipline', fontweight='bold')
+        ax2.set_title(f'''Credit Distribution throughout Disciplines''')
         fig.tight_layout()
-        plt.legend([str(x) for x in typeDistrib.keys()], title="Discipline")
 
         if saveToFile:
             fig.savefig(saveToFile)
             print(f'Saved to {saveToFile} successfully!')
-        return fig, axis
+        return fig, (ax1, ax2)
 
     def plotDescriptorsDistr(self, saveToFile=None, ylogBase=10, xlogBase=10, data=None, numAuthors='NA', numPapers='NA', numTopics='NA', networkName=''):
         '''
