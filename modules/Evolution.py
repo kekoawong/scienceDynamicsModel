@@ -202,7 +202,8 @@ class Evolution:
                 if numIntersectAuths > numHalfAuths:
                     # update topics data structure
                     for oldTopic in paperClass.getTopics():
-                        self.topics[oldTopic].removePaper(paperID)
+                        if paperID in self.topics[oldTopic].getPapers():
+                            self.topics[oldTopic].removePaper(paperID)
                     # update papers data structure
                     paperClass.clearTopics()
                     self.topics[newTopic].addPaper(paperID)
@@ -240,7 +241,7 @@ class Evolution:
 
         # print(f'Random author {authID} with Topic {top1} with authors {self.network.getAuthorswithTopic(top1)}, Topic {top2} with authors {self.network.getAuthorswithTopic(top2)}')
 
-        return self.network.getAuthorswithTopic(top1), self.network.getAuthorswithTopic(top2)
+        return self.network.getAuthorswithTopic(top1), self.network.getAuthorswithTopic(top2), top1, top2
 
     def addAuthortoType(self, authID):
         # define only two types for now
@@ -251,6 +252,25 @@ class Evolution:
         self.network.getAuthorClass(authID).setType(self.types[typeID])
 
         return typeID
+
+    def test(self, d1, d2):
+        # add papers to new discipline without getting rid of old disciplines
+        newTopic = max(self.topics.keys()) + 1
+        for paperID in self.topics[d1].getPapers():
+            paperClass = self.papers[paperID]
+            if d1 in paperClass.getTopics():
+                paperClass.getTopics().remove(d1)
+            paperClass.getTopics().append(newTopic)
+            # self.network.updatePaperInNetwork(paperID, (paperClass.getTopics(), paperClass.getAuthors()))
+        
+        for paperID in self.topics[d2].getPapers():
+            paperClass = self.papers[paperID]
+            if d2 in paperClass.getTopics():
+                paperClass.getTopics().remove(d2)
+            paperClass.getTopics().append(newTopic)
+            # self.network.updatePaperInNetwork(paperID, (paperClass.getTopics(), paperClass.getAuthors()))
+
+        return
 
     def evolve(self, newPapers=None, newAuthors=None):
         '''
@@ -287,8 +307,8 @@ class Evolution:
                 self.newAuthor += 1
 
             # Add new paper, calling function
-            # paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
-            paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper, maxAge=self.maxAge)
+            paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
+            # paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper, maxAge=self.maxAge)
             self.papers[self.newPaper] = Paper(self.newPaper, topics=paperTopics, authors=paperAuthors)
 
             # add paper to corresponding topics
@@ -307,9 +327,12 @@ class Evolution:
 
             # merge random discipline with prob pm
             if random.random() < self.probEvent:
-                disciplines = self.randomNeighboringCommunities()
-                if disciplines:
-                    self.network.mergeCommunities(com1=disciplines[0], com2=disciplines[1])
+                disciplinesObj = self.randomNeighboringCommunities()
+                if disciplinesObj:
+                    newCom = self.network.mergeCommunities(com1=disciplinesObj[0], com2=disciplinesObj[1])
+                    if newCom:
+                        # self.updateNewCommunity(newCom)
+                        self.test(disciplinesObj[2], disciplinesObj[3])
 
             # increment papers, update ind
             self.newPaper += 1

@@ -10,6 +10,9 @@ class Topic:
         # list of authors who count topic as one of their main disciplines
         self.disciplineAuthors = list(set(discAuthors))
 
+    def getPapers(self):
+        return self.papers
+    
     def getNumPapers(self):
         return len(self.papers)
 

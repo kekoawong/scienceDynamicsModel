@@ -115,7 +115,7 @@ if __name__ == "__main__":
         'Pn': 0.04,
         'Pw': 0.35,
         'Pd': 0.01,
-        'newAuthors': int(50),
+        'newAuthors': int(500),
         # 'newAuthors': int(2.2*10**4),
         'simulationName': 'Scholarometer',
         'runs': RUNS
