@@ -34,5 +34,6 @@ class Topic:
         self.papers.remove(paperID)
 
     def __repr__(self):
-        print('Not implemented')
+        # return f'{{"id": {self.id}\n, "authors": {self.disciplineAuthors}\n, "papers": {self.papers}\n}}'
+        return f'Topic {self.id} has {self.getNumPapers()} papers and {self.getNumDiscAuthors()} authors\n'
     

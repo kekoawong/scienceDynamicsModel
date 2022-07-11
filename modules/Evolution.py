@@ -197,15 +197,17 @@ class Evolution:
                 if newTopic not in self.topics:
                     self.topics[newTopic] = Topic(newTopic)
                 self.topics[newTopic].addPaper(paperID)
-            
+
                 # remove paper from old topics if strictly in new topic
                 if numIntersectAuths > numHalfAuths:
-                    # update papers data structure
-                    paperClass.clearTopics()
-                    paperClass.addTopic(newTopic)
                     # update topics data structure
                     for oldTopic in paperClass.getTopics():
                         self.topics[oldTopic].removePaper(paperID)
+                    # update papers data structure
+                    paperClass.clearTopics()
+                    self.topics[newTopic].addPaper(paperID)
+                    paperClass.addTopic(newTopic)
+                    
 
                 # update authors in network with papers
                 self.network.updatePaperInNetwork(paperID, (paperClass.getTopics(), paperClass.getAuthors()))
@@ -469,6 +471,14 @@ class Evolution:
                 # set limits
                 axis.set_ylim(10**-6, 1)
                 axis.set_xlim(1, 10**4)
+
+                # testing for pd
+                if label == 'Pd':
+                    print('Metrics for pd:')
+                    
+                    print(labelData)
+                    print(f'Num disciplines in graph: {len(self.topics.keys())}')
+                    print(self.topics)
 
         # figure styling
         fig.suptitle(f'''{networkName} Network with {numAuthors} total authors, {numPapers} total papers, and {numTopics} total topics.

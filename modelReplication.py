@@ -97,7 +97,7 @@ def saveResults(simName, simData):
     descr, numAuths, numPaps, numTops, degreeDistrib, creditDistr, disciplineObj, simObj = getData(simData)
     saveToFile(fileName=f'outputs/{simName}Data.pi', descr=descr, numAuthors=numAuths, numPapers=numPaps, numTopics=numTops)
     htmlPage.writeHTMLPage(simName=simName, descr=descr, creditDistr=creditDistr, degreeDistrib=degreeDistrib, displineTypeObj=disciplineObj, numAuths=numAuths, numPaps=numPaps, 
-                        numTops=numTops, Pn=simObj['Pn'], Pw=simObj['Pw'], Pd=simObj['Pd'], numRuns=simObj['runs'], directory='./docs/outputs/')
+                        numTops=numTops, numTypes=2, Pn=simObj['Pn'], Pw=simObj['Pw'], Pd=simObj['Pd'], numRuns=simObj['runs'], directory='./docs/outputs/')
 
 if __name__ == "__main__":
 
@@ -124,7 +124,7 @@ if __name__ == "__main__":
         'Pn': 0.80,
         'Pw': 0.71,
         'Pd': 0.50,
-        'newPapers': int(100),
+        'newPapers': int(1000),
         # 'newPapers': int(2.9*10**5),
         'simulationName': 'Bibsonomy',
         'runs': RUNS
