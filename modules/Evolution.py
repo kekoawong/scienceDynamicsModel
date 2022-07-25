@@ -1,3 +1,5 @@
+from cProfile import label
+from modules.Type import Type
 from .ScholarNetwork import Graph
 from .Paper import Paper
 from .Topic import Topic
@@ -10,7 +12,7 @@ import sys
 
 class Evolution:
 
-    def __init__(self, Pn=0.6, Pw=0.3, Pd=0.5):
+    def __init__(self, Pn=0.6, Pw=0.3, Pd=0.5, maxAge=50):
         '''
         The probabilities are as follows:
             Pn: probability of a new author being added to a network at a time step (used in evolve)
@@ -29,14 +31,18 @@ class Evolution:
         self.network = Graph()
         self.papers = {}
         self.topics = {}
+        self.types = {}
 
         '''Inital Parameters'''
         self.newAuthor = 1
         self.newPaper = 1
+        self.maxAge = maxAge
 
         '''Initialize network with one author, one paper, and one topic'''
         initialTopic = 1
-        self.network.addAuthor(self.newAuthor, initialData={initialTopic: [self.newPaper]})
+        # add author, adding it to type
+        self.network.addAuthor(self.newAuthor, birthIteration=self.newAuthor, initialData={initialTopic: [self.newPaper]})
+        self.addAuthortoType(self.newAuthor)
         self.papers[self.newPaper] = Paper(self.newPaper, topics=[initialTopic], authors=[self.newAuthor])
         self.topics[initialTopic] = Topic(initialTopic, papers=[self.newPaper])
         self.newAuthor += 1
@@ -119,6 +125,37 @@ class Evolution:
     def getDegreeDistribution(self):
         return sorted((d for n, d in self.network.degree()), reverse=True)
 
+    def getCreditDistribution(self):
+        '''
+        Returns a dict of { typeKey: [authCredit, authCredit]}
+        '''
+        creditDistr = {}
+        for id, typeClass in self.types.items():
+            creditDistr[id] = []
+            for authID in typeClass.getAuthors():
+                creditDistr[id].append(self.network.getAuthorClass(authID).getCredit())
+        return creditDistr
+
+    def getDisciplineTypeDistribution(self):
+        '''
+            Will return the distribution of types in the disciplines
+            Will return 2 object: the credit distribution and the type distribution
+            { disiplineKey: [authType, authType] } 
+            and 
+            { disiplineKey: [authCredit, authCredit] } 
+            
+        '''
+        types = {}
+        credits = {}
+        for id, discipline in self.topics.items():
+            types[id] = []
+            credits[id] = []
+            for authID in discipline.getAuthors():
+                types[id].append(self.network.getAuthorClass(authID).getType().id)
+                credits[id].append(self.network.getAuthorClass(authID).getCredit())
+        print(f'Num topics: {len(self.topics.keys())}')
+        return types, credits
+
     def updateDisciplineAuthors(self, authID, disciplines):
         for discID in disciplines:
             self.topics[discID].addAuthorToDiscipline(authID)
@@ -161,15 +198,18 @@ class Evolution:
                 if newTopic not in self.topics:
                     self.topics[newTopic] = Topic(newTopic)
                 self.topics[newTopic].addPaper(paperID)
-            
+
                 # remove paper from old topics if strictly in new topic
                 if numIntersectAuths > numHalfAuths:
-                    # update papers data structure
-                    paperClass.clearTopics()
-                    paperClass.addTopic(newTopic)
                     # update topics data structure
                     for oldTopic in paperClass.getTopics():
-                        self.topics[oldTopic].removePaper(paperID)
+                        if paperID in self.topics[oldTopic].getPapers():
+                            self.topics[oldTopic].removePaper(paperID)
+                    # update papers data structure
+                    paperClass.clearTopics()
+                    self.topics[newTopic].addPaper(paperID)
+                    paperClass.addTopic(newTopic)
+                    
 
                 # update authors in network with papers
                 self.network.updatePaperInNetwork(paperID, (paperClass.getTopics(), paperClass.getAuthors()))
@@ -202,7 +242,36 @@ class Evolution:
 
         # print(f'Random author {authID} with Topic {top1} with authors {self.network.getAuthorswithTopic(top1)}, Topic {top2} with authors {self.network.getAuthorswithTopic(top2)}')
 
-        return self.network.getAuthorswithTopic(top1), self.network.getAuthorswithTopic(top2)
+        return self.network.getAuthorswithTopic(top1), self.network.getAuthorswithTopic(top2), top1, top2
+
+    def addAuthortoType(self, authID):
+        # define only two types for now
+        typeID = 0 if random.random() < 0.5 else 1
+        if typeID not in self.types:
+            self.types[typeID] = Type(typeID)
+        self.types[typeID].addAuthor(authID)
+        self.network.getAuthorClass(authID).setType(self.types[typeID])
+
+        return typeID
+
+    def updateMergedCommunities(self, d1, d2):
+        # add papers to new discipline without getting rid of old disciplines
+        newTopic = max(self.topics.keys()) + 1
+        for paperID in self.topics[d1].getPapers():
+            paperClass = self.papers[paperID]
+            if d1 in paperClass.getTopics():
+                paperClass.getTopics().remove(d1)
+            paperClass.getTopics().append(newTopic)
+            # self.network.updatePaperInNetwork(paperID, (paperClass.getTopics(), paperClass.getAuthors()))
+        
+        for paperID in self.topics[d2].getPapers():
+            paperClass = self.papers[paperID]
+            if d2 in paperClass.getTopics():
+                paperClass.getTopics().remove(d2)
+            paperClass.getTopics().append(newTopic)
+            # self.network.updatePaperInNetwork(paperID, (paperClass.getTopics(), paperClass.getAuthors()))
+
+        return
 
     def evolve(self, newPapers=None, newAuthors=None):
         '''
@@ -231,14 +300,16 @@ class Evolution:
                 # generate new author, add as the first author
                 authors.insert(0, self.newAuthor)
                 # add node without data, disciplines will be added after paper is completed
-                self.network.addAuthor(self.newAuthor, initialData={})
+                self.network.addAuthor(self.newAuthor, birthIteration=self.newPaper, initialData={})
                 self.network.add_edge(self.newAuthor, authors[1], weight=1, width=1)
+                # NOTE: add author to type, must be edited out for original model
+                self.addAuthortoType(self.newAuthor)
                 # increment new authorID
                 self.newAuthor += 1
 
             # Add new paper, calling function
-            paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
-            # paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper)
+            # paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
+            paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper, maxAge=self.maxAge)
             self.papers[self.newPaper] = Paper(self.newPaper, topics=paperTopics, authors=paperAuthors)
 
             # add paper to corresponding topics
@@ -257,9 +328,12 @@ class Evolution:
 
             # merge random discipline with prob pm
             if random.random() < self.probEvent:
-                disciplines = self.randomNeighboringCommunities()
-                if disciplines:
-                    self.network.mergeCommunities(com1=disciplines[0], com2=disciplines[1])
+                disciplinesObj = self.randomNeighboringCommunities()
+                if disciplinesObj:
+                    newCom = self.network.mergeCommunities(com1=disciplinesObj[0], com2=disciplinesObj[1])
+                    if newCom:
+                        # self.updateNewCommunity(newCom)
+                        self.updateMergedCommunities(disciplinesObj[2], disciplinesObj[3])
 
             # increment papers, update ind
             self.newPaper += 1
@@ -320,6 +394,62 @@ class Evolution:
         distrib = self.getDegreeDistribution() if not degreeDistrib else degreeDistrib
         return self.plotDistibution(distrib, label=label, ylogBase=ylogBase, xlogBase=xlogBase, ylim=ylim, xlim=xlim, saveToFile=saveToFile)
 
+    def plotCreditDistr(self, distr, ylogBase=1, xlogBase=1, saveToFile=None):
+        # get data
+        distribs = self.getCreditDistribution() if not distr else distr
+
+        # declare figure and axis
+        fig = plt.figure(figsize=(9, 7))
+        axis = fig.add_subplot()
+
+        axis.hist(distribs.values(), label=[str(x) for x in distribs.keys()], density=True, bins='sqrt')
+
+        # styling
+        axis.set_ylabel(f'Density of credit', fontweight='bold')
+        axis.set_xlabel(f'Author Credit', fontweight='bold')
+        fig.suptitle(f'''Network credit distribution per type''')
+        fig.tight_layout()
+        plt.legend([str(x) for x in distribs.keys()], title="Type")
+
+        if saveToFile:
+            fig.savefig(saveToFile)
+            print(f'Saved to {saveToFile} successfully!')
+        return fig, axis
+
+    def plotTypeDisciplineDistrib(self, distr=None, ylogBase=1, xlogBase=1, saveToFile=None):
+        # get data from getDisciplineTypeDistribution method
+        typeDistrib, creditDistrib = self.getDisciplineTypeDistribution() if not distr else distr
+
+        # change orientation of distributions
+        types = {}
+        for displineID, distrib in typeDistrib.items():
+            for typeID in distrib:
+                if typeID not in types:
+                    types[typeID] = []
+                types[typeID].append(displineID)
+
+        # declare figure and axis
+        fig, (ax1, ax2) = plt.subplots(figsize=(9, 7), nrows=2, ncols=1)
+
+        ax1.hist(types.values(), label=[str(x) for x in types.keys()], density=False, bins=len(typeDistrib.keys()), stacked=True)
+        ax2.bar(creditDistrib.keys(), [sum(x)/len(x) if len(x) else 0 for x in creditDistrib.values()], label='Average Credit per Author')
+
+        # styling
+        ax1.set_ylabel(f'Number Authors', fontweight='bold')
+        ax1.set_xlabel(f'Discipline', fontweight='bold')
+        ax1.set_title(f'''Network Type Distribution throughout Disciplines''')
+        ax1.legend([str(x) for x in types.keys()], title="Type")
+
+        ax2.set_ylabel(f'Average Credit per Author', fontweight='bold')
+        ax2.set_xlabel(f'Discipline', fontweight='bold')
+        ax2.set_title(f'''Credit Distribution throughout Disciplines''')
+        fig.tight_layout()
+
+        if saveToFile:
+            fig.savefig(saveToFile)
+            print(f'Saved to {saveToFile} successfully!')
+        return fig, (ax1, ax2)
+
     def plotDescriptorsDistr(self, saveToFile=None, ylogBase=10, xlogBase=10, data=None, numAuthors='NA', numPapers='NA', numTopics='NA', networkName=''):
         '''
         Method will take the descriptors dictionary returned from getQuantDescriptors method and plot subplots
@@ -365,6 +495,14 @@ class Evolution:
                 # set limits
                 axis.set_ylim(10**-6, 1)
                 axis.set_xlim(1, 10**4)
+
+                # testing for pd
+                if label == 'Pd':
+                    print('Metrics for pd:')
+                    
+                    print(labelData)
+                    print(f'Num disciplines in graph: {len(self.topics.keys())}')
+                    print(self.topics)
 
         # figure styling
         fig.suptitle(f'''{networkName} Network with {numAuthors} total authors, {numPapers} total papers, and {numTopics} total topics.

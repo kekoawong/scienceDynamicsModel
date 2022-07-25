@@ -1,14 +1,18 @@
+import math
 import pandas as pd
 
 class Author:
     '''
     Class defines the author in a given network
     '''
-    def __init__(self, id, initialData={}):
+    def __init__(self, id, birthIteration, initialData={}):
 
         # identification
         self.id = id
         self.name = 'Something'
+
+        # used to infer age
+        self.birthIteration = birthIteration
 
         '''
         Main data collection, stored in the following format:
@@ -20,7 +24,8 @@ class Author:
         self.collection = initialData
 
         # credit accumulation
-        self.credit = 0
+        self.credit = 1
+        self.type = None
 
         # measures
         self.numPapers = 0
@@ -29,11 +34,21 @@ class Author:
     def getData(self):
         return self.collection
 
+    def getAge(self, currentIteration):
+        return currentIteration - self.birthIteration
+
+    def getType(self):
+        return self.type
+
     def getID(self):
         return self.id
 
     def getCredit(self):
         return self.credit
+
+    def getReputation(self):
+        '''Added function for collecting the reputation.'''
+        return math.sqrt(self.credit)
 
     def getNumPapers(self):
         return self.numPapers
@@ -86,6 +101,12 @@ class Author:
     #     dfNeighbors = pd.DataFrame(data=formattedData, columns=["Neighbor", "Weight"])
     #     print(dfNeighbors.to_string(index=False))
 
+    def addCredit(self, creditAmount):
+        self.credit += creditAmount
+
+    def setType(self, type):
+        self.type = type
+
     def insertPaper(self, paperID, topics):
         '''
         Function will insert a new paper into the author
@@ -97,7 +118,6 @@ class Author:
                 self.collection[topicID].append(paperID)
         # update measures
         self.numPapers += 1
-        self.credit += 1
         self.numTopics = len(self.collection.keys())
 
     def updateAuthor(self, paperID, paperTopics):
@@ -111,7 +131,6 @@ class Author:
 
         # add paper to new topics, subtract self.numPapers since paper exists
         self.numPapers -= 1
-        self.credit -= 1
         self.insertPaper(paperID, paperTopics)
         
         # Remove topics from author that are empty

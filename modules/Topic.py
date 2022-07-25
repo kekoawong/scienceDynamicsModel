@@ -10,8 +10,14 @@ class Topic:
         # list of authors who count topic as one of their main disciplines
         self.disciplineAuthors = list(set(discAuthors))
 
+    def getPapers(self):
+        return self.papers
+    
     def getNumPapers(self):
         return len(self.papers)
+
+    def getAuthors(self):
+        return self.disciplineAuthors
 
     def getNumDiscAuthors(self):
         return len(self.disciplineAuthors)
@@ -31,5 +37,6 @@ class Topic:
         self.papers.remove(paperID)
 
     def __repr__(self):
-        print('Not implemented')
+        # return f'{{"id": {self.id}\n, "authors": {self.disciplineAuthors}\n, "papers": {self.papers}\n}}'
+        return f'Topic {self.id} has {self.getNumPapers()} papers and {self.getNumDiscAuthors()} authors\n'
     
