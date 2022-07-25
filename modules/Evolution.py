@@ -153,6 +153,7 @@ class Evolution:
             for authID in discipline.getAuthors():
                 types[id].append(self.network.getAuthorClass(authID).getType().id)
                 credits[id].append(self.network.getAuthorClass(authID).getCredit())
+        print(f'Num topics: {len(self.topics.keys())}')
         return types, credits
 
     def updateDisciplineAuthors(self, authID, disciplines):
