@@ -76,11 +76,15 @@ class Graph(nx.Graph):
         Function will update the topics and papers of all authors, updating their credit for the paper and the paper itself
         '''
 
+        # get the author with the max reputation
+        maxReputation = max(self.getAuthorClass(authID).getReputation() for authID in authors)
+
         # right now doing base case of 
         for authID in authors:
             authorClass = self.getAuthorClass(authID)
             authorClass.insertPaper(paperID, topics)
-            amountCredit = authorClass.getType().getCreditAmount(1)
+            # distribute the credit by type
+            amountCredit = authorClass.getType().getCreditAmount(maxReputation)
             authorClass.addCredit(amountCredit)
 
     def determinePaperTopic(self, authors):
@@ -111,7 +115,7 @@ class Graph(nx.Graph):
         # returns the topic that represents the disciplines that most authors are in
         return paperTopics
 
-    def creditWalk(self, authors, probStop, newPaperID, maxAge=50):
+    def creditWalk(self, authors, probStop, newPaperID, maxAge=1000):
         '''
         Recursive function that takes the current list of authors and probStop as input
         Returns paper tuple with (topicID, [authors])

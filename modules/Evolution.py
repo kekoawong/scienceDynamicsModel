@@ -253,7 +253,7 @@ class Evolution:
 
         return typeID
 
-    def test(self, d1, d2):
+    def updateMergedCommunities(self, d1, d2):
         # add papers to new discipline without getting rid of old disciplines
         newTopic = max(self.topics.keys()) + 1
         for paperID in self.topics[d1].getPapers():
@@ -307,8 +307,8 @@ class Evolution:
                 self.newAuthor += 1
 
             # Add new paper, calling function
-            paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
-            # paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper, maxAge=self.maxAge)
+            # paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
+            paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper, maxAge=self.maxAge)
             self.papers[self.newPaper] = Paper(self.newPaper, topics=paperTopics, authors=paperAuthors)
 
             # add paper to corresponding topics
@@ -332,7 +332,7 @@ class Evolution:
                     newCom = self.network.mergeCommunities(com1=disciplinesObj[0], com2=disciplinesObj[1])
                     if newCom:
                         # self.updateNewCommunity(newCom)
-                        self.test(disciplinesObj[2], disciplinesObj[3])
+                        self.updateMergedCommunities(disciplinesObj[2], disciplinesObj[3])
 
             # increment papers, update ind
             self.newPaper += 1

@@ -141,10 +141,10 @@ if __name__ == "__main__":
     data = list(data)
 
     # get nanobank results and save
-    saveResults('nanobank', data[:RUNS])
+    saveResults('nanobankCredit', data[:RUNS])
 
     # get scholarometer results and save
-    saveResults('scholarometer', data[RUNS:2*RUNS])
+    saveResults('scholarometerCredit', data[RUNS:2*RUNS])
 
     # get bibsonomy results
-    saveResults('bibsonomy', data[2*RUNS:])
+    saveResults('bibsonomyCredit', data[2*RUNS:])

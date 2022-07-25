@@ -1,3 +1,4 @@
+import math
 import pandas as pd
 
 class Author:
@@ -44,6 +45,10 @@ class Author:
 
     def getCredit(self):
         return self.credit
+
+    def getReputation(self):
+        '''Added function for collecting the reputation.'''
+        return math.sqrt(self.credit)
 
     def getNumPapers(self):
         return self.numPapers
