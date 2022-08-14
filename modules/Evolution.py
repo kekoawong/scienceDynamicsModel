@@ -363,26 +363,29 @@ class Evolution:
         for authID in self.network.getAuthorIDs():
             authorClass = self.network.getAuthorClass(authID)
             for paperID, creditAdded in authorClass.getPaperClassDict().items():
+                authorType = authorClass.getType().id
                 # add paper to dict if not there
                 if paperID not in paperCreditDistrib:
                     paperCreditDistrib[paperID] = {}
                 
                 # add type to distribution if not there
-                if authorClass.getType() not in paperCreditDistrib[paperID]:
-                    paperCreditDistrib[paperID][authorClass.getType()] = creditAdded
-                    types[authorClass.getType()] = True
+                if authorType not in paperCreditDistrib[paperID]:
+                    paperCreditDistrib[paperID][authorType] = creditAdded
+                    types[authorType] = True
                 
                 # average the value in the paper credit dict
-                paperCreditDistrib[paperID][authorClass.getType()] = ( paperCreditDistrib[paperID][authorClass.getType()] + creditAdded ) / 2
+                paperCreditDistrib[paperID][authorType] = ( paperCreditDistrib[paperID][authorType] + creditAdded ) / 2
 
         # create scatter plot
         fig = plt.figure(figsize=(9, 7))
         axis = fig.add_subplot()
 
         # Add scatters for each type
+        avgVals = list(paperCreditDistrib.values())
+        avgVals.sort(key=lambda val: val.get(1, 0))
         for t in types.keys():
-            x = [key for key, avgCredit in paperCreditDistrib.items() if t in avgCredit]
-            y = [avgCredit[t] for avgCredit in paperCreditDistrib.values() if t in avgCredit]
+            x = [index for index, avgCredit in enumerate(avgVals) if t in avgCredit]
+            y = [avgCredit[t] for avgCredit in avgVals if t in avgCredit]
             axis.scatter(x, y, label=str(t))
         
         # styling
