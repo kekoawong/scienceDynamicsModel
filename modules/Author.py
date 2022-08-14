@@ -26,6 +26,7 @@ class Author:
         # credit accumulation
         self.credit = 1
         self.type = None
+        self.paperCredit = {}
 
         # measures
         self.numPapers = 0
@@ -33,6 +34,9 @@ class Author:
 
     def getData(self):
         return self.collection
+
+    def getPaperClassDict(self):
+        return self.paperCredit
 
     def getAge(self, currentIteration):
         return currentIteration - self.birthIteration
@@ -101,7 +105,8 @@ class Author:
     #     dfNeighbors = pd.DataFrame(data=formattedData, columns=["Neighbor", "Weight"])
     #     print(dfNeighbors.to_string(index=False))
 
-    def addCredit(self, creditAmount):
+    def addCredit(self, creditAmount, paperID):
+        self.paperCredit[paperID] = creditAmount
         self.credit += creditAmount
 
     def setType(self, type):

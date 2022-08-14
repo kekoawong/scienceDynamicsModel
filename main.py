@@ -4,6 +4,8 @@ env = Evolution(Pn=.8)
 
 env.evolve(newAuthors=100)
 
+env.plotCreditPaperTypeDistrib()
+
 # env.printAuthor(0)
 # env.printPaper(1)
 

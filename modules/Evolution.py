@@ -350,6 +350,54 @@ class Evolution:
         # print(f'Initial Paper: {self.initialPaper}')
 
     '''Plotting methods'''
+    def plotCreditPaperTypeDistrib(self, saveToFile=None):
+        '''
+        Will Plot the Average credit per paper, separating by type
+            Will create data structure for plotting like the following:
+            {PaperID:
+                {Type1: Average credit added, Type2: Average Credit Added}
+            }
+        '''
+        paperCreditDistrib = {}
+        types = {}
+        for authID in self.network.getAuthorIDs():
+            authorClass = self.network.getAuthorClass(authID)
+            for paperID, creditAdded in authorClass.getPaperClassDict().items():
+                # add paper to dict if not there
+                if paperID not in paperCreditDistrib:
+                    paperCreditDistrib[paperID] = {}
+                
+                # add type to distribution if not there
+                if authorClass.getType() not in paperCreditDistrib[paperID]:
+                    paperCreditDistrib[paperID][authorClass.getType()] = creditAdded
+                    types[authorClass.getType()] = True
+                
+                # average the value in the paper credit dict
+                paperCreditDistrib[paperID][authorClass.getType()] = ( paperCreditDistrib[paperID][authorClass.getType()] + creditAdded ) / 2
+
+        # create scatter plot
+        fig = plt.figure(figsize=(9, 7))
+        axis = fig.add_subplot()
+
+        # Add scatters for each type
+        for t in types.keys():
+            x = [key for key, avgCredit in paperCreditDistrib.items() if t in avgCredit]
+            y = [avgCredit[t] for avgCredit in paperCreditDistrib.values() if t in avgCredit]
+            axis.scatter(x, y, label=str(t))
+        
+        # styling
+        axis.set_ylabel(f'Average Credit Per Paper', fontweight='bold')
+        axis.set_xlabel(f'Papers', fontweight='bold')
+        fig.suptitle(f'''Credit Distribution by Paper''')
+        plt.legend([str(x) for x in types.keys()], title="Type")
+        fig.tight_layout()
+
+        if saveToFile:
+            fig.savefig(saveToFile)
+            print(f'Saved to {saveToFile} successfully!')
+
+        return fig, axis
+
     def plotDistibution(self, distribution, label='', ylogBase=10, xlogBase=10, ylim=10**-6, xlim=10**4, saveToFile=None):
 
         largestVal = max(distribution)

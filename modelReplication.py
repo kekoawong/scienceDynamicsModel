@@ -1,5 +1,4 @@
 from multiprocessing.pool import RUN
-import sys
 from modules.Evolution import Evolution
 from modules.HTMLPage import Page
 import pickle

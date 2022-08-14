@@ -76,16 +76,16 @@ class Graph(nx.Graph):
         Function will update the topics and papers of all authors, updating their credit for the paper and the paper itself
         '''
 
-        # get the author with the max reputation
-        maxReputation = max(self.getAuthorClass(authID).getReputation() for authID in authors)
+        # get the sum of all the authors reputations
+        maxReputation = sum(self.getAuthorClass(authID).getReputation() for authID in authors)
 
-        # right now doing base case of 
         for authID in authors:
             authorClass = self.getAuthorClass(authID)
             authorClass.insertPaper(paperID, topics)
-            # distribute the credit by type
+            
+            # distribute the credit by type to the authors
             amountCredit = authorClass.getType().getCreditAmount(maxReputation)
-            authorClass.addCredit(amountCredit)
+            authorClass.addCredit(amountCredit, paperID)
 
     def determinePaperTopic(self, authors):
         '''
