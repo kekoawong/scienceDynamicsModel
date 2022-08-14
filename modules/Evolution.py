@@ -396,7 +396,7 @@ class Evolution:
         distrib = self.getDegreeDistribution() if not degreeDistrib else degreeDistrib
         return self.plotDistibution(distrib, label=label, ylogBase=ylogBase, xlogBase=xlogBase, ylim=ylim, xlim=xlim, saveToFile=saveToFile)
 
-    def plotCreditDistr(self, distr, ylogBase=1, xlogBase=1, saveToFile=None):
+    def plotCreditDistr(self, distr=None, ylogBase=1, xlogBase=1, saveToFile=None):
         # get data
         distribs = self.getCreditDistribution() if not distr else distr
 

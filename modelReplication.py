@@ -1,4 +1,5 @@
 from multiprocessing.pool import RUN
+import sys
 from modules.Evolution import Evolution
 from modules.HTMLPage import Page
 import pickle
@@ -12,6 +13,7 @@ Uses multiprocessing
 
 # declare amount of runs to average
 RUNS = 3
+index = 0
 
 def runSimulation(simulationObj):
     '''
@@ -31,6 +33,7 @@ def runSimulation(simulationObj):
         model.evolve(newPapers=simulationObj['newPapers'])
     else:
         model.evolve(newAuthors=simulationObj['newAuthors'])
+    model.plotCreditDistr(saveToFile='outputs/' + simulationObj['simulationName'] + '-' + str(simulationObj['index']))
     print(f'Done with simulation ' + simulationObj['simulationName'])
     return model.getQuantDistr(), model.getNumAuthors(), model.getNumPapers(), model.getNumTopics(), model.getDegreeDistribution(), model.getCreditDistribution(), model.getDisciplineTypeDistribution(), simulationObj
 
@@ -132,9 +135,16 @@ if __name__ == "__main__":
 
 
     # declare multiprocessing
-    pool = Pool(10)
+    pool = Pool(RUNS * 3)
 
-    simulations = [nanobank] * RUNS + [scholarometer] * RUNS + [bibsonomy] * RUNS
+    # create simulations object
+    simulations = []
+    for i in range(RUNS):
+        simulations.append({**nanobank, **{ 'index': i }})
+    for i in range(RUNS):
+        simulations.append({**scholarometer, **{ 'index': i }})
+    for i in range(RUNS):
+        simulations.append({**bibsonomy, **{ 'index': i }})
 
     data = pool.map(runSimulation, simulations)
     pool.close()
