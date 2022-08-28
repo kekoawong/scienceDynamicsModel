@@ -12,7 +12,7 @@ import sys
 
 class Evolution:
 
-    def __init__(self, Pn=0.6, Pw=0.3, Pd=0.5, maxAge=50):
+    def __init__(self, Pn=0.6, Pw=0.3, Pd=0.5, maxAge=1000):
         '''
         The probabilities are as follows:
             Pn: probability of a new author being added to a network at a time step (used in evolve)
@@ -576,13 +576,14 @@ class Evolution:
         allDisciplines = {}
         for topic in self.topics.keys():
             # initialized data
-            allDisciplines[topic] = {
-                'credit': 0,
-                'numAuthors': 0,
-                'Marginalized': 0,
-                'Dominant': 0,
-            }
             for authID in self.network.getDisciplineAuthors(topic):
+                if topic not in allDisciplines:
+                    allDisciplines[topic] = {
+                        'credit': 0,
+                        'numAuthors': 0,
+                        'Marginalized': 0,
+                        'Dominant': 0,
+                    }
                 authClass = self.network.getAuthorClass(authID)
                 allDisciplines[topic]['credit'] += authClass.getCredit()
                 allDisciplines[topic]['numAuthors'] += 1
@@ -599,7 +600,7 @@ class Evolution:
 
         # styling
         axis.set_ylabel(f'Average credit per author in discipline.', fontweight='bold')
-        axis.set_xlabel(f'% type ${typeName} in discipline.', fontweight='bold')
+        axis.set_xlabel(f'% type {typeName} in discipline.', fontweight='bold')
         axis.set_title(f'''Credit and Type Distribution throughout Disciplines''')
         fig.tight_layout()
         
