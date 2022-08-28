@@ -113,7 +113,7 @@ class Evolution:
             disciplines = authClass.getAuthorDiscipline()
             descr['Da'].append(len(disciplines))
             # update disciplines for discipline parameters
-            self.updateDisciplineAuthors(authID, disciplines)
+            self.updateDisciplineAuthors(authClass, disciplines)
 
         # get discipline distributions
         for topic in self.topics.values():
@@ -150,15 +150,15 @@ class Evolution:
         for id, discipline in self.topics.items():
             types[id] = []
             credits[id] = []
-            for authID in discipline.getAuthors():
-                types[id].append(self.network.getAuthorClass(authID).getType().name)
-                credits[id].append(self.network.getAuthorClass(authID).getCredit())
+            for authorClass in discipline.getAuthors():
+                types[id].append(authorClass.getType().name)
+                credits[id].append(authorClass.getCredit())
         print(f'Num topics: {len(self.topics.keys())}')
         return types, credits
 
-    def updateDisciplineAuthors(self, authID, disciplines):
+    def updateDisciplineAuthors(self, authorClass, disciplines):
         for discID in disciplines:
-            self.topics[discID].addAuthorToDiscipline(authID)
+            self.topics[discID].addAuthorToDiscipline(authorClass)
 
     '''Printing and Plotting Functions'''
     def __repr__(self):
@@ -568,7 +568,47 @@ class Evolution:
             print(f'Saved to {saveToFile} successfully!')
         
         return fig, axs
+
+    def plotCreditTypeDistribution(self, saveToFile=None):
+        '''
+        Plot will have the average credit per author on Y-Axis, % type 0 in discipline. Each data point will be a discipline
+        '''
+        allDisciplines = {}
+        for topic in self.topics.keys():
+            # initialized data
+            allDisciplines[topic] = {
+                'credit': 0,
+                'numAuthors': 0,
+                'Marginalized': 0,
+                'Dominant': 0,
+            }
+            for authID in self.network.getDisciplineAuthors(topic):
+                authClass = self.network.getAuthorClass(authID)
+                allDisciplines[topic]['credit'] += authClass.getCredit()
+                allDisciplines[topic]['numAuthors'] += 1
+                allDisciplines[topic][authClass.getType().name] += 1
+
+        # add plot
+        fig = plt.figure(figsize=(9, 7))
+        axis = fig.add_subplot()
+
+        typeName = 'Marginalized'
+        xVals = [x[typeName]/x['numAuthors'] for x in allDisciplines.values()]
+        yVals = [x['credit']/x['numAuthors'] for x in allDisciplines.values()]
+        axis.scatter(xVals, yVals)
+
+        # styling
+        axis.set_ylabel(f'Average credit per author in discipline.', fontweight='bold')
+        axis.set_xlabel(f'% type ${typeName} in discipline.', fontweight='bold')
+        axis.set_title(f'''Credit and Type Distribution throughout Disciplines''')
+        fig.tight_layout()
         
+        
+        if saveToFile:
+            fig.savefig(saveToFile)
+            print(f'Saved to {saveToFile} successfully!')
+
+        return fig, axis
 
     '''Saving Methods'''
     def saveEvolutionWithPickle(self, fileName='evolution.env'):

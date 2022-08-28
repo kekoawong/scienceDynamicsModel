@@ -26,9 +26,9 @@ class Topic:
         if paperID not in self.papers:
             self.papers.append(paperID)
 
-    def addAuthorToDiscipline(self, authID):
-        if authID not in self.disciplineAuthors:
-            self.disciplineAuthors.append(authID)
+    def addAuthorToDiscipline(self, authorClass):
+        if authorClass not in self.disciplineAuthors:
+            self.disciplineAuthors.append(authorClass)
 
     def removeAuthorFromDiscipline(self, authID):
         self.disciplineAuthors.remove(authID)

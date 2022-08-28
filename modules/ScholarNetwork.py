@@ -77,7 +77,7 @@ class Graph(nx.Graph):
         '''
 
         # get the sum of all the authors reputations
-        maxReputation = sum(self.getAuthorClass(authID).getReputation() for authID in authors)
+        maxReputation = math.sqrt(sum(self.getAuthorClass(authID).getCredit() for authID in authors))
 
         for authID in authors:
             authorClass = self.getAuthorClass(authID)
