@@ -130,10 +130,10 @@ class Evolution:
         Returns a dict of { typeKey: [authCredit, authCredit]}
         '''
         creditDistr = {}
-        for id, typeClass in self.types.items():
-            creditDistr[id] = []
+        for typeClass in self.types.values():
+            creditDistr[typeClass.name] = []
             for authID in typeClass.getAuthors():
-                creditDistr[id].append(self.network.getAuthorClass(authID).getCredit())
+                creditDistr[typeClass.name].append(self.network.getAuthorClass(authID).getCredit())
         return creditDistr
 
     def getDisciplineTypeDistribution(self):
@@ -151,7 +151,7 @@ class Evolution:
             types[id] = []
             credits[id] = []
             for authID in discipline.getAuthors():
-                types[id].append(self.network.getAuthorClass(authID).getType().id)
+                types[id].append(self.network.getAuthorClass(authID).getType().name)
                 credits[id].append(self.network.getAuthorClass(authID).getCredit())
         print(f'Num topics: {len(self.topics.keys())}')
         return types, credits
@@ -247,8 +247,9 @@ class Evolution:
     def addAuthortoType(self, authID):
         # define only two types for now
         typeID = 0 if random.random() < 0.5 else 1
+        typeName = 'Marginalized' if typeID == 0 else 'Dominant'
         if typeID not in self.types:
-            self.types[typeID] = Type(typeID)
+            self.types[typeID] = Type(typeID, typeName)
         self.types[typeID].addAuthor(authID)
         self.network.getAuthorClass(authID).setType(self.types[typeID])
 
@@ -363,7 +364,7 @@ class Evolution:
         for authID in self.network.getAuthorIDs():
             authorClass = self.network.getAuthorClass(authID)
             for paperID, creditAdded in authorClass.getPaperClassDict().items():
-                authorType = authorClass.getType().id
+                authorType = authorClass.getType().name
                 # add paper to dict if not there
                 if paperID not in paperCreditDistrib:
                     paperCreditDistrib[paperID] = {}

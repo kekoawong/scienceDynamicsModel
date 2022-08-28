@@ -3,10 +3,11 @@ class Type:
     Class defined the type of the author, used to determine the amount of credit that they get for papers
     '''
 
-    def __init__(self, id, discAuthors=[]):
+    def __init__(self, id, name, discAuthors=[]):
 
         self.id = id
-        
+        self.name = name
+
         # authors with the type
         self.authors = list(set(discAuthors))
         
