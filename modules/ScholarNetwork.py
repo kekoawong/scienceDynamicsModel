@@ -131,8 +131,8 @@ class Graph(nx.Graph):
             # check to make sure that author is below the max age
             if self.getAuthorClass(neighbor).getAge(currentIteration=newPaperID) < maxAge:
                 nData = self.get_edge_data(currAuthorID, neighbor)
-                probs.extend([neighbor] * round(math.log(nData["weight"] * self.getAuthorClass(neighbor).getCredit())) )
-                # probs.extend([neighbor] * nData["weight"])
+                # calculate the probability of traversing to the certain node is based on previous coauthorship and the log of the reputation
+                probs.extend([neighbor] * round(nData["weight"] * math.log(self.getAuthorClass(neighbor).getReputation())) )
 
         # base condition: stop at node if probStop hit or there are no new neighbors to traverse
         if random.random() < probStop or len(probs) == 0:
