@@ -16,6 +16,7 @@ class Paper:
         return self.topics
 
     def getAuthors(self):
+        '''will return list of author ids'''
         return self.authors
 
     def getNumTopics(self):

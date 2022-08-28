@@ -76,16 +76,16 @@ class Graph(nx.Graph):
         Function will update the topics and papers of all authors, updating their credit for the paper and the paper itself
         '''
 
-        # get the author with the max reputation
-        maxReputation = max(self.getAuthorClass(authID).getReputation() for authID in authors)
+        # get the sum of all the authors reputations
+        maxReputation = math.sqrt(sum(self.getAuthorClass(authID).getCredit() for authID in authors))
 
-        # right now doing base case of 
         for authID in authors:
             authorClass = self.getAuthorClass(authID)
             authorClass.insertPaper(paperID, topics)
-            # distribute the credit by type
+            
+            # distribute the credit by type to the authors
             amountCredit = authorClass.getType().getCreditAmount(maxReputation)
-            authorClass.addCredit(amountCredit)
+            authorClass.addCredit(amountCredit, paperID)
 
     def determinePaperTopic(self, authors):
         '''
@@ -131,8 +131,8 @@ class Graph(nx.Graph):
             # check to make sure that author is below the max age
             if self.getAuthorClass(neighbor).getAge(currentIteration=newPaperID) < maxAge:
                 nData = self.get_edge_data(currAuthorID, neighbor)
-                probs.extend([neighbor] * round(math.log(nData["weight"] * self.getAuthorClass(neighbor).getCredit())) )
-                # probs.extend([neighbor] * nData["weight"])
+                # calculate the probability of traversing to the certain node is based on previous coauthorship and the log of the reputation
+                probs.extend([neighbor] * round(nData["weight"] * math.log(self.getAuthorClass(neighbor).getReputation())) )
 
         # base condition: stop at node if probStop hit or there are no new neighbors to traverse
         if random.random() < probStop or len(probs) == 0:

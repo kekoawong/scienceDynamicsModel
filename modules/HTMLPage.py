@@ -2,7 +2,7 @@ from modules.Evolution import Evolution
 
 class Page(Evolution):
     '''
-    Class will extend evolution class for printing functions
+    Class will extend evolution class for generating an HTML Page
     '''
 
     def writeHTMLPage(self, simName, descr, degreeDistrib, creditDistr, displineTypeObj, numAuths='N/A', numPaps='N/A', numTops='N/A', numTypes='N/A', 

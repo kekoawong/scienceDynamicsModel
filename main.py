@@ -2,7 +2,11 @@ from modules.Evolution import Evolution
 
 env = Evolution(Pn=.8)
 
-env.evolve(newAuthors=100)
+env.evolve(newAuthors=2000)
+
+env.plotCreditTypeDistribution(saveToFile='outputs/testingRubin.png')
+
+# env.plotCreditPaperTypeDistrib(saveToFile='testingHere.png')
 
 # env.printAuthor(0)
 # env.printPaper(1)
@@ -23,8 +27,8 @@ env.evolve(newAuthors=100)
 # env.network.plotPyvisGraph(filename='outputs/pyvisNext.html')
 
 # env.saveEvolutionWithPickle('outputs/evolution.env')
-env.plotDescriptorsDistr(saveToFile='outputs/creditAccumulation.png', xlogBase=10, ylogBase=10, 
-                            numAuthors=env.getNumAuthors(), numPapers=env.getNumPapers(), numTopics=env.getNumTopics(), networkName='Credit accumulation')
+# env.plotDescriptorsDistr(saveToFile='outputs/creditAccumulation.png', xlogBase=10, ylogBase=10, 
+#                             numAuthors=env.getNumAuthors(), numPapers=env.getNumPapers(), numTopics=env.getNumTopics(), networkName='Credit accumulation')
 # print(f'num authors: {env.getNumAuthors()}')
 # print(env)
 
