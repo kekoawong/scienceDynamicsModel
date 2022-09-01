@@ -603,7 +603,18 @@ class Evolution:
         axis.set_xlabel(f'% type {typeName} in discipline.', fontweight='bold')
         axis.set_title(f'''Credit and Type Distribution throughout Disciplines''')
         fig.tight_layout()
-        
+
+        # obtain m (slope) and b(intercept) of linear regression line
+        m, b = np.polyfit(xVals, yVals, 1)
+        # use red as color for regression line
+        axis.plot(xVals, [m*x+b for x in xVals], color='red', label=f'y={round(m)}x + {round(b)}')
+
+        # obtain regression line of degree 2
+        # a, m, b = np.polyfit(xVals, yVals, 2)
+        # use red as color for regression line
+        # axis.plot(xVals, [a*(x**2) + m*x + b for x in xVals], color='green', label=f'y={round(a)}x^2 + {round(m)}x + {round(b)}')
+
+        axis.legend()
         
         if saveToFile:
             fig.savefig(saveToFile)
