@@ -116,6 +116,8 @@ class Evolution:
             self.updateDisciplineAuthors(authClass, disciplines)
 
         # get discipline distributions
+        print('topics')
+        print(self.topics.values())
         for topic in self.topics.values():
             descr['Pd'].append(topic.getNumPapers())
             descr['Ad'].append(topic.getNumDiscAuthors())
@@ -209,7 +211,6 @@ class Evolution:
                     paperClass.clearTopics()
                     self.topics[newTopic].addPaper(paperID)
                     paperClass.addTopic(newTopic)
-                    
 
                 # update authors in network with papers
                 self.network.updatePaperInNetwork(paperID, (paperClass.getTopics(), paperClass.getAuthors()))
@@ -258,19 +259,21 @@ class Evolution:
     def updateMergedCommunities(self, d1, d2):
         # add papers to new discipline without getting rid of old disciplines
         newTopic = max(self.topics.keys()) + 1
-        for paperID in self.topics[d1].getPapers():
-            paperClass = self.papers[paperID]
-            if d1 in paperClass.getTopics():
-                paperClass.getTopics().remove(d1)
-            paperClass.getTopics().append(newTopic)
-            # self.network.updatePaperInNetwork(paperID, (paperClass.getTopics(), paperClass.getAuthors()))
+        if d1 in self.topics:
+            for paperID in self.topics[d1].getPapers():
+                paperClass = self.papers[paperID]
+                if d1 in paperClass.getTopics():
+                    paperClass.getTopics().remove(d1)
+                paperClass.getTopics().append(newTopic)
+                self.network.updatePaperInNetwork(paperID, (paperClass.getTopics(), paperClass.getAuthors()))
         
-        for paperID in self.topics[d2].getPapers():
-            paperClass = self.papers[paperID]
-            if d2 in paperClass.getTopics():
-                paperClass.getTopics().remove(d2)
-            paperClass.getTopics().append(newTopic)
-            # self.network.updatePaperInNetwork(paperID, (paperClass.getTopics(), paperClass.getAuthors()))
+        if d2 in self.topics:
+            for paperID in self.topics[d2].getPapers():
+                paperClass = self.papers[paperID]
+                if d2 in paperClass.getTopics():
+                    paperClass.getTopics().remove(d2)
+                paperClass.getTopics().append(newTopic)
+                self.network.updatePaperInNetwork(paperID, (paperClass.getTopics(), paperClass.getAuthors()))
 
         return
 
