@@ -71,7 +71,7 @@ class Graph(nx.Graph):
         for authID in authors:
             self.nodes[authID]["data"].insertPaper(paperID, topics)
 
-    def updateAuthorPapersAndCredit(self, authors, topics, paperID):
+    def updateAuthorPapersAndCredit(self, authors, topics, paperID, unevenCredit=True):
         '''
         Function will update the topics and papers of all authors, updating their credit for the paper and the paper itself
         '''
@@ -84,7 +84,7 @@ class Graph(nx.Graph):
             authorClass.insertPaper(paperID, topics)
             
             # distribute the credit by type to the authors
-            amountCredit = authorClass.getType().getCreditAmount(maxReputation)
+            amountCredit = authorClass.getType().getCreditAmount(maxReputation) if unevenCredit else maxReputation
             authorClass.addCredit(amountCredit, paperID)
 
     def determinePaperTopic(self, authors):
