@@ -72,6 +72,10 @@ class Author:
             allPapers.update(papers)
         return list(allPapers)
 
+    def getAuthorTopics(self):
+        topics = [top for top, papers in self.collection.items()]
+        return topics
+
     def getAuthorDiscipline(self):
         '''
         Function returns a list containing the discipline(s) of the author
