@@ -160,7 +160,8 @@ class Evolution:
 
     def updateDisciplineAuthors(self, authorClass, disciplines):
         for discID in disciplines:
-            self.topics[discID].addAuthorToDiscipline(authorClass)
+            if discID in self.topics:
+                self.topics[discID].addAuthorToDiscipline(authorClass)
 
     '''Printing and Plotting Functions'''
     def __repr__(self):

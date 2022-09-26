@@ -1,5 +1,6 @@
 from multiprocessing import Pool
-from modules.Evolution import Evolution
+# from modules.Evolution import Evolution
+from modules.HTMLPage import Page
 
 def runSimulation(simulationObj):
     '''
@@ -15,7 +16,7 @@ def runSimulation(simulationObj):
     '''
     print(f'Starting simulation ' + simulationObj['simulationName'])
     # initialize model
-    model = Evolution(Pn=simulationObj['Pn'], Pw=simulationObj['Pw'], Pd=simulationObj['Pd'])
+    model = Page(Pn=simulationObj['Pn'], Pw=simulationObj['Pw'], Pd=simulationObj['Pd'])
 
     # evolve criteria
     if 'newPapers' in simulationObj:
@@ -24,7 +25,10 @@ def runSimulation(simulationObj):
         model.evolve(newAuthors=simulationObj['newAuthors'])
 
     # save html page of output
-    model.plotCreditDistr(saveToFile='outputs/' + simulationObj['simulationName'] + '-' + str(simulationObj['index']))
+    model.writeHTMLPage(simName=simulationObj['simulationName'], numPaps=simulationObj['newPapers'], numTops=str(model.getNumTopics()), numTypes='2', 
+                        Pn=simulationObj['Pn'], Pw=simulationObj['Pw'], Pd=simulationObj['Pd'], numRuns='1', directory='./docs/outputs')
+    # model.plotCreditDistr(saveToFile='outputs/' + simulationObj['simulationName'] + '-' + str(simulationObj['index']))
+
     print(f'Done with simulation ' + simulationObj['simulationName'])
     return
 
@@ -44,9 +48,9 @@ if __name__ == "__main__":
 
     # generate the simulation object list
     simulations = []
+    # assign bibsonomy simulations
     for i in range(RUNS):
-        bibsonomy['simulationName'] = bibsonomy['simulationName'] + '-' + str(i)
-        simulations.append(bibsonomy)
+        simulations.append({**bibsonomy, 'simulationName': bibsonomy['simulationName'] + '-' + str(i)})
 
     # run all the model simulations through multiple cores
     pool = Pool(RUNS * 3)
