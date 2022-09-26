@@ -1,42 +1,56 @@
+from multiprocessing import Pool
 from modules.Evolution import Evolution
 
-env = Evolution(Pn=.8)
+def runSimulation(simulationObj):
+    '''
+    Function will be passed to pool to map the different processes
+    simulationObj must contain the following parameters:
+    {
+        'Pn': float
+        'Pw': float
+        'Pd': float
+        'newAuthors' or 'newPapers': int
+        'simulationName': str
+    }
+    '''
+    print(f'Starting simulation ' + simulationObj['simulationName'])
+    # initialize model
+    model = Evolution(Pn=simulationObj['Pn'], Pw=simulationObj['Pw'], Pd=simulationObj['Pd'])
 
-env.evolve(newAuthors=2000)
+    # evolve criteria
+    if 'newPapers' in simulationObj:
+        model.evolve(newPapers=simulationObj['newPapers'])
+    else:
+        model.evolve(newAuthors=simulationObj['newAuthors'])
 
-env.plotCreditTypeDistribution(saveToFile='outputs/testingRubin.png')
+    # save html page of output
+    model.plotCreditDistr(saveToFile='outputs/' + simulationObj['simulationName'] + '-' + str(simulationObj['index']))
+    print(f'Done with simulation ' + simulationObj['simulationName'])
+    return
 
-# env.plotCreditPaperTypeDistrib(saveToFile='testingHere.png')
+if __name__ == "__main__":
 
-# env.printAuthor(0)
-# env.printPaper(1)
+    RUNS = 3
 
-# env.network.getAuthorPapers(1)
+    bibsonomy = {
+        'Pn': 0.80,
+        'Pw': 0.71,
+        'Pd': 0.50,
+        'newPapers': int(1000),
+        # 'newPapers': int(2.9*10**5),
+        'simulationName': 'Bibsonomy',
+        'runs': RUNS
+    }
 
-# env.network.plotPyvisGraph(filename='outputs/pyvis.html')
+    # generate the simulation object list
+    simulations = []
+    for i in range(RUNS):
+        bibsonomy['simulationName'] = bibsonomy['simulationName'] + '-' + str(i)
+        simulations.append(bibsonomy)
 
-# env.saveEvolutionWithPickle('outputs/evolution.env')
-# env.evolve(timeSteps=20)
+    # run all the model simulations through multiple cores
+    pool = Pool(RUNS * 3)
+    pool.map(runSimulation, simulations)
+    pool.close()
 
-
-# env.printAuthor(0)
-# env.printPaper(1)
-
-# env.network.getAuthorPapers(0)
-
-# env.network.plotPyvisGraph(filename='outputs/pyvisNext.html')
-
-# env.saveEvolutionWithPickle('outputs/evolution.env')
-# env.plotDescriptorsDistr(saveToFile='outputs/creditAccumulation.png', xlogBase=10, ylogBase=10, 
-#                             numAuthors=env.getNumAuthors(), numPapers=env.getNumPapers(), numTopics=env.getNumTopics(), networkName='Credit accumulation')
-# print(f'num authors: {env.getNumAuthors()}')
-# print(env)
-
-# test = {
-#     1: [1,2,3],
-#     2: [0, 1, 2, 4, 7, 10],
-#     3: [0, 1, 2, 4, 7, 10],
-# }
-
-# for k, val in test.items():
-#     val.append('hi')
+    # generate main html page, putting in all the simulations links
