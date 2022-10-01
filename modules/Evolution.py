@@ -278,7 +278,7 @@ class Evolution:
 
         return
 
-    def evolve(self, modelType, newPapers=None, newAuthors=None):
+    def evolve(self, modelType= 0 | 1 | 2 | 3, newPapers=None, newAuthors=None):
         '''
         Function will continue evolution for the inputted timesteps
         Inputs:

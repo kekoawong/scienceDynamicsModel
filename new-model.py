@@ -11,7 +11,9 @@ def runSimulation(simulationObj):
         'Pw': float
         'Pd': float
         'newAuthors' or 'newPapers': int
-        'simulationName': str
+        'simulationName': str,
+        'runs': int
+        modelType: 0 | 1 | 2 | 3
     }
     '''
     print(f'Starting simulation ' + simulationObj['simulationName'])
@@ -20,9 +22,9 @@ def runSimulation(simulationObj):
 
     # evolve criteria
     if 'newPapers' in simulationObj:
-        model.evolve(newPapers=simulationObj['newPapers'])
+        model.evolve(modelType=simulationObj['modelType'], newPapers=simulationObj['newPapers'])
     else:
-        model.evolve(newAuthors=simulationObj['newAuthors'])
+        model.evolve(modelType=simulationObj['modelType'], newAuthors=simulationObj['newAuthors'])
 
     # save html page of output
     model.writeHTMLPage(simName=simulationObj['simulationName'], numPaps=simulationObj['newPapers'], numTops=str(model.getNumTopics()), numTypes='2', 
@@ -44,14 +46,19 @@ if __name__ == "__main__":
         'newPapers': int(1000),
         # 'newPapers': int(2.9*10**5),
         'simulationName': 'Bibsonomy',
-        'runs': RUNS
+        'runs': RUNS,
+        'modelType': 0
     }
 
     # generate the simulation object list
     simulations = []
-    # assign bibsonomy simulations
-    for i in range(RUNS):
-        simulations.append({**bibsonomy, 'simulationName': bibsonomy['simulationName'] + '-' + str(i)})
+    # assign bibsonomy simulations for different model types
+    for modelType in range(1, 4):
+        for i in range(RUNS):
+            simulations.append({**bibsonomy, 
+                'simulationName': bibsonomy['simulationName'] + '-' + str(i),
+                'modelType': modelType
+            })
 
     # run all the model simulations through multiple cores
     pool = Pool(RUNS * 3)
