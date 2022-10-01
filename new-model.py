@@ -27,7 +27,11 @@ def runSimulation(simulationObj):
         model.evolve(modelType=simulationObj['modelType'], newAuthors=simulationObj['newAuthors'])
 
     # save html page of output
-    model.writeHTMLPage(simName=simulationObj['simulationName'], numPaps=simulationObj['newPapers'], numTops=str(model.getNumTopics()), numTypes='2', 
+    if 'newPapers' in simulationObj:
+        model.writeHTMLPage(simName=simulationObj['simulationName'], numPaps=simulationObj['newPapers'], numTops=str(model.getNumTopics()), numTypes='2', 
+                        Pn=simulationObj['Pn'], Pw=simulationObj['Pw'], Pd=simulationObj['Pd'], numRuns='1', directory=f"./docs/outputs/model-{simulationObj['modelType']}/")
+    elif 'newAuthors' in simulationObj:
+        model.writeHTMLPage(simName=simulationObj['simulationName'], numAuths=simulationObj['newAuthors'], numTops=str(model.getNumTopics()), numTypes='2', 
                         Pn=simulationObj['Pn'], Pw=simulationObj['Pw'], Pd=simulationObj['Pd'], numRuns='1', directory=f"./docs/outputs/model-{simulationObj['modelType']}/")
     # model.plotCreditDistr(saveToFile='outputs/' + simulationObj['simulationName'] + '-' + str(simulationObj['index']))
 
@@ -39,6 +43,26 @@ if __name__ == "__main__":
     RUNS = 3
 
     # declare simulations
+    nanobank = {
+        'Pn': 0.90,
+        'Pw': 0.28,
+        'Pd': 0.0,
+        'newPapers': int(102),
+        # 'newPapers': int(2.9*10**5),
+        'simulationName': 'Nanobank',
+        'runs': RUNS,
+        'modelType': 0
+    }
+    scholarometer = {
+        'Pn': 0.04,
+        'Pw': 0.35,
+        'Pd': 0.01,
+        'newAuthors': int(500),
+        # 'newAuthors': int(2.2*10**4),
+        'simulationName': 'Scholarometer',
+        'runs': RUNS,
+        'modelType': 0
+    }
     bibsonomy = {
         'Pn': 0.80,
         'Pw': 0.71,
@@ -51,7 +75,7 @@ if __name__ == "__main__":
     }
 
     # generate the simulation object list
-    simulations = []
+    simulations = [{**nanobank}, {**scholarometer}, {**bibsonomy}]
     # assign bibsonomy simulations for different model types
     for modelType in range(1, 4):
         for i in range(RUNS):

@@ -242,7 +242,10 @@ class Graph(nx.Graph):
         newGraph = modularityGraph.from_networkx(subGraph)
 
         # create subgraph and split
-        clusters = newGraph.community_leading_eigenvector(clusters=numClusters)
+        try:
+            clusters = newGraph.community_leading_eigenvector(clusters=numClusters)
+        except:
+            return False
 
         # compare unweighted modularity of new communities to the initial, return if there should not be change in community structure
         if newGraph.modularity(set(subGraph.nodes())) > clusters.modularity or len(clusters) != 2:
