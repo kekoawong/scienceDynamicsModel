@@ -71,20 +71,21 @@ class Graph(nx.Graph):
         for authID in authors:
             self.nodes[authID]["data"].insertPaper(paperID, topics)
 
-    def updateAuthorPapersAndCredit(self, authors, topics, paperID, unevenCredit=True):
+    def updateAuthorPapersAndCredit(self, authors, topics, paperID, useReputation):
         '''
         Function will update the topics and papers of all authors, updating their credit for the paper and the paper itself
+        It will either use reputation or not.
         '''
 
-        # get the sum of all the authors reputations
-        maxReputation = math.sqrt(sum(self.getAuthorClass(authID).getCredit() for authID in authors))
+        # base credit is either the sqrt of authors credit or a constant
+        baseCredit = math.sqrt(sum(self.getAuthorClass(authID).getCredit() for authID in authors)) if useReputation else 1
 
         for authID in authors:
             authorClass = self.getAuthorClass(authID)
             authorClass.insertPaper(paperID, topics)
             
             # distribute the credit by type to the authors
-            amountCredit = authorClass.getType().getCreditAmount(maxReputation) if unevenCredit else maxReputation
+            amountCredit = authorClass.getType().getCreditAmount(baseCredit)
             authorClass.addCredit(amountCredit, paperID)
 
     def determinePaperTopic(self, authors):
@@ -115,7 +116,7 @@ class Graph(nx.Graph):
         # returns the topic that represents the disciplines that most authors are in
         return paperTopics
 
-    def creditWalk(self, authors, probStop, newPaperID, maxAge=1000):
+    def creditWalk(self, authors, probStop, newPaperID, maxAge):
         '''
         Recursive function that takes the current list of authors and probStop as input
         Returns paper tuple with (topicID, [authors])
@@ -139,7 +140,7 @@ class Graph(nx.Graph):
             # determine the paper topic
             topics = self.determinePaperTopic(authors)
             # update the papers for all authors
-            self.updateAuthorPapersAndCredit(authors, topics, newPaperID)
+            self.updateAuthorPapersAndCredit(authors, topics, newPaperID, useReputation=True)
 
             return topics, authors
 
@@ -158,9 +159,9 @@ class Graph(nx.Graph):
 
         # add author to list and call function recursively
         authors.append(coauthorID)
-        return self.creditWalk(authors, probStop, newPaperID)
+        return self.creditWalk(authors, probStop, newPaperID, maxAge)
     
-    def biasedRandomWalk(self, authors, probStop, newPaperID):
+    def biasedRandomWalk(self, authors, probStop, newPaperID, maxAge, includeCredit):
         '''
         Recursive function that takes the current list of authors and probStop as input
         Returns paper tuple with (topicID, [authors])
@@ -174,8 +175,10 @@ class Graph(nx.Graph):
             # determine the paper topic
             topics = self.determinePaperTopic(authors)
             # update the papers for all authors
-            self.updateAuthorPapers(authors, topics, newPaperID)
-
+            if (includeCredit):
+                self.updateAuthorPapersAndCredit(authors, topics, newPaperID, useReputation=False)
+            else:
+                self.updateAuthorPapers(authors, topics, newPaperID)
             return topics, authors
         
         # create list representing probabilities for the neighboring nodes of the current coauthor
@@ -198,7 +201,7 @@ class Graph(nx.Graph):
 
         # add author to list and call function recursively
         authors.append(coauthorID)
-        return self.biasedRandomWalk(authors, probStop, newPaperID)
+        return self.biasedRandomWalk(authors, probStop, newPaperID, maxAge, includeCredit)
 
     def getDisciplineAuthors(self, topicID):
         '''

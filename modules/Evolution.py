@@ -278,7 +278,7 @@ class Evolution:
 
         return
 
-    def evolve(self, newPapers=None, newAuthors=None, modelType=0):
+    def evolve(self, modelType, newPapers=None, newAuthors=None):
         '''
         Function will continue evolution for the inputted timesteps
         Inputs:
@@ -320,11 +320,11 @@ class Evolution:
 
             # Add new paper, calling function
             if (modelType == 0):
-                paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
+                paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper, self.maxAge, includeCredit=False)
             elif (modelType == 1):
-                paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
+                paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper, self.maxAge, includeCredit=True)
             elif (modelType == 2):
-                paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
+                paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper, maxAge=self.maxAge)
             elif (modelType == 3):
                 paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper, maxAge=self.maxAge)
             self.papers[self.newPaper] = Paper(self.newPaper, topics=paperTopics, authors=paperAuthors)
