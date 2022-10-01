@@ -36,6 +36,7 @@ if __name__ == "__main__":
 
     RUNS = 3
 
+    # declare simulations
     bibsonomy = {
         'Pn': 0.80,
         'Pw': 0.71,

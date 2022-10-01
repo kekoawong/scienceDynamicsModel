@@ -278,13 +278,19 @@ class Evolution:
 
         return
 
-    def evolve(self, newPapers=None, newAuthors=None, baseModel=False):
+    def evolve(self, newPapers=None, newAuthors=None, modelType=0):
         '''
         Function will continue evolution for the inputted timesteps
         Inputs:
             newPapers: stopping point for amount of new papers
             newAuthors: stopping point for amount of new authors
         NOTE: input either newPapers or newAuthors stopping point, but not both
+
+        modelType:
+        0: base model, without any credit accumulation
+        1: base model, with credit accumulation
+        2: linking probabilities determined by reputation of author
+        3: Matthew Effect, with linking probabilities and paper credit is a function of the author's reputation
         '''
         # use XOR to make sure either newPapers or newAuthors is inputted, but not both
         if bool(newPapers) == bool(newAuthors):
@@ -313,9 +319,13 @@ class Evolution:
                 self.newAuthor += 1
 
             # Add new paper, calling function
-            if (baseModel):
+            if (modelType == 0):
                 paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
-            else:
+            elif (modelType == 1):
+                paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
+            elif (modelType == 2):
+                paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
+            elif (modelType == 3):
                 paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper, maxAge=self.maxAge)
             self.papers[self.newPaper] = Paper(self.newPaper, topics=paperTopics, authors=paperAuthors)
 
