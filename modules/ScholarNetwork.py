@@ -116,7 +116,7 @@ class Graph(nx.Graph):
         # returns the topic that represents the disciplines that most authors are in
         return paperTopics
 
-    def creditWalk(self, authors, probStop, newPaperID, maxAge):
+    def creditWalk(self, authors, probStop, newPaperID, maxAge, useReputation):
         '''
         Recursive function that takes the current list of authors and probStop as input
         Returns paper tuple with (topicID, [authors])
@@ -140,7 +140,7 @@ class Graph(nx.Graph):
             # determine the paper topic
             topics = self.determinePaperTopic(authors)
             # update the papers for all authors
-            self.updateAuthorPapersAndCredit(authors, topics, newPaperID, useReputation=True)
+            self.updateAuthorPapersAndCredit(authors, topics, newPaperID, useReputation=useReputation)
 
             return topics, authors
 

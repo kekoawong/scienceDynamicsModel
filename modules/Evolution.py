@@ -324,9 +324,9 @@ class Evolution:
             elif (modelType == 1):
                 paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper, self.maxAge, includeCredit=True)
             elif (modelType == 2):
-                paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper, maxAge=self.maxAge)
+                paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper, maxAge=self.maxAge, useReputation=False)
             elif (modelType == 3):
-                paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper, maxAge=self.maxAge)
+                paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper, maxAge=self.maxAge, useReputation=True)
             self.papers[self.newPaper] = Paper(self.newPaper, topics=paperTopics, authors=paperAuthors)
 
             # add paper to corresponding topics
