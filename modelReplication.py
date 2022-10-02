@@ -11,7 +11,7 @@ Uses multiprocessing
 '''
 
 # declare amount of runs to average
-RUNS = 3
+RUNS = 1
 index = 0
 
 def runSimulation(simulationObj):

@@ -116,6 +116,8 @@ class Evolution:
             self.updateDisciplineAuthors(authClass, disciplines)
 
         # get discipline distributions
+        print('topics')
+        print(self.topics.values())
         for topic in self.topics.values():
             descr['Pd'].append(topic.getNumPapers())
             descr['Ad'].append(topic.getNumDiscAuthors())
@@ -158,7 +160,8 @@ class Evolution:
 
     def updateDisciplineAuthors(self, authorClass, disciplines):
         for discID in disciplines:
-            self.topics[discID].addAuthorToDiscipline(authorClass)
+            if discID in self.topics:
+                self.topics[discID].addAuthorToDiscipline(authorClass)
 
     '''Printing and Plotting Functions'''
     def __repr__(self):
@@ -209,7 +212,6 @@ class Evolution:
                     paperClass.clearTopics()
                     self.topics[newTopic].addPaper(paperID)
                     paperClass.addTopic(newTopic)
-                    
 
                 # update authors in network with papers
                 self.network.updatePaperInNetwork(paperID, (paperClass.getTopics(), paperClass.getAuthors()))
@@ -258,29 +260,37 @@ class Evolution:
     def updateMergedCommunities(self, d1, d2):
         # add papers to new discipline without getting rid of old disciplines
         newTopic = max(self.topics.keys()) + 1
-        for paperID in self.topics[d1].getPapers():
-            paperClass = self.papers[paperID]
-            if d1 in paperClass.getTopics():
-                paperClass.getTopics().remove(d1)
-            paperClass.getTopics().append(newTopic)
-            # self.network.updatePaperInNetwork(paperID, (paperClass.getTopics(), paperClass.getAuthors()))
+        if d1 in self.topics:
+            for paperID in self.topics[d1].getPapers():
+                paperClass = self.papers[paperID]
+                if d1 in paperClass.getTopics():
+                    paperClass.getTopics().remove(d1)
+                paperClass.getTopics().append(newTopic)
+                self.network.updatePaperInNetwork(paperID, (paperClass.getTopics(), paperClass.getAuthors()))
         
-        for paperID in self.topics[d2].getPapers():
-            paperClass = self.papers[paperID]
-            if d2 in paperClass.getTopics():
-                paperClass.getTopics().remove(d2)
-            paperClass.getTopics().append(newTopic)
-            # self.network.updatePaperInNetwork(paperID, (paperClass.getTopics(), paperClass.getAuthors()))
+        if d2 in self.topics:
+            for paperID in self.topics[d2].getPapers():
+                paperClass = self.papers[paperID]
+                if d2 in paperClass.getTopics():
+                    paperClass.getTopics().remove(d2)
+                paperClass.getTopics().append(newTopic)
+                self.network.updatePaperInNetwork(paperID, (paperClass.getTopics(), paperClass.getAuthors()))
 
         return
 
-    def evolve(self, newPapers=None, newAuthors=None, baseModel=False):
+    def evolve(self, modelType= 0 | 1 | 2 | 3, newPapers=None, newAuthors=None):
         '''
         Function will continue evolution for the inputted timesteps
         Inputs:
             newPapers: stopping point for amount of new papers
             newAuthors: stopping point for amount of new authors
         NOTE: input either newPapers or newAuthors stopping point, but not both
+
+        modelType:
+        0: base model, without any credit accumulation
+        1: base model, with credit accumulation
+        2: linking probabilities determined by reputation of author
+        3: Matthew Effect, with linking probabilities and paper credit is a function of the author's reputation
         '''
         # use XOR to make sure either newPapers or newAuthors is inputted, but not both
         if bool(newPapers) == bool(newAuthors):
@@ -309,10 +319,14 @@ class Evolution:
                 self.newAuthor += 1
 
             # Add new paper, calling function
-            if (baseModel):
-                paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper)
-            else:
-                paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper, maxAge=self.maxAge)
+            if (modelType == 0):
+                paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper, self.maxAge, includeCredit=False)
+            elif (modelType == 1):
+                paperTopics, paperAuthors = self.network.biasedRandomWalk(authors, self.probStop, self.newPaper, self.maxAge, includeCredit=True)
+            elif (modelType == 2):
+                paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper, maxAge=self.maxAge, useReputation=False)
+            elif (modelType == 3):
+                paperTopics, paperAuthors = self.network.creditWalk(authors, self.probStop, self.newPaper, maxAge=self.maxAge, useReputation=True)
             self.papers[self.newPaper] = Paper(self.newPaper, topics=paperTopics, authors=paperAuthors)
 
             # add paper to corresponding topics
@@ -603,7 +617,18 @@ class Evolution:
         axis.set_xlabel(f'% type {typeName} in discipline.', fontweight='bold')
         axis.set_title(f'''Credit and Type Distribution throughout Disciplines''')
         fig.tight_layout()
-        
+
+        # obtain m (slope) and b(intercept) of linear regression line
+        m, b = np.polyfit(xVals, yVals, 1)
+        # use red as color for regression line
+        axis.plot(xVals, [m*x+b for x in xVals], color='red', label=f'y={round(m)}x + {round(b)}')
+
+        # obtain regression line of degree 2
+        # a, m, b = np.polyfit(xVals, yVals, 2)
+        # use red as color for regression line
+        # axis.plot(xVals, [a*(x**2) + m*x + b for x in xVals], color='green', label=f'y={round(a)}x^2 + {round(m)}x + {round(b)}')
+
+        axis.legend()
         
         if saveToFile:
             fig.savefig(saveToFile)
