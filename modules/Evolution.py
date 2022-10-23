@@ -465,6 +465,8 @@ class Evolution:
     def plotCreditDistr(self, distr=None, ylogBase=1, xlogBase=1, saveToFile=None):
         # get data
         distribs = self.getCreditDistribution() if not distr else distr
+        # xVals = distribs.values() if not distr else distr[0]
+        # yVals = [str(x) for x in distribs.keys()] if not distr else distr[1]
 
         # declare figure and axis
         fig = plt.figure(figsize=(9, 7))
@@ -583,7 +585,7 @@ class Evolution:
         
         return fig, axs
 
-    def plotCreditTypeDistribution(self, saveToFile=None, distrib=[]):
+    def plotCreditTypeDistribution(self, saveToFile=None, distrib=None):
         '''
         Plot will have the average credit per author on Y-Axis, % type 0 in discipline. Each data point will be a discipline
         distrib = [xVals, yVals]
@@ -609,8 +611,8 @@ class Evolution:
         axis = fig.add_subplot()
 
         typeName = 'Marginalized'
-        xVals = [x[typeName]/x['numAuthors'] for x in allDisciplines.values()] if len(distrib) == 0 else distrib[0]
-        yVals = [x['credit']/x['numAuthors'] for x in allDisciplines.values()] if len(distrib) == 0 else distrib[1]
+        xVals = [x[typeName]/x['numAuthors'] for x in allDisciplines.values()] if not distrib else distrib[0]
+        yVals = [x['credit']/x['numAuthors'] for x in allDisciplines.values()] if not distrib else distrib[1]
         axis.scatter(xVals, yVals)
 
         # styling

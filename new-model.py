@@ -27,30 +27,45 @@ def runSimulation(simulationObj):
         model.evolve(modelType=simulationObj['modelType'], newAuthors=simulationObj['newAuthors'])
 
     # save html page of output
-    distrib1 = [], distrib2 = [], distrib3 = []
+    distrib1 = []
+    distrib2Dict = {}
+    distrib3 = []
     if 'newPapers' in simulationObj:
-        distrib1, distrib2, distrib3 = model.writeHTMLPage(simName=simulationObj['simulationName'], numPaps=simulationObj['newPapers'], numTops=str(model.getNumTopics()), numTypes='2', 
+        distrib1, distrib2Dict, distrib3 = model.writeHTMLPage(simName=simulationObj['simulationName'], numPaps=simulationObj['newPapers'], numTops=str(model.getNumTopics()), numTypes='2', 
                         Pn=simulationObj['Pn'], Pw=simulationObj['Pw'], Pd=simulationObj['Pd'], numRuns='1', directory=f"./docs/outputs/model-{simulationObj['modelType']}/")
     elif 'newAuthors' in simulationObj:
-        distrib1, distrib2, distrib3 = model.writeHTMLPage(simName=simulationObj['simulationName'], numAuths=simulationObj['newAuthors'], numTops=str(model.getNumTopics()), numTypes='2', 
+        distrib1, distrib2Dict, distrib3 = model.writeHTMLPage(simName=simulationObj['simulationName'], numAuths=simulationObj['newAuthors'], numTops=str(model.getNumTopics()), numTypes='2', 
                         Pn=simulationObj['Pn'], Pw=simulationObj['Pw'], Pd=simulationObj['Pd'], numRuns='1', directory=f"./docs/outputs/model-{simulationObj['modelType']}/")
     # model.plotCreditDistr(saveToFile='outputs/' + simulationObj['simulationName'] + '-' + str(simulationObj['index']))
 
     print(f'Done with simulation ' + simulationObj['simulationName'])
-    return distrib1, distrib2, distrib3
+    return distrib1, distrib2Dict, distrib3, model.getNumAuthors(), model.getNumPapers(), model.getNumTopics()
 
 def combineResults(modelName, results, simulationObj):
     print(f'Compiling results for {modelName}')
-    distrib1 = [], distrib2 = [], distrib3 = []
+    distrib1 = []
+    distrib2Dict = {}
+    distrib3 = []
+    numAuthors = 0
+    numPapers = 0
+    numTopics = 0
     for distribution in results:
         distrib1 = distrib1 + distribution[0]
-        distrib2 = distrib2 + distribution[1]
+        # combine the dictionary distrib
+        for key in distribution[1].keys():
+            if key in distrib2Dict:
+                distrib2Dict[key] = distrib2Dict[key] + distribution[1][key]
+            else:
+                distrib2Dict[key] = [*distribution[1][key]]
         distrib3 = distrib3 + distribution[2]
-
+        numAuthors += distribution[3]
+        numPapers += distribution[4]
+        numTopics += distribution[5]
     # initialize model page
     model = Page(Pn=simulationObj['Pn'], Pw=simulationObj['Pw'], Pd=simulationObj['Pd'])
 
-    model.writeHTMLPage(simName=f'combined-results-{modelName}', numPaps=simulationObj['newPapers'], numTops=str(len(distrib3)), numTypes='2', 
+    model.writeHTMLPage(simName=f'combined-results-{modelName}', plotDescr=False, degreeDistrib=distrib1, creditDistr=distrib2Dict, creditTypeDistr=distrib3,
+                        numPaps=str(numAuthors), numAuths=str(numAuthors), numTops=str(numTopics), numTypes='2', 
                         Pn=simulationObj['Pn'], Pw=simulationObj['Pw'], Pd=simulationObj['Pd'], numRuns='10', directory=f"./docs/outputs/{modelName}/")
     
     return
@@ -84,7 +99,7 @@ if __name__ == "__main__":
         'Pn': 0.80,
         'Pw': 0.71,
         'Pd': 0.50,
-        'newPapers': int(10000),
+        'newPapers': int(100),
         # 'newPapers': int(2.9*10**5),
         'simulationName': 'Bibsonomy',
         'runs': RUNS,
