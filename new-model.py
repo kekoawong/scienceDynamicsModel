@@ -65,14 +65,14 @@ def combineResults(modelName, results, simulationObj):
     model = Page(Pn=simulationObj['Pn'], Pw=simulationObj['Pw'], Pd=simulationObj['Pd'])
 
     model.writeHTMLPage(simName=f'combined-results-{modelName}', plotDescr=False, degreeDistrib=distrib1, creditDistr=distrib2Dict, creditTypeDistr=distrib3,
-                        numPaps=str(numAuthors), numAuths=str(numAuthors), numTops=str(numTopics), numTypes='2', 
+                        numPaps=str(numPapers), numAuths=str(numAuthors), numTops=str(numTopics), numTypes='2', 
                         Pn=simulationObj['Pn'], Pw=simulationObj['Pw'], Pd=simulationObj['Pd'], numRuns='10', directory=f"./docs/outputs/{modelName}/")
     
     return
 
 if __name__ == "__main__":
 
-    RUNS = 3
+    RUNS = 10
 
     # declare simulations
     nanobank = {
@@ -99,7 +99,7 @@ if __name__ == "__main__":
         'Pn': 0.80,
         'Pw': 0.71,
         'Pd': 0.50,
-        'newPapers': int(100),
+        'newPapers': int(1000),
         # 'newPapers': int(2.9*10**5),
         'simulationName': 'Bibsonomy',
         'runs': RUNS,
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     pool.close()
 
     combineResults("model-1", results[:RUNS], bibsonomy)
-    combineResults("model-1", results[RUNS:RUNS*2], bibsonomy)
-    combineResults("model-1", results[RUNS*2:RUNS*3], bibsonomy)
+    combineResults("model-2", results[RUNS:RUNS*2], bibsonomy)
+    combineResults("model-3", results[RUNS*2:RUNS*3], bibsonomy)
 
     # generate main html page, putting in all the simulations links
