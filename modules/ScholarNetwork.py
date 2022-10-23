@@ -289,6 +289,7 @@ class Graph(nx.Graph):
         try:
             mergedMod = nx_modularity(subGraphMerged, [newCom], weight=None)
         except ZeroDivisionError:
+            return False
             print(f'New Community: {newCom}')
             print(f'Com1: {com1} and Com2: {com2}')
             self.plotPyvisGraph(filename='outputs/ErrorGraph.html', network=subGraphMerged)

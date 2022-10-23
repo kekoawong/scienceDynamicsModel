@@ -5,7 +5,7 @@ class Page(Evolution):
     Class will extend evolution class for generating an HTML Page
     '''
 
-    def writeHTMLPage(self, simName, descr=None, degreeDistrib=None, creditDistr=None, numAuths='N/A', numPaps='N/A', numTops='N/A', numTypes='N/A', 
+    def writeHTMLPage(self, simName, plotDescr=True, descr=None, degreeDistrib=None, creditDistr=None, creditTypeDistr=None, numAuths='N/A', numPaps='N/A', numTops='N/A', numTypes='N/A', 
                         Pn='N/A', Pw='N/A', Pd='N/A', numRuns='N/A', directory='./'):
         '''
         Assumes all the files should be located in the same directory
@@ -20,17 +20,20 @@ class Page(Evolution):
         htmlfileName = directory + f'{simName}Page.html'
 
         # plot distributions
-        self.plotDescriptorsDistr(saveToFile=directory + descrPlotsFile, ylogBase=10, xlogBase=10, data=descr, 
+        if plotDescr:
+            self.plotDescriptorsDistr(saveToFile=directory + descrPlotsFile, ylogBase=10, xlogBase=10, data=descr, 
                                         numAuthors=numAuths, numPapers=numPaps, numTopics=numTops)
-        self.plotDegreeDistr(degreeDistrib=degreeDistrib,saveToFile=directory + degPlotsFile)
-        self.plotCreditDistr(creditDistr, saveToFile=directory + creditPlotsFile)
-        self.plotCreditTypeDistribution(saveToFile=directory + rubinPlotFile)
+        graph1, distrib1 = self.plotDegreeDistr(degreeDistrib=degreeDistrib,saveToFile=directory + degPlotsFile)
+        fig2, axis2, distrib2Dict = self.plotCreditDistr(creditDistr, saveToFile=directory + creditPlotsFile)
+        fig3, axis3, distrib3 = self.plotCreditTypeDistribution(saveToFile=directory + rubinPlotFile, distrib=creditTypeDistr)
         # self.plotTypeDisciplineDistrib(displineTypeObj, saveToFile=directory + displineTypeFile)
 
         with open(htmlfileName, 'w') as fileObj:
             fileObj.write(self.generateHTML(simName=simName, descrPlotFile=descrPlotsFile, degreePlotFile=degPlotsFile, creditPlotFile=creditPlotsFile, 
                             rubinPlotFile=rubinPlotFile, numPapers=numPaps, numAuthors=numAuths, numTopics=numTops, numTypes=numTypes, Pn=Pn, Pw=Pw, Pd=Pd, numRuns=numRuns))
         print(f'Saved to {htmlfileName} successfully!')
+
+        return distrib1, distrib2Dict, distrib3
 
     def generateHTML(self, simName, descrPlotFile, degreePlotFile, creditPlotFile, rubinPlotFile, numPapers='N/A', numAuthors='N/A', numTopics='N/A', numTypes='N/A',
                         Pn='N/A', Pw='N/A', Pd='N/A', numRuns='N/A',):

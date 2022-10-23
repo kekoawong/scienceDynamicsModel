@@ -5,6 +5,7 @@ from .Paper import Paper
 from .Topic import Topic
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 import math
 import random
 import pickle
@@ -434,6 +435,19 @@ class Evolution:
         xVals = [0.5 * (binEdges[i] + binEdges[i+1]) for i in range(len(binVals))]
         axis.scatter(xVals, binVals)
 
+        # obtain m (slope) and b(intercept) of linear regression line
+        m, b = np.polyfit(xVals, binVals, 1)
+        # use red as color for regression line
+        axis.plot([x for x in xVals], [m*x+b for x in xVals], color='red', label=f'y={round(m)}x + {round(b)}')
+
+        # obtain regression line of degree 2
+        a, m, b = np.polyfit(xVals, binVals, 2)
+        # use red as color for regression line
+        sortedX = sorted(xVals)
+        axis.plot(sortedX, [a*(x**2) + m*x + b for x in sortedX], color='green', label=f'y={round(a)}x^2 + {round(m)}x + {round(b)}')
+
+        axis.legend()
+
         # styling
         axis.set_ylabel(f'Density of {label}', fontweight='bold')
         axis.set_xlabel(f'{label}', fontweight='bold')
@@ -460,17 +474,19 @@ class Evolution:
 
     def plotDegreeDistr(self, degreeDistrib=None, label='Degree', ylogBase=10, xlogBase=10, ylim=10**-6, xlim=10**4, saveToFile=None):
         distrib = self.getDegreeDistribution() if not degreeDistrib else degreeDistrib
-        return self.plotDistibution(distrib, label=label, ylogBase=ylogBase, xlogBase=xlogBase, ylim=ylim, xlim=xlim, saveToFile=saveToFile)
+        return self.plotDistibution(distrib, label=label, ylogBase=ylogBase, xlogBase=xlogBase, ylim=ylim, xlim=xlim, saveToFile=saveToFile), distrib
 
     def plotCreditDistr(self, distr=None, ylogBase=1, xlogBase=1, saveToFile=None):
         # get data
         distribs = self.getCreditDistribution() if not distr else distr
+        # xVals = distribs.values() if not distr else distr[0]
+        # yVals = [str(x) for x in distribs.keys()] if not distr else distr[1]
 
         # declare figure and axis
         fig = plt.figure(figsize=(9, 7))
         axis = fig.add_subplot()
 
-        axis.hist(distribs.values(), label=[str(x) for x in distribs.keys()], density=True, bins='sqrt')
+        axis.hist(distribs.values(), label=[str(x) for x in distribs.keys()], color=["blue", "orange"], density=True, bins='sqrt')
 
         # styling
         axis.set_ylabel(f'Density of credit', fontweight='bold')
@@ -482,7 +498,7 @@ class Evolution:
         if saveToFile:
             fig.savefig(saveToFile)
             print(f'Saved to {saveToFile} successfully!')
-        return fig, axis
+        return fig, axis, distribs
 
     def plotTypeDisciplineDistrib(self, distr=None, ylogBase=1, xlogBase=1, saveToFile=None):
         # get data from getDisciplineTypeDistribution method
@@ -583,9 +599,10 @@ class Evolution:
         
         return fig, axs
 
-    def plotCreditTypeDistribution(self, saveToFile=None):
+    def plotCreditTypeDistribution(self, saveToFile=None, distrib=None):
         '''
         Plot will have the average credit per author on Y-Axis, % type 0 in discipline. Each data point will be a discipline
+        distrib = [xVals, yVals]
         '''
         allDisciplines = {}
         for topic in self.topics.keys():
@@ -608,9 +625,11 @@ class Evolution:
         axis = fig.add_subplot()
 
         typeName = 'Marginalized'
-        xVals = [x[typeName]/x['numAuthors'] for x in allDisciplines.values()]
-        yVals = [x['credit']/x['numAuthors'] for x in allDisciplines.values()]
+        xVals = [x[typeName]/x['numAuthors'] for x in allDisciplines.values()] if not distrib else distrib[0]
+        yVals = [x['credit']/x['numAuthors'] for x in allDisciplines.values()] if not distrib else distrib[1]
         axis.scatter(xVals, yVals)
+
+        # sns.regplot(x=xVals, y=yVals, scatter=True, order=2)
 
         # styling
         axis.set_ylabel(f'Average credit per author in discipline.', fontweight='bold')
@@ -624,9 +643,10 @@ class Evolution:
         axis.plot(xVals, [m*x+b for x in xVals], color='red', label=f'y={round(m)}x + {round(b)}')
 
         # obtain regression line of degree 2
-        # a, m, b = np.polyfit(xVals, yVals, 2)
+        a, m, b = np.polyfit(xVals, yVals, 2)
         # use red as color for regression line
-        # axis.plot(xVals, [a*(x**2) + m*x + b for x in xVals], color='green', label=f'y={round(a)}x^2 + {round(m)}x + {round(b)}')
+        sortedX = sorted(xVals)
+        axis.plot(sortedX, [a*(x**2) + m*x + b for x in sortedX], color='green', label=f'y={round(a)}x^2 + {round(m)}x + {round(b)}')
 
         axis.legend()
         
@@ -634,7 +654,7 @@ class Evolution:
             fig.savefig(saveToFile)
             print(f'Saved to {saveToFile} successfully!')
 
-        return fig, axis
+        return fig, axis, [xVals, yVals]
 
     '''Saving Methods'''
     def saveEvolutionWithPickle(self, fileName='evolution.env'):
