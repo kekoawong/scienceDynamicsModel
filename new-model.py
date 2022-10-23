@@ -27,15 +27,32 @@ def runSimulation(simulationObj):
         model.evolve(modelType=simulationObj['modelType'], newAuthors=simulationObj['newAuthors'])
 
     # save html page of output
+    distrib1 = [], distrib2 = [], distrib3 = []
     if 'newPapers' in simulationObj:
-        model.writeHTMLPage(simName=simulationObj['simulationName'], numPaps=simulationObj['newPapers'], numTops=str(model.getNumTopics()), numTypes='2', 
+        distrib1, distrib2, distrib3 = model.writeHTMLPage(simName=simulationObj['simulationName'], numPaps=simulationObj['newPapers'], numTops=str(model.getNumTopics()), numTypes='2', 
                         Pn=simulationObj['Pn'], Pw=simulationObj['Pw'], Pd=simulationObj['Pd'], numRuns='1', directory=f"./docs/outputs/model-{simulationObj['modelType']}/")
     elif 'newAuthors' in simulationObj:
-        model.writeHTMLPage(simName=simulationObj['simulationName'], numAuths=simulationObj['newAuthors'], numTops=str(model.getNumTopics()), numTypes='2', 
+        distrib1, distrib2, distrib3 = model.writeHTMLPage(simName=simulationObj['simulationName'], numAuths=simulationObj['newAuthors'], numTops=str(model.getNumTopics()), numTypes='2', 
                         Pn=simulationObj['Pn'], Pw=simulationObj['Pw'], Pd=simulationObj['Pd'], numRuns='1', directory=f"./docs/outputs/model-{simulationObj['modelType']}/")
     # model.plotCreditDistr(saveToFile='outputs/' + simulationObj['simulationName'] + '-' + str(simulationObj['index']))
 
     print(f'Done with simulation ' + simulationObj['simulationName'])
+    return distrib1, distrib2, distrib3
+
+def combineResults(modelName, results, simulationObj):
+    print(f'Compiling results for {modelName}')
+    distrib1 = [], distrib2 = [], distrib3 = []
+    for distribution in results:
+        distrib1 = distrib1 + distribution[0]
+        distrib2 = distrib2 + distribution[1]
+        distrib3 = distrib3 + distribution[2]
+
+    # initialize model page
+    model = Page(Pn=simulationObj['Pn'], Pw=simulationObj['Pw'], Pd=simulationObj['Pd'])
+
+    model.writeHTMLPage(simName=f'combined-results-{modelName}', numPaps=simulationObj['newPapers'], numTops=str(len(distrib3)), numTypes='2', 
+                        Pn=simulationObj['Pn'], Pw=simulationObj['Pw'], Pd=simulationObj['Pd'], numRuns='10', directory=f"./docs/outputs/{modelName}/")
+    
     return
 
 if __name__ == "__main__":
@@ -75,7 +92,8 @@ if __name__ == "__main__":
     }
 
     # generate the simulation object list
-    simulations = [{**nanobank}, {**scholarometer}, {**bibsonomy}]
+    # simulations = [{**nanobank}, {**scholarometer}, {**bibsonomy}]
+    simulations = []
     # assign bibsonomy simulations for different model types
     for modelType in range(1, 4):
         for i in range(RUNS):
@@ -86,7 +104,11 @@ if __name__ == "__main__":
 
     # run all the model simulations through multiple cores
     pool = Pool()
-    pool.map(runSimulation, simulations)
+    results = pool.map(runSimulation, simulations)
     pool.close()
+
+    combineResults("model-1", results[:RUNS], bibsonomy)
+    combineResults("model-1", results[RUNS:RUNS*2], bibsonomy)
+    combineResults("model-1", results[RUNS*2:RUNS*3], bibsonomy)
 
     # generate main html page, putting in all the simulations links
