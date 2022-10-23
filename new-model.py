@@ -85,7 +85,7 @@ if __name__ == "__main__":
             })
 
     # run all the model simulations through multiple cores
-    pool = Pool(RUNS * 3)
+    pool = Pool()
     pool.map(runSimulation, simulations)
     pool.close()
 

@@ -460,7 +460,7 @@ class Evolution:
 
     def plotDegreeDistr(self, degreeDistrib=None, label='Degree', ylogBase=10, xlogBase=10, ylim=10**-6, xlim=10**4, saveToFile=None):
         distrib = self.getDegreeDistribution() if not degreeDistrib else degreeDistrib
-        return self.plotDistibution(distrib, label=label, ylogBase=ylogBase, xlogBase=xlogBase, ylim=ylim, xlim=xlim, saveToFile=saveToFile)
+        return self.plotDistibution(distrib, label=label, ylogBase=ylogBase, xlogBase=xlogBase, ylim=ylim, xlim=xlim, saveToFile=saveToFile), distrib
 
     def plotCreditDistr(self, distr=None, ylogBase=1, xlogBase=1, saveToFile=None):
         # get data
@@ -482,7 +482,7 @@ class Evolution:
         if saveToFile:
             fig.savefig(saveToFile)
             print(f'Saved to {saveToFile} successfully!')
-        return fig, axis
+        return fig, axis, distribs
 
     def plotTypeDisciplineDistrib(self, distr=None, ylogBase=1, xlogBase=1, saveToFile=None):
         # get data from getDisciplineTypeDistribution method
@@ -583,9 +583,10 @@ class Evolution:
         
         return fig, axs
 
-    def plotCreditTypeDistribution(self, saveToFile=None):
+    def plotCreditTypeDistribution(self, saveToFile=None, distrib=[]):
         '''
         Plot will have the average credit per author on Y-Axis, % type 0 in discipline. Each data point will be a discipline
+        distrib = [xVals, yVals]
         '''
         allDisciplines = {}
         for topic in self.topics.keys():
@@ -608,8 +609,8 @@ class Evolution:
         axis = fig.add_subplot()
 
         typeName = 'Marginalized'
-        xVals = [x[typeName]/x['numAuthors'] for x in allDisciplines.values()]
-        yVals = [x['credit']/x['numAuthors'] for x in allDisciplines.values()]
+        xVals = [x[typeName]/x['numAuthors'] for x in allDisciplines.values()] if len(distrib) == 0 else distrib[0]
+        yVals = [x['credit']/x['numAuthors'] for x in allDisciplines.values()] if len(distrib) == 0 else distrib[1]
         axis.scatter(xVals, yVals)
 
         # styling
@@ -634,7 +635,7 @@ class Evolution:
             fig.savefig(saveToFile)
             print(f'Saved to {saveToFile} successfully!')
 
-        return fig, axis
+        return fig, axis, [xVals, yVals]
 
     '''Saving Methods'''
     def saveEvolutionWithPickle(self, fileName='evolution.env'):
