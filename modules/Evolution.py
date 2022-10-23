@@ -5,6 +5,7 @@ from .Paper import Paper
 from .Topic import Topic
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 import math
 import random
 import pickle
@@ -434,6 +435,19 @@ class Evolution:
         xVals = [0.5 * (binEdges[i] + binEdges[i+1]) for i in range(len(binVals))]
         axis.scatter(xVals, binVals)
 
+        # obtain m (slope) and b(intercept) of linear regression line
+        m, b = np.polyfit(xVals, binVals, 1)
+        # use red as color for regression line
+        axis.plot([x for x in xVals], [m*x+b for x in xVals], color='red', label=f'y={round(m)}x + {round(b)}')
+
+        # obtain regression line of degree 2
+        a, m, b = np.polyfit(xVals, binVals, 2)
+        # use red as color for regression line
+        sortedX = sorted(xVals)
+        axis.plot(sortedX, [a*(x**2) + m*x + b for x in sortedX], color='green', label=f'y={round(a)}x^2 + {round(m)}x + {round(b)}')
+
+        axis.legend()
+
         # styling
         axis.set_ylabel(f'Density of {label}', fontweight='bold')
         axis.set_xlabel(f'{label}', fontweight='bold')
@@ -615,6 +629,8 @@ class Evolution:
         yVals = [x['credit']/x['numAuthors'] for x in allDisciplines.values()] if not distrib else distrib[1]
         axis.scatter(xVals, yVals)
 
+        # sns.regplot(x=xVals, y=yVals, scatter=True, order=2)
+
         # styling
         axis.set_ylabel(f'Average credit per author in discipline.', fontweight='bold')
         axis.set_xlabel(f'% type {typeName} in discipline.', fontweight='bold')
@@ -627,9 +643,10 @@ class Evolution:
         axis.plot(xVals, [m*x+b for x in xVals], color='red', label=f'y={round(m)}x + {round(b)}')
 
         # obtain regression line of degree 2
-        # a, m, b = np.polyfit(xVals, yVals, 2)
+        a, m, b = np.polyfit(xVals, yVals, 2)
         # use red as color for regression line
-        # axis.plot(xVals, [a*(x**2) + m*x + b for x in xVals], color='green', label=f'y={round(a)}x^2 + {round(m)}x + {round(b)}')
+        sortedX = sorted(xVals)
+        axis.plot(sortedX, [a*(x**2) + m*x + b for x in sortedX], color='green', label=f'y={round(a)}x^2 + {round(m)}x + {round(b)}')
 
         axis.legend()
         
