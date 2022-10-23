@@ -472,7 +472,7 @@ class Evolution:
         fig = plt.figure(figsize=(9, 7))
         axis = fig.add_subplot()
 
-        axis.hist(distribs.values(), label=[str(x) for x in distribs.keys()], density=True, bins='sqrt')
+        axis.hist(distribs.values(), label=[str(x) for x in distribs.keys()], color=["blue", "orange"], density=True, bins='sqrt')
 
         # styling
         axis.set_ylabel(f'Density of credit', fontweight='bold')
