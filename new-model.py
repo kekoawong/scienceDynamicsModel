@@ -100,7 +100,7 @@ if __name__ == "__main__":
         'Pn': 0.80,
         'Pw': 0.71,
         'Pd': 0.50,
-        'newPapers': int(1000),
+        'newPapers': int(10000),
         # 'newPapers': int(2.9*10**5),
         'simulationName': 'Bibsonomy',
         'runs': RUNS,
@@ -123,6 +123,7 @@ if __name__ == "__main__":
     results = pool.map(runSimulation, simulations)
     pool.close()
 
+    # combine results and save in a file
     results1 = combineResults("model-1", results[:RUNS], bibsonomy)
     filename = 'pickle-outputs/model-1.pi'
     with open(filename, 'wb') as file:
@@ -141,7 +142,5 @@ if __name__ == "__main__":
         print(f'Saving to file {filename}')
         # A new file will be created
         pickle.dump(results3, file)
-
-    # save results in a file
 
     # generate main html page, putting in all the simulations links
