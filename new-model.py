@@ -1,4 +1,5 @@
 from multiprocessing import Pool
+import pickle
 # from modules.Evolution import Evolution
 from modules.HTMLPage import Page
 
@@ -68,7 +69,7 @@ def combineResults(modelName, results, simulationObj):
                         numPaps=str(numPapers), numAuths=str(numAuthors), numTops=str(numTopics), numTypes='2', 
                         Pn=simulationObj['Pn'], Pw=simulationObj['Pw'], Pd=simulationObj['Pd'], numRuns='10', directory=f"./docs/outputs/{modelName}/")
     
-    return
+    return [distrib1, distrib2Dict, distrib3, numAuthors, numPapers, numTopics]
 
 if __name__ == "__main__":
 
@@ -122,8 +123,25 @@ if __name__ == "__main__":
     results = pool.map(runSimulation, simulations)
     pool.close()
 
-    combineResults("model-1", results[:RUNS], bibsonomy)
-    combineResults("model-2", results[RUNS:RUNS*2], bibsonomy)
-    combineResults("model-3", results[RUNS*2:RUNS*3], bibsonomy)
+    results1 = combineResults("model-1", results[:RUNS], bibsonomy)
+    filename = 'pickle-outputs/model-1.pi'
+    with open(filename, 'wb') as file:
+        print(f'Saving to file {filename}')
+        # A new file will be created
+        pickle.dump(results1, file)
+    results2 = combineResults("model-2", results[RUNS:RUNS*2], bibsonomy)
+    filename = 'pickle-outputs/model-2.pi'
+    with open(filename, 'wb') as file:
+        print(f'Saving to file {filename}')
+        # A new file will be created
+        pickle.dump(results2, file)
+    results3 = combineResults("model-3", results[RUNS*2:RUNS*3], bibsonomy)
+    filename = 'pickle-outputs/model-3.pi'
+    with open(filename, 'wb') as file:
+        print(f'Saving to file {filename}')
+        # A new file will be created
+        pickle.dump(results3, file)
+
+    # save results in a file
 
     # generate main html page, putting in all the simulations links
