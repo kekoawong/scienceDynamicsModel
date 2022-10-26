@@ -18,7 +18,7 @@ def convertToCSV(infile, outfile):
         write.writerow(["Number of Authors:", numAuthors])
         write.writerow(["Number of Papers:", numPapers])
         write.writerow(["Number of Topics:", numTopics])
-        write.writerow(["degree-density-values", f'credit-distrib-{typeNames[0]}', f'credit-distrib-{typeNames[1]}', "percent-marg-x", "avg-credit.y"])
+        write.writerow(["degree-density-values", f'credit-distrib-{typeNames[0].lower()}', f'credit-distrib-{typeNames[1].lower()}', "percent-marg-x", "avg-credit-y"])
         for rowNum in range(max(len1, len2, len3, len45)):
             cell1 = None if rowNum >= len1 else distrib1[rowNum]
             cell2 = None if rowNum >= len2 else typeVals[0][rowNum]
