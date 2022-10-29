@@ -581,12 +581,12 @@ class Evolution:
                 axis.set_xlim(1, 10**4)
 
                 # testing for pd
-                if label == 'Pd':
-                    print('Metrics for pd:')
+                # if label == 'Pd':
+                #     print('Metrics for pd:')
                     
-                    print(labelData)
-                    print(f'Num disciplines in graph: {len(self.topics.keys())}')
-                    print(self.topics)
+                #     print(labelData)
+                #     print(f'Num disciplines in graph: {len(self.topics.keys())}')
+                #     print(self.topics)
 
         # figure styling
         fig.suptitle(f'''{networkName} Network with {numAuthors} total authors, {numPapers} total papers, and {numTopics} total topics.
