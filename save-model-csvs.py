@@ -53,7 +53,7 @@ def runSimulation(simulationObj):
         write.writerow(["Number of Authors:", numAuthors])
         write.writerow(["Number of Papers:", model.getNumPapers()])
         write.writerow(["Number of Topics:", model.getNumTopics()])
-        write.writerow(["author-id", 'author-degree', 'author-credit', 'author-type', "", "percent-marg-x", "avg-credit-y"])
+        write.writerow(["author-id", 'author-degree', 'author-credit', 'author-type', "", "percent-marg-x", "avg-credit-y", "num-authors"])
         for rowNum in range(max(numAuthors, lenDistrib)):
             cell1 = None if rowNum >= numAuthors else authorIDs[rowNum]
             cell2 = None if rowNum >= numAuthors else model.getNetwork().degree[authorIDs[rowNum]]
@@ -62,7 +62,8 @@ def runSimulation(simulationObj):
             cell5 = None
             cell6 = None if rowNum >= lenDistrib else distrib3[0][rowNum]
             cell7 = None if rowNum >= lenDistrib else distrib3[1][rowNum]
-            write.writerow([cell1, cell2, cell3, cell4, cell5, cell6, cell7])
+            cell8 = None if rowNum >= lenDistrib else distrib3[2][rowNum]
+            write.writerow([cell1, cell2, cell3, cell4, cell5, cell6, cell7, cell8])
     print(f'Completed writing to {csvFile}')
 
     return distrib1, distrib2Dict, distrib3, model.getNumAuthors(), model.getNumPapers(), model.getNumTopics()
