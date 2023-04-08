@@ -1,5 +1,5 @@
 # Social Dynamics and the Evolution of Disciplines
-A model of the long-term evolution of sciencific disciplines with the dynamics of collaboration and reputation. Initial model drew from finding in [this Social Dynamics of Science Paper](https://www.nature.com/articles/srep01069). 
+A model of the long-term evolution of sciencific disciplines with the dynamics of collaboration and reputation. Initial model drew from findings in [this Social Dynamics of Science Paper](https://www.nature.com/articles/srep01069). 
 
 <img src="scienceModel.gif"/>
 
