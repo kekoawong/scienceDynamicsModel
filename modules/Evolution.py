@@ -581,12 +581,12 @@ class Evolution:
                 axis.set_xlim(1, 10**4)
 
                 # testing for pd
-                if label == 'Pd':
-                    print('Metrics for pd:')
+                # if label == 'Pd':
+                #     print('Metrics for pd:')
                     
-                    print(labelData)
-                    print(f'Num disciplines in graph: {len(self.topics.keys())}')
-                    print(self.topics)
+                #     print(labelData)
+                #     print(f'Num disciplines in graph: {len(self.topics.keys())}')
+                #     print(self.topics)
 
         # figure styling
         fig.suptitle(f'''{networkName} Network with {numAuthors} total authors, {numPapers} total papers, and {numTopics} total topics.
@@ -627,6 +627,7 @@ class Evolution:
         typeName = 'Marginalized'
         xVals = [x[typeName]/x['numAuthors'] for x in allDisciplines.values()] if not distrib else distrib[0]
         yVals = [x['credit']/x['numAuthors'] for x in allDisciplines.values()] if not distrib else distrib[1]
+        disciplineSizes = [x["numAuthors"] for x in allDisciplines.values()] if not distrib else distrib[2]
         axis.scatter(xVals, yVals)
 
         # sns.regplot(x=xVals, y=yVals, scatter=True, order=2)
@@ -654,7 +655,7 @@ class Evolution:
             fig.savefig(saveToFile)
             print(f'Saved to {saveToFile} successfully!')
 
-        return fig, axis, [xVals, yVals]
+        return fig, axis, [xVals, yVals, disciplineSizes]
 
     '''Saving Methods'''
     def saveEvolutionWithPickle(self, fileName='evolution.env'):
