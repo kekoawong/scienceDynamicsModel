@@ -97,7 +97,7 @@ if __name__ == "__main__":
         'Pn': 0.80,
         'Pw': 0.71,
         'Pd': 0.50,
-        'newPapers': int(1000),
+        'newPapers': int(10000),
         # 'newPapers': int(2.9*10**5),
         'simulationName': 'Bibsonomy',
         'runs': RUNS,

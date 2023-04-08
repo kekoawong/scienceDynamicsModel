@@ -1,10 +1,10 @@
-# Science Dynamics Model
-This repository contains a model based upon [this Social Dynamics of Science Paper](https://www.nature.com/articles/srep01069) which modeled the birth and decline of scientific disciplines. 
+# Social Dynamics and the Evolution of Disciplines
+A model of the long-term evolution of sciencific disciplines with the dynamics of collaboration and reputation. Initial model drew from finding in [this Social Dynamics of Science Paper](https://www.nature.com/articles/srep01069). 
 
-<img src="outputs/scienceModel.gif"/>
+<img src="scienceModel.gif"/>
 
 ## Brief Explanation
-At every time step, new authors and papers are added to the network. Each paper has a certain number of topics associated with it. An author's discipline corresponds to the topics that contain the most papers for the given author.
+We consider the long-term evolution of science and show how a "contagion of disrespect" – an increasing dismissal of research in subfields associated with marginalized groups – can arise due to the dynamics of collaboration and reputation (versus, e.g., preconceived notions of the field’s worth). This has implications both for how we understand the history of science and for how we attempt to promote diverse scientific inquiry.
 
 ## Running the Model
 Reference **main.py** to see how to declare an instance of the **Evolution** class and run a model. With the default parameters, a model can be run and saved with the following code:
@@ -31,8 +31,8 @@ To run the base model (from the original paper) instead of the new model impleme
     * **Type.py**: class that contains the data and methods for types, introduced in this new model.
     * **HTMLPage.py**: class that extends the Evolution class to generate an HTML page with the corresponding outputs. Not an essential class for the model, just useful for visualizing outputs in one place.
 * **outputs**: Contains example **Evolution** data structures, **ScholarNetworks**, and network visualizations from models that have been run. 
-* **main.py**: Example python script that declares an instance of an science evolution model and runs it.
-* **modelReplication.py**: Example script that uses multithreading to run multiple models, combining their data and generating plots at the end using the HTMLPage class.
+* **new-model.py**: Python script that declares an instance of our new model and runs it.
+* **modelReplication.py**:  Script that uses multithreading to run multiple models, combining their data and generating plots at the end using the HTMLPage class.
 * **viewEvolution.ipynb**: Example python notebook that shows the output of various evolution models.
 
 ## Interactive Network Visualizations
@@ -56,4 +56,4 @@ Todo: Edges with thickness for how many they have done together
 * [Pyvis](https://pyvis.readthedocs.io/en/latest/index.html) for interactive network visualizations.
 * [Matplotlib](https://matplotlib.org/) for simple network visualizations.
 * [Pickle](https://docs.python.org/3/library/pickle.html) for saving and loading models.
-* Pandas
+* [Pandas](https://pandas.pydata.org/) for data processing.
